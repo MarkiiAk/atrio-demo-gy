@@ -1,0 +1,61 @@
+# Despliegue en Render (https://render.com).
+#
+# Por qué Render y no Vercel: ATRIO necesita un proceso vivo (worker de cola con
+# debounce y serialización por conversación) y un disco persistente para SQLite.
+# En un entorno serverless el estado de la conversación se perdería entre
+# invocaciones y el asistente olvidaría lo que le acaban de decir.
+services:
+  - type: web
+    name: atrio
+    runtime: node
+    plan: starter # el plan free NO tiene disco persistente
+    region: oregon
+    buildCommand: npm ci && npm run build
+    startCommand: npm start
+    healthCheckPath: /health
+
+    # SQLite necesita vivir en un disco que sobreviva a los redeploys.
+    disk:
+      name: atrio-data
+      mountPath: /var/data
+      sizeGB: 1
+
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: APP_MODE
+        value: demo
+      - key: DATABASE_URL
+        value: file:/var/data/app.db
+      - key: TWILIO_VALIDATE_SIGNATURE
+        value: 'true'
+      - key: LOG_LEVEL
+        value: info
+      - key: LOG_REDACT_PII
+        value: 'true'
+      - key: INBOUND_DEBOUNCE_MS
+        value: '1500'
+      - key: DATA_RETENTION_DAYS
+        value: '90'
+      - key: RUN_LIVE_EVALS
+        value: 'false'
+
+      # Render expone la URL pública del servicio; la firma de Twilio se calcula
+      # sobre esta URL exacta, así que tiene que ser la real y sin slash final.
+      - key: PUBLIC_BASE_URL
+        fromService:
+          type: web
+          name: atrio
+          envVarKey: RENDER_EXTERNAL_URL
+
+      # Secretos: se cargan desde el panel de Render, nunca desde el repo.
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: OPENAI_MODEL
+        sync: false
+      - key: TWILIO_ACCOUNT_SID
+        sync: false
+      - key: TWILIO_AUTH_TOKEN
+        sync: false
+      - key: TWILIO_WHATSAPP_FROM
+        sync: false

@@ -1,0 +1,454 @@
+# Tipos de solicitud que el asistente sabe atender y qué información recaba.
+workflows:
+  SALES_QUOTE:
+    enabled: true
+    department: SALES
+    strategy: qualify_then_route
+    description: "Solicitudes de cotización o compra"
+
+    intents:
+      - SALES_QUOTE
+
+    fields:
+      # Sin estos, la aplicación NO canaliza.
+      essential:
+        - product
+        - quantity
+      # Se piden sólo si surgen de forma natural.
+      useful:
+        - presentation
+        - delivery_city
+        - contact_name
+        - company
+        - email
+        - contact_phone
+      # Nunca se preguntan; se guardan si el cliente los menciona.
+      optional:
+        - intended_use
+
+    # Cómo nombrar cada campo al conversar.
+    field_labels:
+      product: "producto que necesita"
+      quantity: "cantidad"
+      presentation: "presentación o envase"
+      delivery_city: "ciudad de entrega"
+      contact_name: "nombre de contacto"
+      company: "empresa"
+      email: "correo"
+      contact_phone: "teléfono de contacto"
+      intended_use: "uso previsto"
+
+    routing:
+      require_all_essential: true
+      # Campos que el canal ya aporta y no deben volver a pedirse.
+      satisfied_by_channel:
+        - contact_phone
+        - contact_name
+
+    # Lo que este asistente NO puede hacer en este flujo. Se le dice al modelo
+    # para que no lo prometa.
+    cannot_do:
+      - dar precios o cotizaciones con monto
+      - confirmar disponibilidad de inventario
+
+  SUPPLIER:
+    enabled: true
+    department: PURCHASES
+    strategy: collect_then_route
+    description: "Empresas que ofrecen productos o servicios"
+
+    intents:
+      - SUPPLIER
+
+    fields:
+      # Sin estos, la aplicación NO canaliza.
+      essential:
+        - company
+        - offering
+      # Se piden sólo si surgen de forma natural.
+      useful:
+        - location
+        - coverage
+        - certifications
+        - contact_name
+        - email
+        - contact_phone
+      # Nunca se preguntan; se guardan si el cliente los menciona.
+      optional:
+        - documentation
+
+    # Cómo nombrar cada campo al conversar.
+    field_labels:
+      company: "nombre de la empresa"
+      offering: "qué ofrecen"
+      location: "ubicación"
+      coverage: "cobertura de entrega"
+      certifications: "certificaciones"
+      contact_name: "nombre de contacto"
+      email: "correo"
+      contact_phone: "teléfono de contacto"
+      documentation: "documentación disponible"
+
+    routing:
+      require_all_essential: true
+      # Campos que el canal ya aporta y no deben volver a pedirse.
+      satisfied_by_channel:
+        - contact_phone
+        - contact_name
+
+    # Lo que este asistente NO puede hacer en este flujo. Se le dice al modelo
+    # para que no lo prometa.
+    cannot_do:
+      - expresar interés de compra en nombre de la empresa
+      - comprometer una reunión o una respuesta
+
+  HR:
+    enabled: true
+    department: HUMAN_RESOURCES
+    strategy: answer_then_optional_route
+    description: "Postulaciones y consultas de empleo"
+
+    intents:
+      - HR
+
+    fields:
+      # Sin estos, la aplicación NO canaliza.
+      essential:
+        - position_interest
+      # Se piden sólo si surgen de forma natural.
+      useful:
+        - contact_name
+        - email
+        - experience
+        - contact_phone
+      # Nunca se preguntan; se guardan si el cliente los menciona.
+      optional:
+        - availability
+
+    # Cómo nombrar cada campo al conversar.
+    field_labels:
+      position_interest: "área o puesto de interés"
+      contact_name: "nombre"
+      email: "correo"
+      experience: "experiencia"
+      contact_phone: "teléfono de contacto"
+      availability: "disponibilidad"
+
+    routing:
+      require_all_essential: true
+      # Campos que el canal ya aporta y no deben volver a pedirse.
+      satisfied_by_channel:
+        - contact_phone
+        - contact_name
+
+    # Lo que este asistente NO puede hacer en este flujo. Se le dice al modelo
+    # para que no lo prometa.
+    cannot_do:
+      - confirmar vacantes disponibles
+      - agendar entrevistas
+
+  INVOICE:
+    enabled: true
+    department: ADMINISTRATION
+    strategy: collect_then_route
+    description: "Facturación y comprobantes"
+
+    intents:
+      - INVOICE
+
+    fields:
+      # Sin estos, la aplicación NO canaliza.
+      essential:
+        - order_or_invoice_reference
+      # Se piden sólo si surgen de forma natural.
+      useful:
+        - company
+        - contact_name
+        - email
+        - issue_description
+        - contact_phone
+      # Nunca se preguntan; se guardan si el cliente los menciona.
+      optional:
+        - tax_id
+
+    # Cómo nombrar cada campo al conversar.
+    field_labels:
+      order_or_invoice_reference: "número de pedido o factura"
+      company: "empresa"
+      contact_name: "nombre"
+      email: "correo"
+      issue_description: "qué necesita con la factura"
+      contact_phone: "teléfono de contacto"
+      tax_id: "RFC"
+
+    routing:
+      require_all_essential: true
+      # Campos que el canal ya aporta y no deben volver a pedirse.
+      satisfied_by_channel:
+        - contact_phone
+        - contact_name
+
+    # Lo que este asistente NO puede hacer en este flujo. Se le dice al modelo
+    # para que no lo prometa.
+    cannot_do:
+      - emitir, reenviar o cancelar facturas
+      - consultar el estado de una factura
+
+  ORDER_STATUS:
+    enabled: true
+    department: CUSTOMER_SERVICE
+    strategy: collect_then_route
+    description: "Seguimiento de pedidos"
+
+    intents:
+      - ORDER_STATUS
+
+    fields:
+      # Sin estos, la aplicación NO canaliza.
+      essential:
+        - order_number
+      # Se piden sólo si surgen de forma natural.
+      useful:
+        - contact_name
+        - company
+        - contact_phone
+      # Nunca se preguntan; se guardan si el cliente los menciona.
+      optional:
+        - expected_date
+
+    # Cómo nombrar cada campo al conversar.
+    field_labels:
+      order_number: "número de pedido"
+      contact_name: "nombre"
+      company: "empresa"
+      contact_phone: "teléfono de contacto"
+      expected_date: "fecha esperada"
+
+    routing:
+      require_all_essential: true
+      # Campos que el canal ya aporta y no deben volver a pedirse.
+      satisfied_by_channel:
+        - contact_phone
+        - contact_name
+
+    # Lo que este asistente NO puede hacer en este flujo. Se le dice al modelo
+    # para que no lo prometa.
+    cannot_do:
+      - consultar el estatus real de un pedido
+      - dar fechas de entrega
+
+  DELIVERY_ISSUE:
+    enabled: true
+    department: LOGISTICS
+    strategy: collect_then_route
+    description: "Problemas de entrega"
+
+    intents:
+      - DELIVERY_ISSUE
+
+    fields:
+      # Sin estos, la aplicación NO canaliza.
+      essential:
+        - order_number
+        - issue_description
+      # Se piden sólo si surgen de forma natural.
+      useful:
+        - delivery_city
+        - contact_name
+        - urgency
+        - contact_phone
+      # Nunca se preguntan; se guardan si el cliente los menciona.
+      optional:
+        - notes
+
+    # Cómo nombrar cada campo al conversar.
+    field_labels:
+      order_number: "número de pedido"
+      issue_description: "qué ocurrió con la entrega"
+      delivery_city: "ciudad"
+      contact_name: "nombre"
+      urgency: "urgencia"
+      contact_phone: "teléfono de contacto"
+      notes: "notas adicionales"
+
+    routing:
+      require_all_essential: true
+      # Campos que el canal ya aporta y no deben volver a pedirse.
+      satisfied_by_channel:
+        - contact_phone
+        - contact_name
+
+    # Lo que este asistente NO puede hacer en este flujo. Se le dice al modelo
+    # para que no lo prometa.
+    cannot_do:
+      - reprogramar una entrega
+      - contactar al transportista
+
+  PRODUCT_DAMAGE:
+    enabled: true
+    department: CUSTOMER_SERVICE
+    strategy: collect_then_route
+    description: "Producto dañado o en mal estado"
+
+    intents:
+      - PRODUCT_DAMAGE
+
+    fields:
+      # Sin estos, la aplicación NO canaliza.
+      essential:
+        - order_number
+        - product
+        - damage_description
+      # Se piden sólo si surgen de forma natural.
+      useful:
+        - affected_quantity
+        - leak_or_spill
+        - seal_damage
+        - urgency
+        - contact_name
+        - contact_phone
+      # Nunca se preguntan; se guardan si el cliente los menciona.
+      optional:
+        - notes
+
+    # Cómo nombrar cada campo al conversar.
+    field_labels:
+      order_number: "número de pedido"
+      product: "producto afectado"
+      damage_description: "daño observado"
+      affected_quantity: "cantidad afectada"
+      leak_or_spill: "si hubo fuga o derrame"
+      seal_damage: "si los sellos venían dañados"
+      urgency: "urgencia"
+      contact_name: "nombre"
+      contact_phone: "teléfono de contacto"
+      notes: "notas adicionales"
+
+    routing:
+      require_all_essential: true
+      # Campos que el canal ya aporta y no deben volver a pedirse.
+      satisfied_by_channel:
+        - contact_phone
+        - contact_name
+
+    # Lo que este asistente NO puede hacer en este flujo. Se le dice al modelo
+    # para que no lo prometa.
+    cannot_do:
+      - autorizar cambios, reembolsos o notas de crédito
+      - determinar responsabilidad del daño
+
+  COMPLAINT:
+    enabled: true
+    department: CUSTOMER_SERVICE
+    strategy: collect_then_route
+    description: "Quejas e inconformidades"
+
+    intents:
+      - COMPLAINT
+
+    fields:
+      # Sin estos, la aplicación NO canaliza.
+      essential:
+        - complaint_description
+      # Se piden sólo si surgen de forma natural.
+      useful:
+        - order_number
+        - contact_name
+        - company
+        - urgency
+        - contact_phone
+      # Nunca se preguntan; se guardan si el cliente los menciona.
+      optional:
+        - expected_resolution
+
+    # Cómo nombrar cada campo al conversar.
+    field_labels:
+      complaint_description: "motivo de la queja"
+      order_number: "número de pedido"
+      contact_name: "nombre"
+      company: "empresa"
+      urgency: "urgencia"
+      contact_phone: "teléfono de contacto"
+      expected_resolution: "qué esperaría como solución"
+
+    routing:
+      require_all_essential: true
+      # Campos que el canal ya aporta y no deben volver a pedirse.
+      satisfied_by_channel:
+        - contact_phone
+        - contact_name
+
+    # Lo que este asistente NO puede hacer en este flujo. Se le dice al modelo
+    # para que no lo prometa.
+    cannot_do:
+      - ofrecer compensaciones
+      - asignar culpas
+
+  SUGGESTION:
+    enabled: true
+    department: CUSTOMER_SERVICE
+    strategy: collect_then_route
+    description: "Sugerencias y comentarios"
+
+    intents:
+      - SUGGESTION
+
+    fields:
+      # Sin estos, la aplicación NO canaliza.
+      essential:
+        - suggestion
+      # Se piden sólo si surgen de forma natural.
+      useful:
+        - contact_name
+        - company
+      # Nunca se preguntan; se guardan si el cliente los menciona.
+      optional: []
+
+    # Cómo nombrar cada campo al conversar.
+    field_labels:
+      suggestion: "sugerencia"
+      contact_name: "nombre"
+      company: "empresa"
+
+    routing:
+      require_all_essential: true
+      # Campos que el canal ya aporta y no deben volver a pedirse.
+      satisfied_by_channel: []
+
+    # Lo que este asistente NO puede hacer en este flujo. Se le dice al modelo
+    # para que no lo prometa.
+    cannot_do:
+      - comprometer que la sugerencia se implementará
+
+  GENERAL_INFORMATION:
+    enabled: true
+    department: CUSTOMER_SERVICE
+    strategy: answer_then_optional_route
+    description: "Preguntas informativas respondibles con la documentación autorizada"
+
+    intents:
+      - GENERAL_INFORMATION
+
+    fields:
+      # Sin estos, la aplicación NO canaliza.
+      essential: []
+      # Se piden sólo si surgen de forma natural.
+      useful:
+        - topic
+      # Nunca se preguntan; se guardan si el cliente los menciona.
+      optional:
+        - contact_name
+
+    # Cómo nombrar cada campo al conversar.
+    field_labels:
+      topic: "tema de la consulta"
+      contact_name: "nombre"
+
+    routing:
+      require_all_essential: true
+      # Campos que el canal ya aporta y no deben volver a pedirse.
+      satisfied_by_channel: []
+
+    # Lo que este asistente NO puede hacer en este flujo. Se le dice al modelo
+    # para que no lo prometa.
+    cannot_do: []

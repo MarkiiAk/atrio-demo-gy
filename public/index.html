@@ -1,0 +1,541 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>Asistente — demo</title>
+    <style>
+      :root {
+        --bg: #f4f5f7;
+        --panel: #ffffff;
+        --ink: #16181d;
+        --ink-soft: #5b6272;
+        --line: #e3e6ec;
+        --accent: #0f5c4d;
+        --accent-soft: #e6f2ef;
+        --bubble-in: #ffffff;
+        --bubble-out: #0f5c4d;
+        --bubble-out-ink: #ffffff;
+        --warn: #a35a00;
+        --radius: 14px;
+        --shadow: 0 1px 2px rgba(16, 20, 28, 0.06), 0 8px 24px rgba(16, 20, 28, 0.06);
+        --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+        --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      }
+
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg: #0e1013;
+          --panel: #171a1f;
+          --ink: #eef0f4;
+          --ink-soft: #99a1b0;
+          --line: #262b33;
+          --accent: #4bbfa4;
+          --accent-soft: #16302b;
+          --bubble-in: #21262e;
+          --bubble-out: #1f6d5c;
+          --bubble-out-ink: #f2fbf8;
+          --warn: #e0a458;
+          --shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 8px 24px rgba(0, 0, 0, 0.3);
+        }
+      }
+
+      * { box-sizing: border-box; }
+
+      html, body {
+        margin: 0;
+        height: 100%;
+        background: var(--bg);
+        color: var(--ink);
+        font-family: var(--sans);
+        font-size: 15px;
+        line-height: 1.55;
+        -webkit-font-smoothing: antialiased;
+      }
+
+      body {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0;
+      }
+
+      .shell {
+        width: 100%;
+        max-width: 720px;
+        height: 100dvh;
+        max-height: 100dvh;
+        display: flex;
+        flex-direction: column;
+        background: var(--panel);
+        box-shadow: var(--shadow);
+      }
+
+      @media (min-width: 760px) {
+        body { padding: 24px; }
+        .shell { height: min(880px, calc(100dvh - 48px)); border-radius: var(--radius); overflow: hidden; border: 1px solid var(--line); }
+      }
+
+      header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 14px 18px;
+        border-bottom: 1px solid var(--line);
+        background: var(--panel);
+        flex: 0 0 auto;
+      }
+
+      .avatar {
+        width: 38px; height: 38px;
+        flex: 0 0 auto;
+        border-radius: 50%;
+        background: var(--accent-soft);
+        color: var(--accent);
+        display: grid; place-items: center;
+        font-weight: 650; font-size: 15px;
+        letter-spacing: .02em;
+      }
+
+      .who { min-width: 0; flex: 1; }
+      .who strong { display: block; font-weight: 600; font-size: 15px; }
+      .who span { display: block; font-size: 12.5px; color: var(--ink-soft); }
+
+      .ghost {
+        appearance: none;
+        border: 1px solid var(--line);
+        background: transparent;
+        color: var(--ink-soft);
+        border-radius: 999px;
+        padding: 5px 11px;
+        font: inherit; font-size: 12.5px;
+        cursor: pointer;
+        white-space: nowrap;
+      }
+      .ghost:hover { color: var(--ink); border-color: var(--ink-soft); }
+      .ghost[aria-pressed="true"] { background: var(--accent-soft); color: var(--accent); border-color: transparent; }
+
+      #log {
+        flex: 1 1 auto;
+        overflow-y: auto;
+        overscroll-behavior: contain;
+        padding: 18px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      .row { display: flex; }
+      .row.me { justify-content: flex-end; }
+
+      .bubble {
+        max-width: min(78%, 520px);
+        padding: 9px 13px;
+        border-radius: 16px;
+        white-space: pre-wrap;
+        overflow-wrap: anywhere;
+        background: var(--bubble-in);
+        border: 1px solid var(--line);
+        border-bottom-left-radius: 5px;
+      }
+      .row.me .bubble {
+        background: var(--bubble-out);
+        color: var(--bubble-out-ink);
+        border-color: transparent;
+        border-bottom-left-radius: 16px;
+        border-bottom-right-radius: 5px;
+      }
+
+      .intro {
+        margin: 8px 0 4px;
+        padding: 16px;
+        border: 1px dashed var(--line);
+        border-radius: var(--radius);
+        color: var(--ink-soft);
+        font-size: 14px;
+      }
+      .intro p { margin: 0 0 10px; }
+      .chips { display: flex; flex-wrap: wrap; gap: 7px; }
+      .chip {
+        appearance: none;
+        border: 1px solid var(--line);
+        background: var(--panel);
+        color: var(--ink);
+        border-radius: 999px;
+        padding: 6px 12px;
+        font: inherit; font-size: 13px;
+        cursor: pointer;
+        text-align: left;
+      }
+      .chip:hover { border-color: var(--accent); color: var(--accent); }
+
+      .dots { display: inline-flex; gap: 4px; padding: 4px 2px; }
+      .dots i {
+        width: 6px; height: 6px; border-radius: 50%;
+        background: var(--ink-soft); opacity: .4;
+        animation: blink 1.3s infinite;
+      }
+      .dots i:nth-child(2) { animation-delay: .18s; }
+      .dots i:nth-child(3) { animation-delay: .36s; }
+      @keyframes blink { 0%, 60%, 100% { opacity: .25; } 30% { opacity: .9; } }
+
+      .trace {
+        align-self: flex-start;
+        max-width: min(90%, 560px);
+        margin: -2px 0 4px;
+        font-family: var(--mono);
+        font-size: 11.5px;
+        line-height: 1.6;
+        color: var(--ink-soft);
+        background: transparent;
+        border-left: 2px solid var(--line);
+        padding: 2px 0 2px 10px;
+      }
+      .trace b { color: var(--ink); font-weight: 600; }
+      .trace .tag { color: var(--accent); }
+
+      .notice {
+        align-self: center;
+        font-size: 12.5px;
+        color: var(--warn);
+        text-align: center;
+        max-width: 90%;
+      }
+
+      form {
+        flex: 0 0 auto;
+        display: flex;
+        gap: 9px;
+        align-items: flex-end;
+        padding: 12px 14px calc(12px + env(safe-area-inset-bottom));
+        border-top: 1px solid var(--line);
+        background: var(--panel);
+      }
+
+      textarea {
+        flex: 1;
+        resize: none;
+        min-height: 42px;
+        max-height: 140px;
+        padding: 10px 13px;
+        border-radius: 20px;
+        border: 1px solid var(--line);
+        background: var(--bg);
+        color: var(--ink);
+        font: inherit;
+      }
+      textarea:focus { outline: 2px solid var(--accent); outline-offset: -1px; border-color: transparent; }
+
+      button.send {
+        flex: 0 0 auto;
+        width: 42px; height: 42px;
+        border-radius: 50%;
+        border: 0;
+        background: var(--accent);
+        color: #fff;
+        display: grid; place-items: center;
+        cursor: pointer;
+      }
+      button.send:disabled { opacity: .4; cursor: default; }
+      button.send svg { width: 19px; height: 19px; }
+
+      footer {
+        flex: 0 0 auto;
+        text-align: center;
+        font-size: 11.5px;
+        color: var(--ink-soft);
+        padding: 0 14px 10px;
+        background: var(--panel);
+      }
+      footer a { color: inherit; }
+
+      .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+    </style>
+  </head>
+
+  <body>
+    <main class="shell">
+      <header>
+        <div class="avatar" id="initials">··</div>
+        <div class="who">
+          <strong id="assistant-name">Cargando…</strong>
+          <span id="company-line">&nbsp;</span>
+        </div>
+        <button class="ghost" id="toggle-trace" aria-pressed="false" title="Muestra qué detectó y qué hizo el sistema en cada turno">
+          Detalle
+        </button>
+        <button class="ghost" id="reset" title="Empezar de nuevo">Reiniciar</button>
+      </header>
+
+      <div id="log" role="log" aria-live="polite" aria-label="Conversación"></div>
+
+      <form id="composer">
+        <label class="sr" for="input">Escribe tu mensaje</label>
+        <textarea id="input" rows="1" placeholder="Escribe tu mensaje…" autocomplete="off"></textarea>
+        <button class="send" id="send" type="submit" aria-label="Enviar">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 12h15M13 6l6 6-6 6" />
+          </svg>
+        </button>
+      </form>
+
+      <footer id="footer">Demostración. Las respuestas las genera un asistente automatizado.</footer>
+    </main>
+
+    <script>
+      (function () {
+        'use strict';
+
+        var log = document.getElementById('log');
+        var form = document.getElementById('composer');
+        var input = document.getElementById('input');
+        var send = document.getElementById('send');
+        var traceBtn = document.getElementById('toggle-trace');
+        var resetBtn = document.getElementById('reset');
+
+        var params = new URLSearchParams(location.search);
+        var tenant = params.get('tenant') || '';
+        var showTrace = params.get('debug') === '1';
+        var sessionId = null;
+        var meta = null;
+        var busy = false;
+
+        traceBtn.setAttribute('aria-pressed', String(showTrace));
+
+        function qs(path) {
+          return tenant ? path + (path.indexOf('?') < 0 ? '?' : '&') + 'tenant=' + encodeURIComponent(tenant) : path;
+        }
+
+        function el(tag, cls, text) {
+          var n = document.createElement(tag);
+          if (cls) n.className = cls;
+          if (text != null) n.textContent = text;
+          return n;
+        }
+
+        function scroll() {
+          log.scrollTop = log.scrollHeight;
+        }
+
+        function addBubble(text, mine) {
+          var row = el('div', 'row' + (mine ? ' me' : ''));
+          row.appendChild(el('div', 'bubble', text));
+          log.appendChild(row);
+          scroll();
+          return row;
+        }
+
+        function addTyping() {
+          var row = el('div', 'row');
+          var b = el('div', 'bubble');
+          var d = el('span', 'dots');
+          d.appendChild(el('i')); d.appendChild(el('i')); d.appendChild(el('i'));
+          b.appendChild(d);
+          row.appendChild(b);
+          log.appendChild(row);
+          scroll();
+          return row;
+        }
+
+        function addTrace(t) {
+          if (!t) return;
+          var box = el('div', 'trace');
+          var lines = [];
+
+          var intents = (t.intents || []).map(function (i) {
+            return i.intent + ' ' + Number(i.confidence).toFixed(2);
+          });
+          lines.push(['detectó', intents.length ? intents.join(' · ') : 'nada concluyente']);
+
+          lines.push([
+            'consultó',
+            (t.knowledgeSources && t.knowledgeSources.length)
+              ? t.knowledgeSources.length + ' documento(s)'
+              : 'ninguna fuente'
+          ]);
+
+          var missing = [];
+          Object.keys(t.missingEssential || {}).forEach(function (k) {
+            var v = t.missingEssential[k];
+            missing.push(k + ': ' + (v.length ? v.join(', ') : 'completo'));
+          });
+          if (missing.length) lines.push(['le falta', missing.join(' | ')]);
+
+          if (t.routed && t.routed.length) {
+            lines.push(['canalizó', t.routed.map(function (r) { return '#' + r.caseId + ' ' + r.workflow; }).join(' · ')]);
+          }
+
+          lines.push(['costo', (t.tokens || 0) + ' tokens · ' + (t.latencyMs || 0) + ' ms']);
+
+          lines.forEach(function (pair) {
+            var line = el('div');
+            var tag = el('span', 'tag', pair[0] + ' ');
+            line.appendChild(tag);
+            line.appendChild(document.createTextNode(pair[1]));
+            box.appendChild(line);
+          });
+
+          box.hidden = !showTrace;
+          box.dataset.trace = '1';
+          log.appendChild(box);
+          scroll();
+        }
+
+        function addNotice(text) {
+          var n = el('div', 'notice', text);
+          log.appendChild(n);
+          scroll();
+        }
+
+        function renderIntro() {
+          var box = el('div', 'intro');
+          var p = el('p', null,
+            'Escríbele como le escribirías por WhatsApp a la recepción de la empresa. ' +
+            'Entiende varias cosas a la vez y no inventa información.');
+          box.appendChild(p);
+
+          var chips = el('div', 'chips');
+          [
+            '¿Qué productos manejan?',
+            '¿En qué presentaciones venden el alcohol isopropílico?',
+            'Necesito cotizar 800 litros de tolueno para Querétaro',
+            'No me llegó mi factura y además me llegaron 3 tambos golpeados',
+            'Somos fabricantes de tambores y queremos ofrecerles nuestros productos'
+          ].forEach(function (t) {
+            var b = el('button', 'chip', t);
+            b.type = 'button';
+            b.addEventListener('click', function () {
+              input.value = t;
+              autosize();
+              form.requestSubmit();
+            });
+            chips.appendChild(b);
+          });
+
+          box.appendChild(chips);
+          log.appendChild(box);
+          scroll();
+        }
+
+        function autosize() {
+          input.style.height = 'auto';
+          input.style.height = Math.min(140, input.scrollHeight) + 'px';
+        }
+
+        async function loadMeta() {
+          try {
+            var res = await fetch(qs('/api/web/meta'));
+            if (!res.ok) throw new Error('meta');
+            meta = await res.json();
+          } catch (e) {
+            document.getElementById('assistant-name').textContent = 'Asistente no disponible';
+            document.getElementById('company-line').textContent = 'Revisa la configuración del servidor';
+            send.disabled = true;
+            return;
+          }
+
+          document.getElementById('assistant-name').textContent = meta.assistantName;
+          document.getElementById('company-line').textContent =
+            meta.companyName + (meta.mode === 'demo' ? ' · demostración' : '');
+          document.title = meta.assistantName;
+
+          var words = String(meta.companyName).split(/\s+/).filter(Boolean);
+          document.getElementById('initials').textContent =
+            (words[0] ? words[0][0] : '') + (words[1] ? words[1][0] : '');
+
+          if (meta.website) {
+            var f = document.getElementById('footer');
+            f.textContent = '';
+            f.appendChild(document.createTextNode('Demostración. Las respuestas las genera un asistente automatizado · '));
+            var a = el('a', null, String(meta.website).replace(/^https?:\/\//, ''));
+            a.href = meta.website;
+            a.rel = 'noopener noreferrer';
+            a.target = '_blank';
+            f.appendChild(a);
+          }
+
+          renderIntro();
+        }
+
+        async function submit(text) {
+          if (busy || !text) return;
+          busy = true;
+          send.disabled = true;
+
+          addBubble(text, true);
+          var typing = addTyping();
+
+          try {
+            var res = await fetch(qs('/api/web/chat'), {
+              method: 'POST',
+              headers: { 'content-type': 'application/json' },
+              body: JSON.stringify({ message: text, sessionId: sessionId, tenantId: tenant || undefined })
+            });
+
+            typing.remove();
+
+            if (!res.ok) {
+              addNotice('No se pudo enviar el mensaje. Intenta de nuevo.');
+              return;
+            }
+
+            var data = await res.json();
+            sessionId = data.sessionId || sessionId;
+            addBubble(data.reply, false);
+            addTrace(data.trace);
+            if (data.degraded) addNotice('El asistente respondió en modo de respaldo.');
+          } catch (e) {
+            typing.remove();
+            addNotice('Se perdió la conexión con el servidor.');
+          } finally {
+            busy = false;
+            send.disabled = false;
+            input.focus();
+          }
+        }
+
+        form.addEventListener('submit', function (e) {
+          e.preventDefault();
+          var text = input.value.trim();
+          if (!text) return;
+          input.value = '';
+          autosize();
+          submit(text);
+        });
+
+        input.addEventListener('input', autosize);
+        input.addEventListener('keydown', function (e) {
+          if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            form.requestSubmit();
+          }
+        });
+
+        traceBtn.addEventListener('click', function () {
+          showTrace = !showTrace;
+          traceBtn.setAttribute('aria-pressed', String(showTrace));
+          Array.prototype.forEach.call(log.querySelectorAll('[data-trace]'), function (n) {
+            n.hidden = !showTrace;
+          });
+        });
+
+        resetBtn.addEventListener('click', async function () {
+          try {
+            await fetch(qs('/api/web/reset'), {
+              method: 'POST',
+              headers: { 'content-type': 'application/json' },
+              body: JSON.stringify({ sessionId: sessionId, tenantId: tenant || undefined })
+            });
+          } catch (e) { /* el reinicio local igual procede */ }
+          sessionId = null;
+          log.textContent = '';
+          renderIntro();
+          input.focus();
+        });
+
+        loadMeta().then(function () { input.focus(); });
+      })();
+    </script>
+  </body>
+</html>

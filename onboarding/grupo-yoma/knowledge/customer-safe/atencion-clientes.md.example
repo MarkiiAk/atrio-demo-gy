@@ -1,0 +1,33 @@
+# Atención a clientes — información autorizada
+
+> Archivo `.example`: **no se indexa**. Renómbralo a `atencion-clientes.md`
+> cuando Grupo Yoma confirme cada punto.
+
+## Qué necesita el equipo para atender un incidente de producto
+
+<!-- Ej: número de pedido o remisión, producto, lote, cantidad afectada,
+     si hubo derrame, estado de los sellos, fotos. -->
+
+## Qué necesita el equipo para una aclaración de factura
+
+<!-- Ej: número de factura o pedido, RFC, qué se necesita corregir. -->
+
+## Horarios de atención
+
+<!-- El sitio público ya declara: Oficina 08:00–18:00, Ventas 24 h.
+     Confirmar si aplica a WhatsApp y si hay horario de almacén distinto. -->
+
+## Requisitos para proveedores nuevos
+
+<!-- Ej: documentación fiscal, certificaciones, cobertura de entrega,
+     contacto de compras. -->
+
+## Preguntas frecuentes aprobadas
+
+<!-- Pares pregunta/respuesta que Grupo Yoma autoriza responder tal cual. -->
+
+## Qué NO debe salir de aquí
+
+- Precios, márgenes y condiciones comerciales.
+- Correos y teléfonos internos que no sean punto de contacto público.
+- Reglas de a quién se canaliza cada caso: eso vive en `routing.yaml`.

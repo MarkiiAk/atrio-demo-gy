@@ -1,0 +1,45 @@
+# A dónde va cada caso una vez que la aplicación decide que está listo.
+# Adapters disponibles hoy: LOG (siempre), EMAIL (si SMTP_ENABLED=true).
+# WEBHOOK / CRM / HUMAN_INBOX están declarados pero no implementados: caen a LOG.
+routing:
+  SALES:
+    type: LOG
+    to: []
+    # Con LOG nadie recibe nada todavía: el asistente sólo puede confirmar registro.
+    confirmation_semantics: REGISTERED_ONLY
+
+  PURCHASES:
+    type: LOG
+    to: []
+    # Con LOG nadie recibe nada todavía: el asistente sólo puede confirmar registro.
+    confirmation_semantics: REGISTERED_ONLY
+
+  HUMAN_RESOURCES:
+    type: LOG
+    to: []
+    # Con LOG nadie recibe nada todavía: el asistente sólo puede confirmar registro.
+    confirmation_semantics: REGISTERED_ONLY
+
+  CUSTOMER_SERVICE:
+    type: LOG
+    to: []
+    # Con LOG nadie recibe nada todavía: el asistente sólo puede confirmar registro.
+    confirmation_semantics: REGISTERED_ONLY
+
+  ADMINISTRATION:
+    type: LOG
+    to: []
+    # Con LOG nadie recibe nada todavía: el asistente sólo puede confirmar registro.
+    confirmation_semantics: REGISTERED_ONLY
+
+  LOGISTICS:
+    type: LOG
+    to: []
+    # Con LOG nadie recibe nada todavía: el asistente sólo puede confirmar registro.
+    confirmation_semantics: REGISTERED_ONLY
+
+# Destino usado cuando un caso no tiene área resoluble.
+fallback:
+  type: LOG
+  to: []
+  confirmation_semantics: REGISTERED_ONLY

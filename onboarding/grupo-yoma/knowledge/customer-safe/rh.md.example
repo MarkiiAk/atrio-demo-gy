@@ -1,0 +1,26 @@
+# Recursos Humanos — información autorizada
+
+> Este archivo termina en `.example`, así que **NO se indexa**. Quita el sufijo
+> (`rh.md`) sólo cuando Grupo Yoma haya confirmado el contenido. Todo lo que
+> quede aquí el asistente podrá decírselo a cualquier persona que escriba.
+
+## Cómo enviar un CV
+
+Correo autorizado para recibir currículums:
+<!-- Pendiente de confirmar con Grupo Yoma. Mientras esta línea no tenga un
+     correo real, el asistente NO lo inventa: registra un gap de onboarding
+     visible en `npm run onboard:gaps -- grupo-yoma`. -->
+
+## Áreas que suelen contratar
+
+<!-- Ej: operación de almacén, transporte, ventas internas, administración. -->
+
+## Qué debe incluir la postulación
+
+<!-- Ej: CV en PDF, puesto de interés, disponibilidad, ciudad de residencia. -->
+
+## Qué NO debe prometer el asistente
+
+- No confirmar que hay vacantes abiertas.
+- No agendar entrevistas.
+- No dar tiempos de respuesta.

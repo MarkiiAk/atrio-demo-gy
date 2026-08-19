@@ -1,0 +1,25 @@
+# Áreas internas de la empresa. Son configuración, no un catálogo fijo del producto.
+departments:
+  SALES:
+    name: "Ventas"
+    description: ""
+
+  PURCHASES:
+    name: "Compras"
+    description: ""
+
+  HUMAN_RESOURCES:
+    name: "Recursos Humanos"
+    description: ""
+
+  CUSTOMER_SERVICE:
+    name: "Atención al Cliente"
+    description: ""
+
+  ADMINISTRATION:
+    name: "Administración"
+    description: ""
+
+  LOGISTICS:
+    name: "Logística"
+    description: ""

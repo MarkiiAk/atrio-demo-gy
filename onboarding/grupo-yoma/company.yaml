@@ -1,0 +1,23 @@
+# Identidad del cliente. Todo lo que el asistente dice de sí mismo sale de aquí.
+company:
+  id: grupo-yoma
+  name: "Grupo Yoma"
+  website: "https://grupoyoma.com.mx"
+  # Una o dos frases sobre qué hace la empresa. El asistente las usa para presentarse.
+  description: "Distribuidor industrial de productos químicos. Atiende a empresas con suministro de insumos químicos en distintas presentaciones."
+
+assistant:
+  display_name: "Asistente de Grupo Yoma"
+  locale: "es-MX"
+  # Texto exacto que se envía si el proveedor de IA no responde.
+  fallback_message: "Gracias por escribir a Grupo Yoma. En este momento no pude procesar tu mensaje. ¿Puedes intentar de nuevo en unos minutos?"
+  # Texto seguro cuando ya se tiene la información pero la canalización interna falló.
+  # No debe prometer que alguien ya lo recibió.
+  routing_failed_message: "Ya tengo la información necesaria. La dejo registrada para darle seguimiento."
+
+channels:
+  whatsapp:
+    enabled: true
+    # Sender de Twilio de este cliente, formato whatsapp:+E164.
+    # Si se deja vacío se usa TWILIO_WHATSAPP_FROM del entorno.
+    from: ""

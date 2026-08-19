@@ -1,0 +1,52 @@
+{
+  "name": "@aklabs/atrio",
+  "version": "0.1.0",
+  "private": true,
+  "description": "ATRIO — plataforma multi-tenant de asistentes IA para WhatsApp. Primer tenant: grupo-yoma.",
+  "license": "UNLICENSED",
+  "engines": {
+    "node": ">=20.11"
+  },
+  "main": "dist/src/server.js",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/src/server.js",
+    "dev": "tsx watch src/server.ts",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "db:migrate": "tsx scripts/db-migrate.ts",
+    "onboard:new": "tsx scripts/onboard-new.ts",
+    "onboard:validate": "tsx scripts/onboard-validate.ts",
+    "onboard:sync": "tsx scripts/onboard-sync.ts",
+    "onboard:status": "tsx scripts/onboard-status.ts",
+    "onboard:gaps": "tsx scripts/onboard-gaps.ts",
+    "knowledge:web-sync": "tsx scripts/knowledge-web-sync.ts",
+    "chat": "tsx scripts/cli-chat.ts",
+    "eval:demo": "tsx scripts/eval-demo.ts",
+    "usage:report": "tsx scripts/usage-report.ts",
+    "data:purge": "tsx scripts/data-purge.ts"
+  },
+  "dependencies": {
+    "better-sqlite3": "^13.0.3",
+    "cheerio": "^1.2.0",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "nodemailer": "^9.0.5",
+    "openai": "^7.5.0",
+    "twilio": "^6.1.0",
+    "yaml": "^2.9.0",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^7.6.13",
+    "@types/express": "^5.0.0",
+    "@types/node": "^22.15.0",
+    "@types/nodemailer": "^7.0.0",
+    "@types/supertest": "^7.2.1",
+    "supertest": "^7.2.2",
+    "tsx": "^4.23.12",
+    "typescript": "^5.9.3",
+    "vitest": "^4.1.11"
+  }
+}
