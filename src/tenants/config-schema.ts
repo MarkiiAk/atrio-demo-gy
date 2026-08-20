@@ -126,6 +126,15 @@ export const WorkflowSchema = z.object({
     .default({ require_all_essential: true, satisfied_by_channel: [] }),
   /** Cosas que este workflow explícitamente NO puede prometer ni resolver. */
   cannot_do: z.array(z.string().min(1)).default([]),
+  /**
+   * Campos cuyo valor debe existir en la documentación autorizada antes de
+   * tratarse como algo que la empresa ofrece.
+   *
+   * Sin esto, si el cliente afirma "ustedes venden X", el asistente puede
+   * creerle y armar una solicitud de un producto inexistente. La aplicación
+   * verifica contra el conocimiento en disco y avisa cuando no cuadra.
+   */
+  verify_against_knowledge: z.array(z.string().min(1)).default([]),
 });
 export type WorkflowConfig = z.infer<typeof WorkflowSchema>;
 

@@ -8,25 +8,37 @@ services:
   - type: web
     name: atrio
     runtime: node
-    plan: starter # el plan free NO tiene disco persistente
+    # free basta para demostrar el producto. Ver la nota sobre durabilidad abajo.
+    # Para piloto real con clientes: sube a `starter` y descomenta el bloque `disk`.
+    plan: free
     region: oregon
     buildCommand: npm ci && npm run build
     startCommand: npm start
     healthCheckPath: /health
 
-    # SQLite necesita vivir en un disco que sobreviva a los redeploys.
-    disk:
-      name: atrio-data
-      mountPath: /var/data
-      sizeGB: 1
+    # Disco persistente: sólo disponible en planes de pago.
+    # disk:
+    #   name: atrio-data
+    #   mountPath: /var/data
+    #   sizeGB: 1
 
     envVars:
       - key: NODE_ENV
         value: production
       - key: APP_MODE
         value: demo
+
+      # En plan free el filesystem es efímero: la base vive mientras el
+      # contenedor esté arriba y se borra en cada redeploy o al dormirse.
+      #
+      # Para una DEMO eso es suficiente: lo que la conversación necesita es
+      # recordar los mensajes anteriores, no sobrevivir semanas. Lo que se
+      # pierde al reiniciar son los históricos (gaps, consumo, casos viejos),
+      # no la capacidad de conversar.
+      #
+      # Con plan starter + disco, cambiar a: file:/var/data/app.db
       - key: DATABASE_URL
-        value: file:/var/data/app.db
+        value: file:/tmp/atrio.db
       - key: TWILIO_VALIDATE_SIGNATURE
         value: 'true'
       - key: LOG_LEVEL

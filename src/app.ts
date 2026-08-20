@@ -5,6 +5,7 @@ import { log } from './lib/logger';
 import { getDb } from './db';
 import { twilioRouter } from './channels/whatsapp/twilio.routes';
 import { webRouter } from './channels/web/web.routes';
+import { panelRouter } from './panel/panel.routes';
 import { jobStats } from './jobs/job.repository';
 import { listTenants } from './tenants/tenant-loader';
 
@@ -40,6 +41,7 @@ export function createApp(): Express {
 
   app.use('/webhooks/twilio', twilioRouter);
   app.use('/api/web', webRouter);
+  app.use('/api/panel', panelRouter);
 
   // Chat de demostración: mismo engine que WhatsApp, en el navegador.
   app.use(

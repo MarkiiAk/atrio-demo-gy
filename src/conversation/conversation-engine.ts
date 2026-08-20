@@ -3,6 +3,7 @@ import { log, pii, snip } from '../lib/logger';
 import { runAssistantTurn, OpenAiUnavailableError, type TurnResult } from '../ai/openai.service';
 import type { AiTurnOutput } from '../ai/ai-schema';
 import { getVectorStoreId } from '../knowledge/vector-store.service';
+import { verifyCaseFields, verifyTerm } from '../knowledge/knowledge-verifier';
 import { recordGap } from '../onboarding/gap.service';
 import { buildSystemPrompt, buildTurnHint, type ActiveCaseView } from '../prompts/build-system-prompt';
 import {
@@ -50,6 +51,8 @@ export interface EngineDebug {
   knowledgeSources: string[];
   missingEssential: Record<string, string[]>;
   routed: Array<{ caseId: number; workflow: string; detail: string }>;
+  /** Valores que la aplicación NO pudo confirmar contra la documentación. */
+  unverified: string[];
   guardViolations: string[];
   usage: { inputTokens: number; outputTokens: number; latencyMs: number };
   passes: number;
@@ -79,6 +82,7 @@ export async function processTurn(input: EngineInput): Promise<EngineResult> {
     knowledgeSources: [],
     missingEssential: {},
     routed: [],
+    unverified: [],
     guardViolations: [],
     usage: { inputTokens: 0, outputTokens: 0, latencyMs: 0 },
     passes: 0,
@@ -162,10 +166,35 @@ export async function processTurn(input: EngineInput): Promise<EngineResult> {
   snapshot = snapshotConversation(config, conversation.id, channel);
   for (const v of snapshot.views) debug.missingEssential[v.workflowKey] = v.status.missingEssential;
 
+  // Lo que la persona pidió y no está en la documentación es información que el
+  // cliente debería aclarar: o sí lo maneja y falta documentarlo, o no lo maneja
+  // y conviene saber cuánta gente lo pide.
+  for (const v of snapshot.views) {
+    for (const u of v.unverified) {
+      debug.unverified.push(`${v.workflowKey}.${u.field}="${u.value}"`);
+      recordGap({
+        tenantId,
+        gapType: 'UNANSWERED_KNOWLEDGE',
+        intent: v.workflowKey,
+        topic: `"${u.value}" no aparece en la documentación`,
+        missingInformation: `confirmar si se maneja "${u.value}"; si sí, documentarlo`,
+        conversationId: conversation.id,
+      });
+    }
+  }
+
   // ── 5. Canalización determinista ───────────────────────────────────────────
   let deliveryAuthorized = false;
   let bestSemantics: 'REGISTERED_ONLY' | 'DELIVERED_TO_TEAM' | null = null;
   let routedSomething = false;
+  /**
+   * El producto que pidieron no está en la documentación. La respuesta ya se
+   * generó sin saberlo (la verificación ocurre después de extraer los campos),
+   * así que hay que rehacerla: si no, el asistente sigue pidiendo cantidad y
+   * ciudad de algo que quizá ni se vende.
+   */
+  let blockedByVerification = false;
+  const justRoutedCaseIds = new Set<number>();
 
   // Señal de escalamiento: algo quedó sin respaldo o pidieron una acción que
   // este asistente no puede ejecutar. Es lo único que hace que un flujo
@@ -179,8 +208,21 @@ export async function processTurn(input: EngineInput): Promise<EngineResult> {
     const decision = evaluateEligibility(config, caseData, {
       essentialComplete: status.essentialComplete,
       escalationSignal,
+      unverifiedFields: verifyCaseFields(config, caseData.row.workflow_key, status.known).map(
+        (v) => v.field,
+      ),
     });
-    if (!decision.eligible) continue;
+    if (!decision.eligible) {
+      if (decision.reason.startsWith('sin confirmar')) {
+        blockedByVerification = true;
+        debug.routed.push({
+          caseId: caseData.row.id,
+          workflow: caseData.row.workflow_key,
+          detail: `BLOQUEADO — ${decision.reason}`,
+        });
+      }
+      continue;
+    }
 
     const outcome = await routeCase(config, caseData, decision, {
       contactName: contact.display_name,
@@ -198,6 +240,7 @@ export async function processTurn(input: EngineInput): Promise<EngineResult> {
     if (outcome.routed) {
       routedSomething = true;
       deliveryAuthorized = true;
+      justRoutedCaseIds.add(caseData.row.id);
       if (outcome.confirmationSemantics === 'DELIVERED_TO_TEAM') bestSemantics = 'DELIVERED_TO_TEAM';
       else if (bestSemantics === null) bestSemantics = outcome.confirmationSemantics;
     }
@@ -208,8 +251,8 @@ export async function processTurn(input: EngineInput): Promise<EngineResult> {
   // La respuesta se generó cuando el caso AÚN no estaba canalizado, así que no
   // podía confirmar nada. Ahora que sí ocurrió, se regenera con el estado real:
   // así el asistente confirma después del hecho, nunca antes.
-  if (routedSomething) {
-    snapshot = snapshotConversation(config, conversation.id, channel);
+  if (routedSomething || blockedByVerification) {
+    snapshot = snapshotConversation(config, conversation.id, channel, justRoutedCaseIds);
     systemPrompt = buildPrompt(snapshot.views);
     debug.systemPrompt = systemPrompt;
     try {
@@ -242,6 +285,10 @@ export async function processTurn(input: EngineInput): Promise<EngineResult> {
     config,
     deliveryAuthorized,
     confirmationSemantics: bestSemantics,
+    // Permite cazar "sí manejamos X" cuando X no está en la documentación.
+    // La respuesta se genera antes de que se pueda verificar el campo extraído,
+    // así que este es el único punto donde se puede atrapar en el mismo turno.
+    verify: (term: string) => verifyTerm(config, term),
   };
 
   let inspection = inspectReply(ai.reply, guardCtx);
@@ -308,6 +355,7 @@ export async function processTurn(input: EngineInput): Promise<EngineResult> {
         .join(' ') || '(ninguno)',
     ],
     ['Canalizado', debug.routed.map((r) => `#${r.caseId} ${r.workflow} ${r.detail}`).join(' | ') || '(no)'],
+    ['Sin confirmar', debug.unverified.join(', ') || '(nada)'],
     ['Guard', debug.guardViolations.join(', ') || 'ok'],
     ['Pasadas', String(debug.passes)],
   ]);

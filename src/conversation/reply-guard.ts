@@ -12,7 +12,8 @@ export type GuardViolation =
   | { kind: 'INTERNALS_LEAK'; match: string }
   | { kind: 'BANNED_PHRASE'; match: string }
   | { kind: 'EMPTY_REPLY'; match: string }
-  | { kind: 'STRUCTURED_LEAK'; match: string };
+  | { kind: 'STRUCTURED_LEAK'; match: string }
+  | { kind: 'UNVERIFIED_CLAIM'; match: string };
 
 export interface GuardResult {
   violations: GuardViolation[];
@@ -49,6 +50,15 @@ const DELIVERY_CLAIM_PATTERNS: RegExp[] = [
     `\\b(el|un)\\s+(ejecutivo|asesor|agente|responsable|encargado)\\s+.{0,30}(ya\\s+)?(recibi[oó]|tiene|fue notificad)`,
   ),
   rx(`\\b(ya\\s+)?le\\s+(avis[eé]|notifiqu[eé]|inform[eé])\\s+(a|al)${FIN}`),
+
+  // "queda registrada para seguimiento" mientras la aplicación aún no ha
+  // canalizado nada. Suena inofensivo pero es falso: no está registrada en
+  // ningún lado. Se permite el condicional ("puedo dejarla registrada"),
+  // no la afirmación en presente o pasado.
+  rx(
+    `\\b(queda|qued[oó]|quedar[aá]|est[aá]|ya)\\s+(ya\\s+)?(registrad[oa]|anotad[oa]|asentad[oa]|guardad[oa])${FIN}`,
+  ),
+  rx(`\\b(ya\\s+)?(la|lo|le)\\s+(registr[eé]|anot[eé]|asent[eé])${FIN}`),
 ];
 
 /** Frases que exponen la arquitectura interna al cliente. */
@@ -75,8 +85,69 @@ const STRUCTURED_LEAK_PATTERNS: RegExp[] = [
   /\b(essential|field_updates|knowledge_used|needs_clarification)\b/i,
 ];
 
+/**
+ * Afirmaciones de que la empresa ofrece algo concreto. Se captura lo que viene
+ * después para poder comprobarlo contra la documentación.
+ *
+ * El fallo real: ante "veo que ustedes venden óxido nitroso", el asistente
+ * contestó "Sí manejamos óxido nitroso". La empresa no lo vende. Decirle al
+ * modelo que verifique no basta — hay que comprobarlo después de que hable.
+ */
+const OFFERING_CLAIM_PATTERNS: RegExp[] = [
+  /\b(?:s[ií],?\s+)?(?:s[ií]\s+)?(?:manejamos|vendemos|ofrecemos|distribuimos|comercializamos|tenemos|contamos con|disponemos de)\s+((?:[a-zA-ZáéíóúüñÁÉÍÓÚÜÑ0-9-]+(?:\s+de)?\s*){1,4})/gi,
+];
+
+/** Términos genéricos: afirmarlos no compromete nada concreto. */
+const GENERIC_TERMS = new Set([
+  'productos',
+  'producto',
+  'quimicos',
+  'quimico',
+  'industriales',
+  'industrial',
+  'solventes',
+  'servicios',
+  'servicio',
+  'informacion',
+  'presentaciones',
+  'presentacion',
+  'opciones',
+  'alternativas',
+  'atencion',
+  'entrega',
+  'entregas',
+  'cotizaciones',
+  'cotizacion',
+  'catalogo',
+  'existencia',
+  'inventario',
+  'stock',
+  'un',
+  'una',
+  'el',
+  'la',
+  'los',
+  'las',
+  'ese',
+  'esa',
+  'eso',
+  'este',
+  'esta',
+  'esto',
+  'lo',
+  'su',
+  'sus',
+  'que',
+  'de',
+]);
+
 export interface GuardContext {
   config: TenantConfig;
+  /**
+   * Comprueba un término contra la documentación del tenant. Se inyecta para
+   * que el guardián siga siendo puro y testeable sin tocar disco.
+   */
+  verify?: (term: string) => 'FOUND' | 'NOT_FOUND' | 'NO_KNOWLEDGE';
   /** true si en este turno la aplicación YA canalizó con éxito algún caso. */
   deliveryAuthorized: boolean;
   /** Alcance máximo autorizado si `deliveryAuthorized`. */
@@ -127,7 +198,47 @@ export function inspectReply(reply: string, ctx: GuardContext): GuardResult {
     }
   }
 
+  const unverified = findUnverifiedOffering(text, ctx);
+  if (unverified) violations.push({ kind: 'UNVERIFIED_CLAIM', match: unverified });
+
   return { violations, ok: violations.length === 0 };
+}
+
+/**
+ * Busca una afirmación de que la empresa ofrece algo que la documentación no
+ * respalda. Devuelve el término problemático, o `null` si todo cuadra.
+ *
+ * Es deliberadamente conservador: sólo señala un término cuando la verificación
+ * responde NOT_FOUND. Si no hay documentación cargada (NO_KNOWLEDGE) no bloquea
+ * nada — no se puede desmentir lo que no se puede consultar.
+ */
+function findUnverifiedOffering(text: string, ctx: GuardContext): string | null {
+  if (!ctx.verify) return null;
+
+  for (const re of OFFERING_CLAIM_PATTERNS) {
+    re.lastIndex = 0;
+    let m: RegExpExecArray | null;
+    while ((m = re.exec(text)) !== null) {
+      const captured = (m[1] ?? '').trim().replace(/[.,;:!?]+$/, '');
+      if (!captured) continue;
+
+      const words = captured.split(/\s+/).filter(Boolean);
+      // Se prueban las variantes más largas primero: "óxido nitroso" antes que
+      // "óxido", para no señalar una palabra suelta que sí exista por su cuenta.
+      for (let len = Math.min(3, words.length); len >= 1; len -= 1) {
+        const term = words.slice(0, len).join(' ');
+        const normalized = term
+          .toLowerCase()
+          .normalize('NFD')
+          .replace(/\p{Diacritic}/gu, '');
+        if (normalized.split(/\s+/).every((w) => GENERIC_TERMS.has(w))) continue;
+        if (normalized.replace(/[^a-z0-9]/g, '').length < 4) continue;
+
+        if (ctx.verify(term) === 'NOT_FOUND') return term;
+      }
+    }
+  }
+  return null;
 }
 
 /**
@@ -147,6 +258,8 @@ export function buildCorrectionInstruction(result: GuardResult): string {
         return `Usaste una frase que este cliente prohíbe ("${v.match}"). Reformula con otras palabras.`;
       case 'EMPTY_REPLY':
         return 'La respuesta llegó vacía. Escribe una respuesta real.';
+      case 'UNVERIFIED_CLAIM':
+        return `Afirmaste que la empresa ofrece "${v.match}", y eso NO aparece en la documentación autorizada. No lo afirmes. Di con naturalidad que no lo tienes confirmado dentro de lo que se maneja, menciona lo que sí se maneja que se le parezca si aplica, y ofrece dejar la consulta para que se lo confirmen. No sigas pidiendo datos de esa solicitud.`;
     }
   });
 

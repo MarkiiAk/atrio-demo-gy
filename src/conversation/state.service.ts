@@ -3,6 +3,7 @@ import type { ActiveCaseView } from '../prompts/build-system-prompt';
 import { activeCases, lastRoutingOutcome, type CaseWithData } from '../repositories/case.repository';
 import type { ChannelContext } from '../workflows/field-engine';
 import { evaluateFields } from '../workflows/field-engine';
+import { verifyCaseFields } from '../knowledge/knowledge-verifier';
 
 export interface ConversationSnapshot {
   cases: CaseWithData[];
@@ -17,6 +18,8 @@ export function snapshotConversation(
   config: TenantConfig,
   conversationId: number,
   channel: ChannelContext,
+  /** Casos canalizados en ESTE turno: sólo ellos pueden confirmarse ahora. */
+  justRoutedCaseIds: ReadonlySet<number> = new Set(),
 ): ConversationSnapshot {
   const cases = activeCases(conversationId);
   const views: ActiveCaseView[] = [];
@@ -43,7 +46,14 @@ export function snapshotConversation(
       departmentKey: c.row.department_key,
       status,
       routed: routed && semantics !== null,
+      justRouted: justRoutedCaseIds.has(c.row.id),
       confirmationSemantics: semantics,
+      // Se comprueba contra el conocimiento en disco, no contra lo que el
+      // modelo crea: que el cliente afirme que vendemos algo no lo vuelve cierto.
+      unverified: verifyCaseFields(config, c.row.workflow_key, status.known).map((v) => ({
+        field: v.field,
+        value: v.value,
+      })),
     });
   }
 

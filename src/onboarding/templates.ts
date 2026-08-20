@@ -37,6 +37,7 @@ export const WORKFLOW_LIBRARY: Record<
     tone: string[];
     cannotDo: string[];
     satisfiedByChannel: string[];
+    verifyAgainstKnowledge: string[];
   }
 > = {
   SALES_QUOTE: {
@@ -45,7 +46,10 @@ export const WORKFLOW_LIBRARY: Record<
     intents: ['SALES_QUOTE'],
     description: 'Solicitudes de cotización o compra',
     essential: ['product', 'quantity'],
-    useful: ['presentation', 'delivery_city', 'contact_name', 'company', 'email', 'contact_phone'],
+    // contact_name va primero a propósito: el foco sugerido sigue este orden, y
+    // preguntar el nombre al final se siente como un formulario, no como alguien
+    // que te atiende.
+    useful: ['contact_name', 'delivery_city', 'presentation', 'company', 'email', 'contact_phone'],
     optional: ['intended_use'],
     labels: {
       product: 'producto que necesita',
@@ -61,6 +65,7 @@ export const WORKFLOW_LIBRARY: Record<
     tone: ['comercial', 'amable', 'proactivo', 'natural'],
     cannotDo: ['dar precios o cotizaciones con monto', 'confirmar disponibilidad de inventario'],
     satisfiedByChannel: ['contact_phone', 'contact_name'],
+    verifyAgainstKnowledge: ['product'],
   },
 
   SUPPLIER: {
@@ -88,6 +93,7 @@ export const WORKFLOW_LIBRARY: Record<
       'comprometer una reunión o una respuesta',
     ],
     satisfiedByChannel: ['contact_phone', 'contact_name'],
+    verifyAgainstKnowledge: [],
   },
 
   HR: {
@@ -109,6 +115,7 @@ export const WORKFLOW_LIBRARY: Record<
     tone: ['cordial', 'claro', 'neutral'],
     cannotDo: ['confirmar vacantes disponibles', 'agendar entrevistas'],
     satisfiedByChannel: ['contact_phone', 'contact_name'],
+    verifyAgainstKnowledge: [],
   },
 
   INVOICE: {
@@ -131,6 +138,7 @@ export const WORKFLOW_LIBRARY: Record<
     tone: ['empático', 'resolutivo', 'breve'],
     cannotDo: ['emitir, reenviar o cancelar facturas', 'consultar el estado de una factura'],
     satisfiedByChannel: ['contact_phone', 'contact_name'],
+    verifyAgainstKnowledge: [],
   },
 
   ORDER_STATUS: {
@@ -151,6 +159,7 @@ export const WORKFLOW_LIBRARY: Record<
     tone: ['empático', 'resolutivo', 'breve'],
     cannotDo: ['consultar el estatus real de un pedido', 'dar fechas de entrega'],
     satisfiedByChannel: ['contact_phone', 'contact_name'],
+    verifyAgainstKnowledge: [],
   },
 
   DELIVERY_ISSUE: {
@@ -173,6 +182,7 @@ export const WORKFLOW_LIBRARY: Record<
     tone: ['sereno', 'cuidadoso', 'empático', 'no defensivo'],
     cannotDo: ['reprogramar una entrega', 'contactar al transportista'],
     satisfiedByChannel: ['contact_phone', 'contact_name'],
+    verifyAgainstKnowledge: [],
   },
 
   PRODUCT_DAMAGE: {
@@ -201,6 +211,7 @@ export const WORKFLOW_LIBRARY: Record<
       'determinar responsabilidad del daño',
     ],
     satisfiedByChannel: ['contact_phone', 'contact_name'],
+    verifyAgainstKnowledge: ['product'],
   },
 
   COMPLAINT: {
@@ -223,6 +234,7 @@ export const WORKFLOW_LIBRARY: Record<
     tone: ['sereno', 'cuidadoso', 'empático', 'no defensivo'],
     cannotDo: ['ofrecer compensaciones', 'asignar culpas'],
     satisfiedByChannel: ['contact_phone', 'contact_name'],
+    verifyAgainstKnowledge: [],
   },
 
   SUGGESTION: {
@@ -241,6 +253,7 @@ export const WORKFLOW_LIBRARY: Record<
     tone: ['cordial', 'breve', 'agradecido'],
     cannotDo: ['comprometer que la sugerencia se implementará'],
     satisfiedByChannel: [],
+    verifyAgainstKnowledge: [],
   },
 
   GENERAL_INFORMATION: {
@@ -255,6 +268,7 @@ export const WORKFLOW_LIBRARY: Record<
     tone: ['directo', 'útil', 'breve'],
     cannotDo: [],
     satisfiedByChannel: [],
+    verifyAgainstKnowledge: [],
   },
 };
 
@@ -322,12 +336,18 @@ base:
     - no prometer acciones o resultados no autorizados
     - no usar lenguaje innecesariamente corporativo
     - priorizar claridad
+    - no repetir lo que la persona acaba de decir
+    - pedir los datos que faltan de una vez, no de uno en uno
+    - reconocer lo que preocupa a la persona, no sólo sus datos
 
-  # Frases que este cliente NO quiere oír nunca. Se verifican después de generar.
-  banned_phrases: []
+  # Frases que este cliente NO quiere oír nunca. Se verifican DESPUÉS de generar
+  # la respuesta: si aparecen, se regenera. Sirven para matar muletillas.
+  banned_phrases:
+    - "quedó registrado para seguimiento"
 
-  # Tope de preguntas por respuesta. 1 evita el efecto interrogatorio.
-  max_questions_per_reply: 1
+  # Temas por respuesta (no datos: dentro de un tema se pueden pedir varios
+  # datos juntos). 2 permite responder algo y además pedir lo que falta.
+  max_questions_per_reply: 2
 
 # Tono por tipo de solicitud. La clave debe existir en workflows.yaml.
 tones:
@@ -388,7 +408,12 @@ ${labels || '      {}'}
 
     # Lo que este asistente NO puede hacer en este flujo. Se le dice al modelo
     # para que no lo prometa.
-    cannot_do:${list(wf.cannotDo, '      ')}`;
+    cannot_do:${list(wf.cannotDo, '      ')}
+
+    # Campos que la APLICACIÓN verifica contra la documentación autorizada antes
+    # de que el asistente los trate como algo que la empresa ofrece. Evita que
+    # un cliente afirme "ustedes venden X" y el asistente se lo crea.
+    verify_against_knowledge:${list(wf.verifyAgainstKnowledge, '      ')}`;
     })
     .filter(Boolean)
     .join('\n\n');

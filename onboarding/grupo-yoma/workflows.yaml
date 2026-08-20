@@ -16,9 +16,9 @@ workflows:
         - quantity
       # Se piden sólo si surgen de forma natural.
       useful:
-        - presentation
-        - delivery_city
         - contact_name
+        - delivery_city
+        - presentation
         - company
         - email
         - contact_phone
@@ -50,6 +50,8 @@ workflows:
     cannot_do:
       - dar precios o cotizaciones con monto
       - confirmar disponibilidad de inventario
+    verify_against_knowledge:
+      - product
 
   SUPPLIER:
     enabled: true
@@ -101,6 +103,7 @@ workflows:
     cannot_do:
       - expresar interés de compra en nombre de la empresa
       - comprometer una reunión o una respuesta
+    verify_against_knowledge: []
 
   HR:
     enabled: true
@@ -146,6 +149,7 @@ workflows:
     cannot_do:
       - confirmar vacantes disponibles
       - agendar entrevistas
+    verify_against_knowledge: []
 
   INVOICE:
     enabled: true
@@ -193,6 +197,7 @@ workflows:
     cannot_do:
       - emitir, reenviar o cancelar facturas
       - consultar el estado de una factura
+    verify_against_knowledge: []
 
   ORDER_STATUS:
     enabled: true
@@ -236,6 +241,7 @@ workflows:
     cannot_do:
       - consultar el estatus real de un pedido
       - dar fechas de entrega
+    verify_against_knowledge: []
 
   DELIVERY_ISSUE:
     enabled: true
@@ -283,6 +289,7 @@ workflows:
     cannot_do:
       - reprogramar una entrega
       - contactar al transportista
+    verify_against_knowledge: []
 
   PRODUCT_DAMAGE:
     enabled: true
@@ -336,6 +343,8 @@ workflows:
     cannot_do:
       - autorizar cambios, reembolsos o notas de crédito
       - determinar responsabilidad del daño
+    verify_against_knowledge:
+      - product
 
   COMPLAINT:
     enabled: true
@@ -383,6 +392,7 @@ workflows:
     cannot_do:
       - ofrecer compensaciones
       - asignar culpas
+    verify_against_knowledge: []
 
   SUGGESTION:
     enabled: true
@@ -419,6 +429,7 @@ workflows:
     # para que no lo prometa.
     cannot_do:
       - comprometer que la sugerencia se implementará
+    verify_against_knowledge: []
 
   GENERAL_INFORMATION:
     enabled: true
@@ -452,3 +463,5 @@ workflows:
     # Lo que este asistente NO puede hacer en este flujo. Se le dice al modelo
     # para que no lo prometa.
     cannot_do: []
+
+    verify_against_knowledge: []

@@ -39,6 +39,10 @@ describe('guardián: promesas de entrega', () => {
     'Perfecto, ya notifiqué a mi compañero.',
     'Su caso ya quedó con el equipo de atención.',
     'Ya le avisé al responsable del almacén.',
+    // Suena inofensivo, pero afirma un hecho que todavía no ocurrió.
+    'La solicitud queda registrada para seguimiento.',
+    'Su solicitud ya quedó registrada.',
+    'Listo, ya la anoté.',
   ];
 
   it('bloquea afirmar entrega sin autorización', () => {
@@ -62,7 +66,9 @@ describe('guardián: promesas de entrega', () => {
     const safe = [
       'Perfecto, ya tengo lo necesario para preparar tu solicitud.',
       'Con eso dejo lista la solicitud para darle seguimiento.',
+      // Condicional: ofrece hacerlo, no afirma que ya pasó.
       'Gracias, con el número de pedido puedo dejar registrada la revisión.',
+      'Si me confirma la cantidad, preparo la solicitud.',
     ];
     for (const reply of safe) {
       expect(inspectReply(reply, unauthorized).ok, `no debió bloquear: "${reply}"`).toBe(true);
@@ -94,6 +100,59 @@ describe('guardián: fuga de arquitectura interna', () => {
     const ok =
       'Gracias, ya tengo el número de pedido. Con eso puedo dejar registrada la solicitud de seguimiento para que se revise y le respondan con precisión.';
     expect(inspectReply(ok, unauthorized).ok).toBe(true);
+  });
+});
+
+describe('guardián: afirmar que se ofrece algo no documentado', () => {
+  // Catálogo de prueba: tiene tolueno y acetatos, NO tiene acetona ni óxido nitroso.
+  const catalogo = new Set(['tolueno', 'acetato de etilo', 'alcohol isopropilico', 'productos quimicos']);
+  const verify = (term: string) => {
+    const t = term.toLowerCase().normalize('NFD').replace(/\p{Diacritic}/gu, '');
+    return [...catalogo].some((c) => c.includes(t) || t.includes(c)) ? 'FOUND' : 'NOT_FOUND';
+  };
+  const ctx = { config, deliveryAuthorized: false, confirmationSemantics: null, verify } as const;
+
+  it('bloquea afirmar un producto que no está en el catálogo', () => {
+    // El fallo real observado con Grupo Yoma.
+    for (const reply of [
+      'Sí manejamos óxido nitroso. Para preparar su cotización necesito la cantidad.',
+      'Sí, vendemos acetona en varias presentaciones.',
+      'Claro, contamos con hidróxido de sodio.',
+    ]) {
+      const r = inspectReply(reply, ctx);
+      expect(r.ok, `debió bloquear: "${reply}"`).toBe(false);
+      expect(r.violations.some((v) => v.kind === 'UNVERIFIED_CLAIM')).toBe(true);
+    }
+  });
+
+  it('permite afirmar lo que sí está documentado', () => {
+    for (const reply of [
+      'Sí manejamos tolueno, en tambos y porrones.',
+      'Sí, tenemos acetato de etilo disponible.',
+      'Manejamos productos químicos para uso industrial.',
+    ]) {
+      expect(inspectReply(reply, ctx).ok, `no debió bloquear: "${reply}"`).toBe(true);
+    }
+  });
+
+  it('no bloquea cuando no hay documentación con qué contrastar', () => {
+    const sinKnowledge = {
+      config,
+      deliveryAuthorized: false,
+      confirmationSemantics: null,
+      verify: () => 'NO_KNOWLEDGE' as const,
+    };
+    expect(inspectReply('Sí manejamos óxido nitroso.', sinKnowledge).ok).toBe(true);
+  });
+
+  it('sin verificador disponible el guardián no inventa violaciones', () => {
+    const sinVerify = { config, deliveryAuthorized: false, confirmationSemantics: null };
+    expect(inspectReply('Sí manejamos óxido nitroso.', sinVerify).ok).toBe(true);
+  });
+
+  it('la corrección le dice al modelo qué término retirar', () => {
+    const r = inspectReply('Sí manejamos óxido nitroso.', ctx);
+    expect(buildCorrectionInstruction(r)).toContain('óxido nitroso');
   });
 });
 
@@ -153,6 +212,30 @@ describe('elegibilidad de canalización (determinista)', () => {
     const d = evaluateEligibility(config, c, { essentialComplete: true, escalationSignal: false });
     expect(d.eligible).toBe(false);
     expect(d.reason).toContain('informativa');
+  });
+
+  it('BLOQUEA la canalización si un dato no está confirmado en la documentación', () => {
+    // El caso real: alguien pidió cotizar óxido nitroso, que Grupo Yoma no
+    // vende, y el sistema canalizó la solicitud a Ventas igualmente.
+    const c = makeCase('SALES_QUOTE', 'SALES', 'elig-unverified');
+    const d = evaluateEligibility(config, c, {
+      essentialComplete: true,
+      escalationSignal: false,
+      unverifiedFields: ['product'],
+    });
+    expect(d.eligible).toBe(false);
+    expect(d.reason).toContain('sin confirmar');
+    expect(d.target).toBeNull();
+  });
+
+  it('canaliza normalmente cuando todo está confirmado', () => {
+    const c = makeCase('SALES_QUOTE', 'SALES', 'elig-verified');
+    const d = evaluateEligibility(config, c, {
+      essentialComplete: true,
+      escalationSignal: false,
+      unverifiedFields: [],
+    });
+    expect(d.eligible).toBe(true);
   });
 
   it('un flujo informativo SÍ escala cuando algo quedó sin resolver', () => {
@@ -333,6 +416,7 @@ tones: {}
           status,
           routed: false,
           confirmationSemantics: null,
+          unverified: [],
         },
       ],
     });
@@ -353,12 +437,21 @@ tones: {}
 
     const notRouted = prompt({
       activeCases: [
-        { caseId: 1, workflowKey: 'SALES_QUOTE', departmentKey: 'SALES', status, routed: false, confirmationSemantics: null },
+        {
+          caseId: 1,
+          workflowKey: 'SALES_QUOTE',
+          departmentKey: 'SALES',
+          status,
+          routed: false,
+          justRouted: false,
+          confirmationSemantics: null,
+          unverified: [],
+        },
       ],
     });
     expect(notRouted).toContain('NO AUTORIZADO');
 
-    const routed = prompt({
+    const justRouted = prompt({
       activeCases: [
         {
           caseId: 1,
@@ -366,12 +459,33 @@ tones: {}
           departmentKey: 'SALES',
           status,
           routed: true,
+          justRouted: true,
           confirmationSemantics: 'REGISTERED_ONLY',
+          unverified: [],
         },
       ],
     });
-    expect(routed).toContain('AUTORIZADO');
-    expect(routed).toContain('NO afirmes que ya lo recibió');
+    expect(justRouted).toContain('AUTORIZADO (sólo en esta respuesta)');
+    expect(justRouted).toContain('NO afirmes que ya lo recibió');
+
+    // Turnos posteriores: ya se confirmó. Repetirlo es la muletilla que hace
+    // que el asistente suene a robot.
+    const alreadyConfirmed = prompt({
+      activeCases: [
+        {
+          caseId: 1,
+          workflowKey: 'SALES_QUOTE',
+          departmentKey: 'SALES',
+          status,
+          routed: true,
+          justRouted: false,
+          confirmationSemantics: 'REGISTERED_ONLY',
+          unverified: [],
+        },
+      ],
+    });
+    expect(alreadyConfirmed).toContain('YA CONFIRMADO');
+    expect(alreadyConfirmed).toContain('NO lo vuelvas a anunciar');
   });
 
   it('prohíbe explícitamente las frases que exponen las tripas', () => {

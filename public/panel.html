@@ -1,0 +1,552 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>Panel — ATRIO</title>
+    <style>
+      :root {
+        --bg: #f5f6f8;
+        --panel: #ffffff;
+        --ink: #16181d;
+        --ink-soft: #626a79;
+        --ink-faint: #8b93a1;
+        --line: #e4e7ec;
+        --accent: #0f5c4d;
+        --accent-soft: #e7f2ef;
+        --warn: #9a5b00;
+        --warn-soft: #fdf3e2;
+        --danger: #a52f2f;
+        --danger-soft: #fbeeee;
+        --ok: #1d6b47;
+        --ok-soft: #e6f4ec;
+        --radius: 12px;
+        --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+        --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg: #0d0f12;
+          --panel: #16191e;
+          --ink: #eceff4;
+          --ink-soft: #9aa3b2;
+          --ink-faint: #6d7686;
+          --line: #252a32;
+          --accent: #4bbfa4;
+          --accent-soft: #14302a;
+          --warn: #e0a458;
+          --warn-soft: #2e2412;
+          --danger: #e08585;
+          --danger-soft: #2e1818;
+          --ok: #63c894;
+          --ok-soft: #142b1f;
+        }
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0; background: var(--bg); color: var(--ink);
+        font-family: var(--sans); font-size: 14.5px; line-height: 1.55;
+        -webkit-font-smoothing: antialiased;
+      }
+      .wrap { max-width: 1180px; margin: 0 auto; padding: 22px 20px 60px; }
+
+      header.top {
+        display: flex; align-items: center; gap: 13px; flex-wrap: wrap;
+        padding-bottom: 16px; border-bottom: 1px solid var(--line); margin-bottom: 20px;
+      }
+      .logo {
+        width: 38px; height: 38px; border-radius: 9px; flex: 0 0 auto;
+        background: var(--accent); color: #fff; display: grid; place-items: center;
+        font-weight: 700; letter-spacing: .04em; font-size: 13px;
+      }
+      .titles { flex: 1; min-width: 180px; }
+      .titles h1 { margin: 0; font-size: 17px; font-weight: 650; }
+      .titles p { margin: 1px 0 0; font-size: 12.5px; color: var(--ink-soft); }
+      .badge {
+        font-size: 11.5px; padding: 3px 9px; border-radius: 999px;
+        background: var(--accent-soft); color: var(--accent); font-weight: 600;
+      }
+      .badge.demo { background: var(--warn-soft); color: var(--warn); }
+
+      nav.tabs { display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 18px; }
+      nav.tabs button {
+        appearance: none; border: 1px solid transparent; background: transparent;
+        color: var(--ink-soft); font: inherit; font-size: 13.5px;
+        padding: 7px 14px; border-radius: 8px; cursor: pointer;
+      }
+      nav.tabs button:hover { color: var(--ink); background: var(--panel); }
+      nav.tabs button[aria-selected="true"] {
+        background: var(--panel); color: var(--ink); border-color: var(--line); font-weight: 600;
+      }
+
+      .grid { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(168px, 1fr)); }
+      .card {
+        background: var(--panel); border: 1px solid var(--line);
+        border-radius: var(--radius); padding: 15px 16px;
+      }
+      .card .label { font-size: 12px; color: var(--ink-soft); margin-bottom: 5px; }
+      .card .value { font-size: 25px; font-weight: 650; letter-spacing: -.02em; line-height: 1.1; }
+      .card .sub { font-size: 12px; color: var(--ink-faint); margin-top: 4px; }
+
+      section.block { margin-top: 26px; }
+      section.block > h2 {
+        font-size: 13px; text-transform: uppercase; letter-spacing: .06em;
+        color: var(--ink-soft); margin: 0 0 10px; font-weight: 650;
+      }
+
+      .surface {
+        background: var(--panel); border: 1px solid var(--line);
+        border-radius: var(--radius); overflow: hidden;
+      }
+      .scroll { overflow-x: auto; }
+      table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+      th, td { text-align: left; padding: 10px 14px; border-bottom: 1px solid var(--line); vertical-align: top; }
+      th { font-size: 11.5px; text-transform: uppercase; letter-spacing: .05em; color: var(--ink-soft); font-weight: 600; white-space: nowrap; }
+      tr:last-child td { border-bottom: 0; }
+      tbody tr.clickable { cursor: pointer; }
+      tbody tr.clickable:hover { background: var(--accent-soft); }
+
+      .pill {
+        display: inline-block; font-size: 11.5px; font-weight: 600;
+        padding: 2px 8px; border-radius: 999px; white-space: nowrap;
+      }
+      .pill.ok { background: var(--ok-soft); color: var(--ok); }
+      .pill.warn { background: var(--warn-soft); color: var(--warn); }
+      .pill.danger { background: var(--danger-soft); color: var(--danger); }
+      .pill.mute { background: var(--bg); color: var(--ink-soft); }
+
+      .kv { font-size: 12.5px; color: var(--ink-soft); }
+      .kv b { color: var(--ink); font-weight: 600; }
+      .mono { font-family: var(--mono); font-size: 12px; }
+      .muted { color: var(--ink-faint); }
+      .empty { padding: 34px 18px; text-align: center; color: var(--ink-faint); font-size: 13.5px; }
+
+      .freq {
+        display: inline-block; min-width: 30px; text-align: center;
+        font-family: var(--mono); font-size: 12px; font-weight: 700;
+        background: var(--warn-soft); color: var(--warn);
+        padding: 2px 7px; border-radius: 6px;
+      }
+
+      dialog {
+        border: 1px solid var(--line); border-radius: var(--radius);
+        background: var(--panel); color: var(--ink); padding: 0;
+        max-width: 640px; width: calc(100% - 32px); max-height: 82vh;
+      }
+      dialog::backdrop { background: rgba(8, 10, 14, .55); }
+      .dlg-head {
+        display: flex; align-items: center; gap: 10px;
+        padding: 14px 18px; border-bottom: 1px solid var(--line); position: sticky; top: 0;
+        background: var(--panel);
+      }
+      .dlg-head h3 { margin: 0; font-size: 15px; flex: 1; }
+      .dlg-body { padding: 16px 18px; overflow-y: auto; }
+      .x {
+        appearance: none; border: 0; background: transparent; color: var(--ink-soft);
+        font-size: 20px; line-height: 1; cursor: pointer; padding: 2px 6px;
+      }
+
+      .msg { margin-bottom: 9px; display: flex; }
+      .msg.out { justify-content: flex-end; }
+      .msg span {
+        max-width: 82%; padding: 8px 12px; border-radius: 13px; white-space: pre-wrap;
+        background: var(--bg); border: 1px solid var(--line); font-size: 13.5px;
+      }
+      .msg.out span { background: var(--accent); color: #fff; border-color: transparent; }
+
+      .note {
+        background: var(--warn-soft); color: var(--warn); border-radius: 8px;
+        padding: 10px 13px; font-size: 13px; margin-bottom: 14px;
+      }
+      .bar { height: 5px; background: var(--line); border-radius: 3px; overflow: hidden; margin-top: 6px; }
+      .bar i { display: block; height: 100%; background: var(--accent); }
+      a.plain { color: var(--accent); }
+    </style>
+  </head>
+
+  <body>
+    <div class="wrap">
+      <header class="top">
+        <div class="logo">AT</div>
+        <div class="titles">
+          <h1 id="company">Cargando…</h1>
+          <p id="assistant">&nbsp;</p>
+        </div>
+        <span class="badge" id="mode"></span>
+      </header>
+
+      <nav class="tabs" role="tablist">
+        <button role="tab" aria-selected="true" data-tab="resumen">Resumen</button>
+        <button role="tab" aria-selected="false" data-tab="casos">Solicitudes</button>
+        <button role="tab" aria-selected="false" data-tab="conversaciones">Conversaciones</button>
+        <button role="tab" aria-selected="false" data-tab="gaps">Qué le falta saber</button>
+        <button role="tab" aria-selected="false" data-tab="config">Configuración</button>
+      </nav>
+
+      <main id="view"></main>
+    </div>
+
+    <dialog id="dlg">
+      <div class="dlg-head">
+        <h3 id="dlg-title">Conversación</h3>
+        <button class="x" id="dlg-close" aria-label="Cerrar">×</button>
+      </div>
+      <div class="dlg-body" id="dlg-body"></div>
+    </dialog>
+
+    <script>
+      (function () {
+        'use strict';
+
+        var view = document.getElementById('view');
+        var params = new URLSearchParams(location.search);
+        var tenant = params.get('tenant') || '';
+        var current = 'resumen';
+        var cache = {};
+
+        function api(p) {
+          var url = '/api/panel' + p;
+          if (tenant) url += (url.indexOf('?') < 0 ? '?' : '&') + 'tenant=' + encodeURIComponent(tenant);
+          return fetch(url).then(function (r) {
+            if (!r.ok) throw new Error('HTTP ' + r.status);
+            return r.json();
+          });
+        }
+
+        function el(tag, cls, text) {
+          var n = document.createElement(tag);
+          if (cls) n.className = cls;
+          if (text != null) n.textContent = text;
+          return n;
+        }
+
+        function card(label, value, sub) {
+          var c = el('div', 'card');
+          c.appendChild(el('div', 'label', label));
+          c.appendChild(el('div', 'value', String(value)));
+          if (sub) c.appendChild(el('div', 'sub', sub));
+          return c;
+        }
+
+        function table(headers, rows, onRowClick) {
+          var wrapper = el('div', 'surface');
+          if (!rows.length) {
+            wrapper.appendChild(el('div', 'empty', 'Todavía no hay nada aquí.'));
+            return wrapper;
+          }
+          var scroll = el('div', 'scroll');
+          var t = el('table');
+          var thead = el('thead');
+          var tr = el('tr');
+          headers.forEach(function (h) { tr.appendChild(el('th', null, h)); });
+          thead.appendChild(tr);
+          t.appendChild(thead);
+
+          var tb = el('tbody');
+          rows.forEach(function (cells, i) {
+            var r = el('tr');
+            if (onRowClick) {
+              r.className = 'clickable';
+              r.addEventListener('click', function () { onRowClick(i); });
+            }
+            cells.forEach(function (c) {
+              var td = el('td');
+              if (typeof c === 'string' || typeof c === 'number') td.textContent = String(c);
+              else if (c) td.appendChild(c);
+              r.appendChild(td);
+            });
+            tb.appendChild(r);
+          });
+          t.appendChild(tb);
+          scroll.appendChild(t);
+          wrapper.appendChild(scroll);
+          return wrapper;
+        }
+
+        function pill(text, kind) {
+          return el('span', 'pill ' + (kind || 'mute'), text);
+        }
+
+        function section(title, node) {
+          var s = el('section', 'block');
+          s.appendChild(el('h2', null, title));
+          s.appendChild(node);
+          return s;
+        }
+
+        function fecha(v) {
+          if (!v) return '—';
+          return String(v).replace('T', ' ').slice(0, 16);
+        }
+
+        // ── vistas ─────────────────────────────────────────────────────────
+
+        function renderResumen(d) {
+          view.textContent = '';
+
+          var g = el('div', 'grid');
+          g.appendChild(card('Conversaciones', d.totals.conversations, d.totals.contacts + ' personas'));
+          g.appendChild(card('Solicitudes', d.totals.cases, d.totals.casesRouted + ' canalizadas'));
+          g.appendChild(card('Mensajes', d.totals.messagesIn + d.totals.messagesOut,
+            d.totals.messagesIn + ' recibidos · ' + d.totals.messagesOut + ' enviados'));
+          g.appendChild(card('Preguntas sin respuesta', d.totals.gaps, 'para completar en onboarding'));
+          view.appendChild(g);
+
+          var g2 = el('div', 'grid');
+          g2.appendChild(card('Documentos consultables', d.knowledge.websitePages + d.knowledge.publicDocs + d.knowledge.customerSafeDocs,
+            d.knowledge.websitePages + ' del sitio · ' + d.knowledge.customerSafeDocs + ' autorizados'));
+          g2.appendChild(card('Consultas a la IA', d.usage.openaiCalls, d.usage.avgLatencyMs + ' ms en promedio'));
+          g2.appendChild(card('Consumo', d.usage.totalTokens.toLocaleString('es-MX') + ' tk',
+            d.usage.tokensPerConversation.toLocaleString('es-MX') + ' por conversación'));
+          view.appendChild(section('Operación', g2));
+
+          if (d.byDepartment.length) {
+            var max = Math.max.apply(null, d.byDepartment.map(function (x) { return x.cases; }));
+            var rows = d.byDepartment.map(function (x) {
+              var box = el('div');
+              var bar = el('div', 'bar');
+              var i = el('i');
+              i.style.width = Math.round((x.cases / max) * 100) + '%';
+              bar.appendChild(i);
+              box.appendChild(bar);
+              return [x.name, x.cases, x.routed, box];
+            });
+            view.appendChild(section('Solicitudes por área',
+              table(['Área', 'Total', 'Canalizadas', ''], rows)));
+          }
+
+          if (d.byWorkflow.length) {
+            var rows2 = d.byWorkflow.map(function (x) {
+              return [x.key, x.cases, x.routed];
+            });
+            view.appendChild(section('Por tipo de solicitud',
+              table(['Tipo', 'Total', 'Canalizadas'], rows2)));
+          }
+        }
+
+        function renderCasos(d) {
+          view.textContent = '';
+          var cs = d.cases;
+
+          var nota = el('div', 'note');
+          nota.textContent = 'Cada renglón es una solicitud que el asistente recabó y dejó lista para el área correspondiente. Haz clic para ver el detalle.';
+          view.appendChild(nota);
+
+          var rows = cs.map(function (c) {
+            var estado = c.status === 'ROUTED' ? pill('Canalizada', 'ok')
+              : c.status === 'ROUTING_FAILED' ? pill('Falló el envío', 'danger')
+              : pill('En curso', 'warn');
+            var urg = c.urgency === 'HIGH' ? pill('Alta', 'danger') : el('span', 'muted', '—');
+            var resumen = el('div');
+            resumen.appendChild(el('div', null, c.workflowKey));
+            var campos = c.fields.slice(0, 3).map(function (f) { return f.label + ': ' + f.value; }).join(' · ');
+            if (campos) resumen.appendChild(el('div', 'kv', campos));
+            return ['#' + c.id, resumen, c.department, c.contactName || el('span', 'muted', 'sin nombre'), estado, urg, fecha(c.createdAt)];
+          });
+
+          view.appendChild(table(
+            ['ID', 'Solicitud', 'Área', 'Contacto', 'Estado', 'Urgencia', 'Recibida'],
+            rows,
+            function (i) { showCase(cs[i]); }
+          ));
+        }
+
+        function showCase(c) {
+          document.getElementById('dlg-title').textContent = 'Solicitud #' + c.id + ' — ' + c.workflowKey;
+          var b = document.getElementById('dlg-body');
+          b.textContent = '';
+
+          var meta = el('div', 'kv');
+          meta.innerHTML = '';
+          [['Área', c.department], ['Estado', c.status], ['Urgencia', c.urgency],
+           ['Canal', c.channel], ['Contacto', c.contactName || 'sin nombre'],
+           ['Teléfono', c.contactPhone || '—'], ['Recibida', fecha(c.createdAt)],
+           ['Canalizada', fecha(c.routedAt)]].forEach(function (p) {
+            var line = el('div');
+            var k = el('b', null, p[0] + ': ');
+            line.appendChild(k);
+            line.appendChild(document.createTextNode(p[1]));
+            meta.appendChild(line);
+          });
+          b.appendChild(meta);
+
+          if (c.fields.length) {
+            b.appendChild(el('h4', null, 'Información recabada'));
+            var ul = el('div', 'kv');
+            c.fields.forEach(function (f) {
+              var line = el('div');
+              line.appendChild(el('b', null, f.label + ': '));
+              line.appendChild(document.createTextNode(f.value));
+              ul.appendChild(line);
+            });
+            b.appendChild(ul);
+          }
+
+          if (c.intents.length) {
+            b.appendChild(el('h4', null, 'Motivos detectados'));
+            var box = el('div');
+            c.intents.forEach(function (i) {
+              box.appendChild(pill(i.intent + ' · ' + Math.round(i.confidence * 100) + '%', 'mute'));
+              box.appendChild(document.createTextNode(' '));
+            });
+            b.appendChild(box);
+          }
+
+          if (c.routing) {
+            b.appendChild(el('h4', null, 'Canalización'));
+            b.appendChild(el('div', 'kv mono',
+              c.routing.adapter + ' · ' + c.routing.outcome + (c.routing.detail ? ' · ' + c.routing.detail : '')));
+          }
+
+          var verBtn = el('button', 'x');
+          document.getElementById('dlg').showModal();
+        }
+
+        function renderConversaciones(d) {
+          view.textContent = '';
+          var cs = d.conversations;
+          var rows = cs.map(function (c) {
+            var quien = el('div');
+            quien.appendChild(el('div', null, c.contactName || 'Sin nombre'));
+            if (c.contactPhone) quien.appendChild(el('div', 'kv mono', c.contactPhone));
+            var prev = el('div', 'kv');
+            prev.textContent = (c.preview || '').slice(0, 90);
+            var animo = c.lastSentiment && c.lastSentiment !== 'NEUTRAL'
+              ? pill(c.lastSentiment, c.lastSentiment === 'ANGRY' || c.lastSentiment === 'FRUSTRATED' ? 'danger' : 'mute')
+              : el('span', 'muted', '—');
+            return [quien, c.channel, prev, c.messageCount, c.caseCount, animo, fecha(c.lastMessageAt)];
+          });
+          view.appendChild(table(
+            ['Persona', 'Canal', 'Último mensaje', 'Msjs', 'Solicitudes', 'Ánimo', 'Actividad'],
+            rows,
+            function (i) { showTranscript(cs[i]); }
+          ));
+        }
+
+        function showTranscript(c) {
+          document.getElementById('dlg-title').textContent =
+            'Conversación con ' + (c.contactName || c.contactPhone || 'contacto');
+          var b = document.getElementById('dlg-body');
+          b.textContent = 'Cargando…';
+          document.getElementById('dlg').showModal();
+
+          api('/conversations/' + c.id + '/transcript').then(function (d) {
+            b.textContent = '';
+            if (!d.messages.length) { b.appendChild(el('div', 'empty', 'Sin mensajes.')); return; }
+            d.messages.forEach(function (m) {
+              var row = el('div', 'msg' + (m.direction === 'OUTBOUND' ? ' out' : ''));
+              row.appendChild(el('span', null, m.body || '(sin texto)'));
+              b.appendChild(row);
+            });
+          }).catch(function () { b.textContent = 'No se pudo cargar.'; });
+        }
+
+        function renderGaps(d) {
+          view.textContent = '';
+          var nota = el('div', 'note');
+          nota.textContent = 'Esto es lo que le preguntaron al asistente y no pudo responder con información respaldada. Cada línea es algo que conviene aclarar o documentar.';
+          view.appendChild(nota);
+
+          var rows = d.gaps.map(function (g) {
+            return [
+              el('span', 'freq', g.frequency + 'x'),
+              g.topic,
+              g.missingInformation ? el('span', 'kv', g.missingInformation) : el('span', 'muted', '—'),
+              pill(g.gapType.replace(/_/g, ' ').toLowerCase(), 'mute'),
+              fecha(g.lastSeenAt),
+            ];
+          });
+          view.appendChild(table(['Veces', 'Tema', 'Qué falta', 'Tipo', 'Última vez'], rows));
+        }
+
+        function renderConfig(d) {
+          view.textContent = '';
+
+          var p = el('div', 'surface');
+          var pb = el('div');
+          pb.style.padding = '15px 16px';
+          pb.appendChild(el('div', 'kv', 'Estilo: ' + d.personality.style.join(', ')));
+          pb.appendChild(el('div', 'kv', 'Trato: de ' + (d.personality.pronoun === 'usted' ? 'usted' : 'tú')));
+          pb.appendChild(el('div', 'kv', 'Máximo de temas por respuesta: ' + d.personality.maxQuestions));
+          if (d.personality.banned.length) {
+            pb.appendChild(el('div', 'kv', 'Frases prohibidas: ' + d.personality.banned.join(' · ')));
+          }
+          p.appendChild(pb);
+          view.appendChild(section('Personalidad', p));
+
+          var rows = d.workflows.map(function (w) {
+            return [
+              w.key,
+              w.enabled ? pill('Activo', 'ok') : pill('Apagado', 'mute'),
+              w.department,
+              w.essential.join(', ') || el('span', 'muted', '—'),
+              w.verifiedFields.length ? pill('verifica ' + w.verifiedFields.join(', '), 'warn') : el('span', 'muted', '—'),
+              w.cannotDo.length ? el('span', 'kv', w.cannotDo.join(' · ')) : el('span', 'muted', '—'),
+            ];
+          });
+          view.appendChild(section('Qué sabe atender',
+            table(['Tipo', 'Estado', 'Área', 'Datos indispensables', 'Contra catálogo', 'No puede'], rows)));
+
+          var rrows = d.routing.map(function (r) {
+            return [r.name, r.type,
+              r.semantics === 'DELIVERED_TO_TEAM' ? pill('confirma entrega', 'ok') : pill('sólo registro', 'mute')];
+          });
+          view.appendChild(section('A dónde va cada solicitud',
+            table(['Área', 'Medio', 'Qué puede confirmar'], rrows)));
+        }
+
+        // ── ruteo de pestañas ──────────────────────────────────────────────
+
+        var LOADERS = {
+          resumen: { path: '/summary', render: renderResumen },
+          casos: { path: '/cases', render: renderCasos },
+          conversaciones: { path: '/conversations', render: renderConversaciones },
+          gaps: { path: '/gaps', render: renderGaps },
+          config: { path: '/config', render: renderConfig },
+        };
+
+        function show(tab) {
+          current = tab;
+          Array.prototype.forEach.call(document.querySelectorAll('nav.tabs button'), function (b) {
+            b.setAttribute('aria-selected', String(b.dataset.tab === tab));
+          });
+          view.textContent = '';
+          view.appendChild(el('div', 'empty', 'Cargando…'));
+
+          var L = LOADERS[tab];
+          api(L.path).then(function (d) {
+            cache[tab] = d;
+            L.render(d);
+          }).catch(function (e) {
+            view.textContent = '';
+            view.appendChild(el('div', 'empty', 'No se pudo cargar: ' + e.message));
+          });
+        }
+
+        Array.prototype.forEach.call(document.querySelectorAll('nav.tabs button'), function (b) {
+          b.addEventListener('click', function () { show(b.dataset.tab); });
+        });
+
+        document.getElementById('dlg-close').addEventListener('click', function () {
+          document.getElementById('dlg').close();
+        });
+
+        api('/summary').then(function (d) {
+          document.getElementById('company').textContent = d.tenant.name;
+          document.getElementById('assistant').textContent =
+            d.tenant.assistantName + ' · panel de administración';
+          var m = document.getElementById('mode');
+          m.textContent = d.tenant.mode === 'demo' ? 'Demostración' : 'Producción';
+          if (d.tenant.mode === 'demo') m.className = 'badge demo';
+          document.title = 'Panel — ' + d.tenant.name;
+          cache.resumen = d;
+          renderResumen(d);
+        }).catch(function (e) {
+          document.getElementById('company').textContent = 'No se pudo cargar el panel';
+          view.appendChild(el('div', 'empty', String(e.message)));
+        });
+      })();
+    </script>
+  </body>
+</html>

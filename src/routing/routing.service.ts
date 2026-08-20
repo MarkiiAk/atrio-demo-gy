@@ -31,6 +31,11 @@ export interface EligibilityInput {
    * ejecutar. Sólo aplica a workflows `answer_then_optional_route`.
    */
   escalationSignal: boolean;
+  /**
+   * Campos declarados en `verify_against_knowledge` cuyo valor NO se encontró
+   * en la documentación autorizada.
+   */
+  unverifiedFields?: string[];
 }
 
 /**
@@ -64,6 +69,19 @@ export function evaluateEligibility(
 
   if (!input.essentialComplete) {
     return { eligible: false, reason: 'faltan campos esenciales', target: null };
+  }
+
+  // Un dato que no se pudo confirmar contra la documentación BLOQUEA la
+  // canalización. Avisarle al modelo no basta: puede ignorarlo y seguir
+  // recabando, y entonces el área interna recibe una solicitud de algo que la
+  // empresa no ofrece. Primero se aclara con la persona; después se canaliza.
+  const unverified = input.unverifiedFields ?? [];
+  if (unverified.length > 0) {
+    return {
+      eligible: false,
+      reason: `sin confirmar contra la documentación: ${unverified.join(', ')}`,
+      target: null,
+    };
   }
 
   const deptKey = wf.config.department;
