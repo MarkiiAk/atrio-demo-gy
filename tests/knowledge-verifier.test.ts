@@ -5,7 +5,9 @@ import * as path from 'path';
 import { writeTenant } from './helpers/fixtures';
 import { clearTenantCache, requireTenantConfig } from '../src/tenants/tenant-loader';
 import { clearVerifierCache, verifyCaseFields, verifyTerm } from '../src/knowledge/knowledge-verifier';
-import { websiteCacheDir } from '../src/knowledge/knowledge-manifest';
+import { getVectorStoreId } from '../src/knowledge/vector-store.service';
+import { ensureTenantRow, getTenantConfig } from '../src/db';
+import { tenantCacheDir, websiteCacheDir } from '../src/knowledge/knowledge-manifest';
 
 /**
  * Estos tests codifican dos fallos reales observados en producción:
@@ -87,6 +89,41 @@ describe('verificación de términos contra el conocimiento', () => {
 
     // Sin corpus no se puede desmentir: NO_KNOWLEDGE nunca bloquea nada.
     expect(verifyTerm(config, 'lo que sea')).toBe('NO_KNOWLEDGE');
+  });
+});
+
+describe('recuperación del vector store tras un despliegue', () => {
+  it('lo lee del manifest cuando la base está en blanco', () => {
+    // El fallo real: al desplegar, la base nace vacía y el id del vector store
+    // sólo vivía ahí. El asistente perdía el RAG y respondía sin catálogo sin
+    // que nada lo delatara, aunque el conocimiento siguiera indexado en OpenAI.
+    writeTenant('vs-recuperado');
+    clearTenantCache();
+    ensureTenantRow('vs-recuperado', 'VS Recuperado');
+
+    const dir = tenantCacheDir('vs-recuperado');
+    fs.mkdirSync(dir, { recursive: true });
+    fs.writeFileSync(
+      path.join(dir, 'manifest.json'),
+      JSON.stringify({
+        tenantId: 'vs-recuperado',
+        vectorStoreId: 'vs_del_manifest',
+        updatedAt: new Date(0).toISOString(),
+        entries: {},
+      }),
+      'utf8',
+    );
+
+    expect(getVectorStoreId('vs-recuperado')).toBe('vs_del_manifest');
+    // Y queda persistido, para no releer el archivo en cada turno.
+    expect(getTenantConfig('vs-recuperado', 'vector_store_id')).toBe('vs_del_manifest');
+  });
+
+  it('sin manifest ni base devuelve null y no inventa un id', () => {
+    writeTenant('vs-sin-nada');
+    clearTenantCache();
+    ensureTenantRow('vs-sin-nada', 'Sin Nada');
+    expect(getVectorStoreId('vs-sin-nada')).toBeNull();
   });
 });
 

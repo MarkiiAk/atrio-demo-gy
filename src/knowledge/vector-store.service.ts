@@ -1,6 +1,7 @@
 import { getTenantConfig as getStoredConfig, setTenantConfig } from '../db';
 import { log } from '../lib/logger';
 import { openai } from '../ai/openai.service';
+import { loadManifest } from './knowledge-manifest';
 
 const VS_KEY = 'vector_store_id';
 
@@ -31,8 +32,30 @@ export async function ensureVectorStore(tenantId: string, tenantName: string): P
   return created.id;
 }
 
+/**
+ * Vector store del tenant, o `null` si no hay conocimiento indexado.
+ *
+ * Se consulta primero la base y, si está vacía, el manifest del onboarding.
+ * Ese doble camino no es redundancia: el id se guarda en la base al sincronizar,
+ * pero un despliegue nuevo arranca con la base en blanco mientras el manifest sí
+ * viaja en el repo. Sin este respaldo el asistente perdía el RAG al desplegar
+ * —respondía sin catálogo y sin darse cuenta— aunque el conocimiento siguiera
+ * perfectamente indexado en OpenAI.
+ */
 export function getVectorStoreId(tenantId: string): string | null {
-  return getStoredConfig(tenantId, VS_KEY);
+  const stored = getStoredConfig(tenantId, VS_KEY);
+  if (stored) return stored;
+
+  const fromManifest = loadManifest(tenantId).vectorStoreId;
+  if (!fromManifest) return null;
+
+  // Se persiste para no volver a leer el archivo en cada turno.
+  setTenantConfig(tenantId, VS_KEY, fromManifest);
+  log.info('Vector store recuperado del manifest de onboarding', {
+    tenant: tenantId,
+    vectorStoreId: fromManifest,
+  });
+  return fromManifest;
 }
 
 export interface UploadInput {
