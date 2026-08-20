@@ -25,12 +25,24 @@ const EMPTYISH = new Set([
   'pendiente',
 ]);
 
+/**
+ * Valores que se refieren al propio canal en vez de dar el dato.
+ *
+ * Cuando alguien contesta "mi teléfono es este mismo desde el que te escribo",
+ * el modelo lo guardaba literal y el área interna recibía "mismo desde el que
+ * se está escribiendo" en lugar de un número. El dato real lo tiene el canal.
+ */
+const SELF_REFERENTIAL =
+  /(\best[ae]\s+mismo|\bel\s+mismo\s+(de|desde|que)|\bmismo\s+(n[uú]mero|whats|correo|desde)|desde\s+(el\s+)?que\s+.{0,20}escrib|\bel\s+que\s+.{0,12}(us|escrib)|\bpor\s+(aqu[ií]|este\s+medio)|\baqu[ií]\s+mismo|\bel\s+de\s+whats)/i;
+
 /** Un valor extraído sólo cuenta si realmente dice algo. */
 export function isMeaningful(value: unknown): value is string {
   if (typeof value !== 'string') return false;
   const v = value.trim();
   if (v.length === 0) return false;
-  return !EMPTYISH.has(v.toLowerCase());
+  if (EMPTYISH.has(v.toLowerCase())) return false;
+  // "este mismo número" no es un número: es una referencia al canal.
+  return !SELF_REFERENTIAL.test(v);
 }
 
 /**
@@ -168,7 +180,10 @@ export function evaluateFields(
   known: FieldMap,
   ctx: ChannelContext,
 ): FieldStatus {
-  const effective: FieldMap = { ...channelSatisfiedFields(wf, ctx), ...known };
+  // El canal MANDA sobre lo extraído para los campos que él aporta: el número
+  // real de WhatsApp es más fiable que cualquier cosa que el modelo entienda del
+  // texto, y evita que un "este mismo" acabe en el paquete que recibe el área.
+  const effective: FieldMap = { ...known, ...channelSatisfiedFields(wf, ctx) };
   const missing = (list: string[]) => list.filter((f) => !isMeaningful(effective[f]));
 
   const missingEssential = missing(wf.fields.essential);

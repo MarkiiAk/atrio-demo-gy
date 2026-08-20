@@ -57,6 +57,22 @@ export function evaluateEligibility(
     return { eligible: false, reason: 'ya canalizado', target: null };
   }
 
+  // Nada de avisos vacíos. Un mensaje al área que sólo dice "alguien escribió"
+  // es basura que hace que el responsable deje de leer el canal. Los datos que
+  // aporta el canal (teléfono, nombre de perfil) no cuentan como información
+  // sustantiva: llegan solos, sin que la persona haya dicho nada.
+  const fromChannel = new Set(wf.config.routing.satisfied_by_channel);
+  const substantive = Object.entries(caseData.fields).filter(
+    ([k, v]) => !fromChannel.has(k) && typeof v === 'string' && v.trim() !== '',
+  );
+  if (substantive.length === 0) {
+    return {
+      eligible: false,
+      reason: 'sin información sustantiva que entregar al área',
+      target: null,
+    };
+  }
+
   // Un flujo informativo NO genera caso sólo por haber respondido bien. Sólo
   // escala cuando algo quedó sin resolver: convertir cada consulta en un lead
   // es justo lo que hace odioso a un bot.

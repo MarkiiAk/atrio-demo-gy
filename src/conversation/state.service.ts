@@ -49,6 +49,9 @@ export function snapshotConversation(
       status,
       routed: routed && semantics !== null,
       justRouted: justRoutedCaseIds.has(c.row.id),
+      // Los datos ya están guardados: si los esenciales están completos, hay un
+      // registro real al que la persona puede referirse con su folio.
+      registered: status.essentialComplete,
       confirmationSemantics: semantics,
       // Se comprueba contra el conocimiento en disco, no contra lo que el
       // modelo crea: que el cliente afirme que vendemos algo no lo vuelve cierto.

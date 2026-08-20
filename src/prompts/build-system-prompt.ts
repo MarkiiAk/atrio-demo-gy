@@ -26,6 +26,12 @@ export interface ActiveCaseView {
    */
   justRouted: boolean;
   /**
+   * El caso está completo y sus datos ya viven en la base, aunque el aviso al
+   * área haya fallado. El folio identifica ESE registro, no la entrega: negarlo
+   * cuando falla un WhatsApp deja a la persona sin nada a lo que referirse.
+   */
+  registered: boolean;
+  /**
    * Semántica de confirmación permitida por el destino ya ejecutado.
    * La aplicación la impone; el modelo no puede subirla de nivel.
    */
@@ -251,6 +257,14 @@ export function buildSystemPrompt(ctx: PromptContext): string {
       '2. DI QUÉ VAS A HACER. Una frase: que vas a recabar la información y dejarla con el',
       '   área correspondiente para que le den seguimiento.',
       '',
+      ...(ctx.contactName
+        ? [`   Ya sabes que se llama ${ctx.contactName}: úsalo y NO lo vuelvas a preguntar.`]
+        : [
+            '   AÚN NO SABES SU NOMBRE. Pídelo en ESTA respuesta, junto con lo demás que falte.',
+            '   Es la primera cosa que pregunta cualquier recepción, y sin nombre el área que',
+            '   atienda no sabe a quién le está respondiendo. No lo dejes para el final.',
+          ]),
+      '',
       '3. EXTRAE LO QUE YA TE DIJO. Antes de pedir nada, relee el mensaje. Si dijo "mi pedido',
       '   lleva 3 días de retraso", el motivo del asunto YA lo tienes: es "retraso de 3 días',
       '   en el pedido". Regístralo tú, no se lo vuelvas a preguntar. Volver a pedir algo que',
@@ -394,21 +408,36 @@ function buildStateLines(ctx: PromptContext): string[] {
 
     if (c.routed && c.justRouted && c.confirmationSemantics === 'DELIVERED_TO_TEAM') {
       lines.push(
-        'AUTORIZADO (sólo en esta respuesta): confirma UNA vez que el asunto ya quedó con el equipo correspondiente.',
-        `Dale el folio ${c.folio} para que pueda dar seguimiento, y dile qué pasa después.`,
+        `CIERRA ESTE ASUNTO (sólo en esta respuesta). El folio es ${c.folio}.`,
+        'Puedes confirmar que ya quedó con el área correspondiente, porque el aviso sí se entregó.',
+        'Cierra bien: agradece usando su nombre si lo sabes, da el folio, di que el área lo contactará',
+        'por el medio que dejó, y pregunta si hay algo más en que puedas ayudar. Nada de despedidas secas.',
       );
-    } else if (c.routed && c.justRouted && c.confirmationSemantics === 'REGISTERED_ONLY') {
+    } else if (c.routed && c.justRouted) {
       lines.push(
-        'AUTORIZADO (sólo en esta respuesta): confirma UNA vez que el asunto quedó registrado para seguimiento. NO afirmes que ya lo recibió una persona ni un área.',
-        `Dale el folio ${c.folio} para que pueda dar seguimiento, y dile qué pasa después.`,
+        `CIERRA ESTE ASUNTO (sólo en esta respuesta). El folio es ${c.folio}.`,
+        'Puedes confirmar que la solicitud quedó REGISTRADA con ese folio. NO afirmes que ya la recibió',
+        'una persona ni un área: eso todavía no ocurrió.',
+        'Cierra bien: agradece usando su nombre si lo sabes, da el folio, di que le darán seguimiento',
+        'por el medio que dejó, y pregunta si hay algo más en que puedas ayudar.',
       );
     } else if (c.routed) {
       lines.push(
         'YA CONFIRMADO en un mensaje anterior. NO lo vuelvas a anunciar ni repitas el resumen de la solicitud: la persona ya lo sabe. Continúa la conversación con normalidad.',
       );
+    } else if (c.status.essentialComplete && c.registered) {
+      // El registro sí ocurrió; lo que falló fue avisar al área. El folio es del
+      // registro, así que dárselo es honesto y le sirve para dar seguimiento.
+      lines.push(
+        `CIERRA ESTE ASUNTO. Su solicitud quedó REGISTRADA con el folio ${c.folio}.`,
+        'Puedes dar ese folio con confianza. Lo que NO puedes decir es que ya llegó a una persona',
+        'o a un área concreta, porque ese aviso no se pudo completar.',
+        'Cierra bien: agradece usando su nombre si lo sabes, da el folio, di que le darán seguimiento',
+        'por el medio que dejó, y pregunta si hay algo más en que puedas ayudar.',
+      );
     } else {
       lines.push(
-        'NO AUTORIZADO: este asunto todavía no se ha canalizado. No confirmes envío, turnado ni notificación de ningún tipo.',
+        'NO AUTORIZADO: este asunto todavía no está listo. No confirmes envío, registro, turnado ni notificación de ningún tipo, y no des folio.',
       );
     }
   }

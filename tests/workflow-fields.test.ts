@@ -35,6 +35,23 @@ describe('valores significativos', () => {
     expect(isMeaningful('Tolueno')).toBe(true);
     expect(isMeaningful(42 as unknown as string)).toBe(false);
   });
+
+  it('descarta valores que se refieren al propio canal en vez de dar el dato', () => {
+    // El área interna recibía "mismo desde el que se está escribiendo" en el
+    // campo de teléfono, en lugar de un número.
+    for (const ref of [
+      'mismo desde el que se está escribiendo',
+      'este mismo',
+      'el mismo desde el que te escribo',
+      'este mismo número',
+      'el que estoy usando',
+      'por aquí',
+    ]) {
+      expect(isMeaningful(ref), `debió descartar: "${ref}"`).toBe(false);
+    }
+    // Un número real sí pasa.
+    expect(isMeaningful('+52 55 1933 0800')).toBe(true);
+  });
 });
 
 describe('fusión de campos', () => {
@@ -75,6 +92,17 @@ describe('datos que aporta el canal', () => {
 
   it('no inventa nada si el canal no aporta', () => {
     expect(channelSatisfiedFields(wf, { channel: 'cli' })).toEqual({});
+  });
+
+  it('el canal gana sobre lo que el modelo haya extraído', () => {
+    // Si el modelo guardó "este mismo" como teléfono, el número real del canal
+    // debe sobrescribirlo: es el dato que de verdad sirve al área.
+    const status = evaluateFields(
+      wf,
+      { product: 'Tolueno', quantity: '1000 L', contact_phone: 'mismo desde el que escribo' },
+      { channel: 'whatsapp', phone: '+5215519330800' },
+    );
+    expect(status.known.contact_phone).toBe('+5215519330800');
   });
 
   it('sólo satisface campos declarados en satisfied_by_channel', () => {

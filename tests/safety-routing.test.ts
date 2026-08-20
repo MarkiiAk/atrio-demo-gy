@@ -6,7 +6,7 @@ import { clearTenantCache, requireTenantConfig } from '../src/tenants/tenant-loa
 import { closeDb, ensureTenantRow } from '../src/db';
 import { buildCorrectionInstruction, inspectReply } from '../src/conversation/reply-guard';
 import { evaluateEligibility, routeCase } from '../src/routing/routing.service';
-import { createCase, getCase } from '../src/repositories/case.repository';
+import { createCase, getCase, upsertCaseFields } from '../src/repositories/case.repository';
 import { resolveContact } from '../src/repositories/contact.repository';
 import { getOrCreateConversation } from '../src/repositories/conversation.repository';
 import { buildSystemPrompt } from '../src/prompts/build-system-prompt';
@@ -181,16 +181,30 @@ describe('guardián: fugas estructurales y frases prohibidas', () => {
 });
 
 describe('elegibilidad de canalización (determinista)', () => {
-  function makeCase(workflowKey: string, department: string, external: string) {
+  /**
+   * Crea un caso CON datos. Un caso vacío no se canaliza por diseño (evita los
+   * avisos basura al área), así que sembrar un campo es parte del escenario.
+   */
+  function makeCase(
+    workflowKey: string,
+    department: string,
+    external: string,
+    fields: Record<string, string> = { product: 'Tolueno' },
+  ) {
     const { contact } = resolveContact({ tenantId: 'acme', channel: 'cli', externalUserId: external });
     const conv = getOrCreateConversation('acme', contact.id, 'cli');
-    return createCase({
+    const created = createCase({
       tenantId: 'acme',
       conversationId: conv.id,
       contactId: contact.id,
       workflowKey,
       departmentKey: department,
     });
+    if (Object.keys(fields).length > 0) {
+      upsertCaseFields(created.row.id, fields, 'LLM');
+      return getCase(created.row.id)!;
+    }
+    return created;
   }
 
   it('no canaliza con esenciales incompletos', () => {
@@ -208,7 +222,7 @@ describe('elegibilidad de canalización (determinista)', () => {
   });
 
   it('un flujo informativo NO canaliza sólo por responder bien', () => {
-    const c = makeCase('INFO', 'CUSTOMER_SERVICE', 'elig-3');
+    const c = makeCase('INFO', 'CUSTOMER_SERVICE', 'elig-3', { topic: 'horarios' });
     const d = evaluateEligibility(config, c, { essentialComplete: true, escalationSignal: false });
     expect(d.eligible).toBe(false);
     expect(d.reason).toContain('informativa');
@@ -238,10 +252,38 @@ describe('elegibilidad de canalización (determinista)', () => {
     expect(d.eligible).toBe(true);
   });
 
-  it('un flujo informativo SÍ escala cuando algo quedó sin resolver', () => {
-    const c = makeCase('INFO', 'CUSTOMER_SERVICE', 'elig-4');
+  it('NUNCA avisa al área con un caso vacío', () => {
+    // El fallo real: llegó un aviso por WhatsApp que sólo decía "alguien
+    // escribió", sin un solo dato. Ese ruido hace que el responsable deje de
+    // leer el canal interno.
+    const c = makeCase('INFO', 'CUSTOMER_SERVICE', 'elig-vacio', {});
     const d = evaluateEligibility(config, c, { essentialComplete: true, escalationSignal: true });
+    expect(d.eligible).toBe(false);
+    expect(d.reason).toContain('sin información sustantiva');
+  });
+
+  it('un flujo informativo SÍ escala cuando hay algo concreto sin resolver', () => {
+    const c = makeCase('INFO', 'CUSTOMER_SERVICE', 'elig-4', {
+      topic: 'recubrimiento interior de los tambores',
+    });
+    const d = evaluateEligibility(config, c, {
+      essentialComplete: true,
+      escalationSignal: true,
+    });
     expect(d.eligible).toBe(true);
+  });
+
+  it('el teléfono que aporta el canal no basta para justificar un aviso', () => {
+    // Llega solo, sin que la persona haya dicho nada: no es información.
+    const c = makeCase('SALES_QUOTE', 'SALES', 'elig-solo-canal', {
+      contact_phone: '+5215519330800',
+    });
+    const d = evaluateEligibility(config, c, {
+      essentialComplete: true,
+      escalationSignal: false,
+    });
+    expect(d.eligible).toBe(false);
+    expect(d.reason).toContain('sin información sustantiva');
   });
 
   it('no vuelve a canalizar un caso ya canalizado', async () => {
@@ -289,13 +331,16 @@ describe('la canalización ocurre ANTES de poder confirmarla', () => {
   it('el caso queda ROUTED y sólo autoriza el alcance del destino', async () => {
     const { contact } = resolveContact({ tenantId: 'acme', channel: 'cli', externalUserId: 'orden-1' });
     const conv = getOrCreateConversation('acme', contact.id, 'cli');
-    const c = createCase({
+    const created = createCase({
       tenantId: 'acme',
       conversationId: conv.id,
       contactId: contact.id,
       workflowKey: 'SALES_QUOTE',
       departmentKey: 'SALES',
     });
+    // Con datos reales: un caso vacío no se canaliza por diseño.
+    upsertCaseFields(created.row.id, { product: 'Tolueno', quantity: '800 L' }, 'LLM');
+    const c = getCase(created.row.id)!;
 
     // Antes de canalizar: nada autorizado.
     expect(getCase(c.row.id)!.row.status).toBe('OPEN');
@@ -446,6 +491,7 @@ tones: {}
           status,
           routed: false,
           justRouted: false,
+          registered: false,
           confirmationSemantics: null,
           unverified: [],
         },
@@ -463,13 +509,15 @@ tones: {}
           status,
           routed: true,
           justRouted: true,
+          registered: true,
           confirmationSemantics: 'REGISTERED_ONLY',
           unverified: [],
         },
       ],
     });
-    expect(justRouted).toContain('AUTORIZADO (sólo en esta respuesta)');
-    expect(justRouted).toContain('NO afirmes que ya lo recibió');
+    expect(justRouted).toContain('CIERRA ESTE ASUNTO (sólo en esta respuesta)');
+    expect(justRouted).toContain('COT-0001'); // el folio va en el cierre
+    expect(justRouted).toContain('NO afirmes que ya la recibió');
 
     // Turnos posteriores: ya se confirmó. Repetirlo es la muletilla que hace
     // que el asistente suene a robot.
@@ -483,6 +531,7 @@ tones: {}
           status,
           routed: true,
           justRouted: false,
+          registered: true,
           confirmationSemantics: 'REGISTERED_ONLY',
           unverified: [],
         },
@@ -490,6 +539,48 @@ tones: {}
     });
     expect(alreadyConfirmed).toContain('YA CONFIRMADO');
     expect(alreadyConfirmed).toContain('NO lo vuelvas a anunciar');
+
+    // Caso completo cuyo aviso al área FALLÓ: el registro sí existe, así que el
+    // folio se puede dar. Lo que no se puede es decir que ya llegó a alguien.
+    const registradoSinEntrega = prompt({
+      activeCases: [
+        {
+          caseId: 1,
+          folio: 'COT-0001',
+          workflowKey: 'SALES_QUOTE',
+          departmentKey: 'SALES',
+          status,
+          routed: false,
+          justRouted: false,
+          registered: true,
+          confirmationSemantics: null,
+          unverified: [],
+        },
+      ],
+    });
+    expect(registradoSinEntrega).toContain('COT-0001');
+    expect(registradoSinEntrega).toContain('quedó REGISTRADA');
+    expect(registradoSinEntrega).toContain('NO puedes decir es que ya llegó');
+
+    // Caso incompleto: ni folio ni confirmación de nada.
+    const incompleto = prompt({
+      activeCases: [
+        {
+          caseId: 1,
+          folio: 'COT-0001',
+          workflowKey: 'SALES_QUOTE',
+          departmentKey: 'SALES',
+          status: evaluateFields(wf, {}, { channel: 'whatsapp', phone: '+1' }),
+          routed: false,
+          justRouted: false,
+          registered: false,
+          confirmationSemantics: null,
+          unverified: [],
+        },
+      ],
+    });
+    expect(incompleto).toContain('NO AUTORIZADO');
+    expect(incompleto).toContain('no des folio');
   });
 
   it('prohíbe explícitamente las frases que exponen las tripas', () => {
