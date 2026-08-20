@@ -125,6 +125,34 @@ describe('guardián: afirmar que se ofrece algo no documentado', () => {
     }
   });
 
+  it('NO bloquea la respuesta honesta que niega tener el producto', () => {
+    // Falso positivo real en producción: el modelo contestó bien —"no tenemos
+    // confirmado acetona dentro de lo que manejamos"— y el guardián lo leyó
+    // como una afirmación, tiró la respuesta correcta y puso un texto roto.
+    for (const reply of [
+      'No tenemos confirmado acetona dentro de lo que manejamos.',
+      'No manejamos óxido nitroso, pero sí tolueno y xileno.',
+      'Sobre la acetona, no tengo confirmado que la vendamos.',
+      'Ni vendemos acetona ni la distribuimos.',
+      'No contamos con hidróxido de sodio en este momento.',
+    ]) {
+      const r = inspectReply(reply, ctx);
+      expect(
+        r.violations.some((v) => v.kind === 'UNVERIFIED_CLAIM'),
+        `no debió marcar como afirmación: "${reply}"`,
+      ).toBe(false);
+    }
+  });
+
+  it('cuando sí bloquea, nombra el producto y no una muletilla', () => {
+    const r = inspectReply('Sí tenemos disponible óxido nitroso para su pedido.', ctx);
+    const v = r.violations.find((x) => x.kind === 'UNVERIFIED_CLAIM');
+    expect(v).toBeDefined();
+    // "disponible" es un adjetivo, no el producto.
+    expect(v!.match.toLowerCase()).toContain('xido nitroso');
+    expect(v!.match.toLowerCase()).not.toContain('disponible');
+  });
+
   it('permite afirmar lo que sí está documentado', () => {
     for (const reply of [
       'Sí manejamos tolueno, en tambos y porrones.',

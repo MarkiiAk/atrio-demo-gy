@@ -94,8 +94,49 @@ const STRUCTURED_LEAK_PATTERNS: RegExp[] = [
  * modelo que verifique no basta — hay que comprobarlo después de que hable.
  */
 const OFFERING_CLAIM_PATTERNS: RegExp[] = [
-  /\b(?:s[ií],?\s+)?(?:s[ií]\s+)?(?:manejamos|vendemos|ofrecemos|distribuimos|comercializamos|tenemos|contamos con|disponemos de)\s+((?:[a-zA-ZáéíóúüñÁÉÍÓÚÜÑ0-9-]+(?:\s+de)?\s*){1,4})/gi,
+  // El lookbehind descarta las NEGACIONES. Sin él, "no tenemos confirmado X"
+  // —que es justo la respuesta honesta que queremos— se leía como si afirmara X,
+  // y el guardián tiraba la respuesta correcta para poner un texto de respaldo.
+  /(?<!\b(?:no|sin|tampoco|ni|nunca)\s)(?<!\b(?:no|sin|tampoco|ni|nunca)\s\w{1,12}\s)\b(?:s[ií],?\s+)?(?:manejamos|vendemos|ofrecemos|distribuimos|comercializamos|tenemos|contamos con|disponemos de)\s+((?:[a-zA-ZáéíóúüñÁÉÍÓÚÜÑ0-9-]+(?:\s+de)?\s*){1,4})/gi,
 ];
+
+/**
+ * Palabras que no nombran un producto: adjetivos y muletillas que se cuelan al
+ * capturar las siguientes palabras tras el verbo ("tenemos *confirmado* X").
+ * Se recortan del inicio del término antes de verificarlo.
+ */
+const NON_PRODUCT_LEADING = new Set([
+  'confirmado',
+  'confirmada',
+  'confirmados',
+  'confirmadas',
+  'disponible',
+  'disponibles',
+  'registrado',
+  'registrada',
+  'anotado',
+  'anotada',
+  'listo',
+  'lista',
+  'claro',
+  'mucho',
+  'varios',
+  'varias',
+  'algunos',
+  'algunas',
+  'otros',
+  'otras',
+  'todo',
+  'todos',
+  'todas',
+  'dentro',
+  'como',
+  'entre',
+  'para',
+  'desde',
+  'hasta',
+  'sobre',
+]);
 
 /** Términos genéricos: afirmarlos no compromete nada concreto. */
 const GENERIC_TERMS = new Set([
@@ -212,6 +253,15 @@ export function inspectReply(reply: string, ctx: GuardContext): GuardResult {
  * responde NOT_FOUND. Si no hay documentación cargada (NO_KNOWLEDGE) no bloquea
  * nada — no se puede desmentir lo que no se puede consultar.
  */
+/** Minúsculas sin acentos, para comparar palabras. */
+function strip(word: string): string {
+  return word
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/\p{Diacritic}/gu, '')
+    .replace(/[^a-z0-9]/g, '');
+}
+
 function findUnverifiedOffering(text: string, ctx: GuardContext): string | null {
   if (!ctx.verify) return null;
 
@@ -223,6 +273,9 @@ function findUnverifiedOffering(text: string, ctx: GuardContext): string | null 
       if (!captured) continue;
 
       const words = captured.split(/\s+/).filter(Boolean);
+      // "tenemos confirmado acetona" → el producto es "acetona", no "confirmado".
+      while (words.length > 0 && NON_PRODUCT_LEADING.has(strip(words[0]))) words.shift();
+      if (words.length === 0) continue;
       // Se prueban las variantes más largas primero: "óxido nitroso" antes que
       // "óxido", para no señalar una palabra suelta que sí exista por su cuenta.
       for (let len = Math.min(3, words.length); len >= 1; len -= 1) {
