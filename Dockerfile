@@ -45,13 +45,22 @@ COPY onboarding ./onboarding
 # el asistente vuelve a aceptar productos fuera de catálogo.
 COPY .cache/knowledge ./.cache/knowledge
 
-# Datos persistentes (SQLite + casos canalizados). Montar un volumen aquí.
+# Datos persistentes (SQLite + casos canalizados).
+#
+# Aquí NO va una instrucción `VOLUME`: Railway la rechaza porque gestiona los
+# volúmenes desde su panel (Settings → Volumes → mount path /var/data), y otros
+# hosts hacen lo mismo. Basta con que el directorio exista; quien despliegue
+# monta el almacenamiento encima.
+#
+# Sin un volumen montado en /var/data la base es efímera y se borra en cada
+# redeploy: el asistente perdería todas las conversaciones.
 RUN mkdir -p /var/data
 ENV DATABASE_URL=file:/var/data/app.db
-VOLUME ["/var/data"]
 
 EXPOSE 3000
-HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 \
-  CMD node -e "fetch('http://127.0.0.1:'+(process.env.PORT||3000)+'/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
+
+# El healthcheck lo hace la plataforma contra /health (ver railway.json o
+# render.yaml). Un HEALTHCHECK propio de Docker se solaparía con el suyo y
+# algunos hosts lo ignoran o lo rechazan.
 
 CMD ["node", "dist/src/server.js"]
