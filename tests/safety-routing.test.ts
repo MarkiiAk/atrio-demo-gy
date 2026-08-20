@@ -4,7 +4,7 @@ import { afterAll, describe, expect, it } from 'vitest';
 import { writeTenant } from './helpers/fixtures';
 import { clearTenantCache, requireTenantConfig } from '../src/tenants/tenant-loader';
 import { closeDb, ensureTenantRow } from '../src/db';
-import { buildCorrectionInstruction, inspectReply } from '../src/conversation/reply-guard';
+import { buildCorrectionInstruction, inspectReply, safeFallbackFor } from '../src/conversation/reply-guard';
 import { evaluateEligibility, routeCase } from '../src/routing/routing.service';
 import { createCase, getCase, upsertCaseFields } from '../src/repositories/case.repository';
 import { resolveContact } from '../src/repositories/contact.repository';
@@ -153,6 +153,21 @@ describe('guardián: afirmar que se ofrece algo no documentado', () => {
   it('la corrección le dice al modelo qué término retirar', () => {
     const r = inspectReply('Sí manejamos óxido nitroso.', ctx);
     expect(buildCorrectionInstruction(r)).toContain('óxido nitroso');
+  });
+
+  it('el texto de respaldo encaja con lo que se bloqueó', () => {
+    // El fallo real: ante un producto sin confirmar caía un genérico ("ya tengo
+    // la información necesaria") que suena a que todo va bien justo cuando no.
+    const porProducto = safeFallbackFor(inspectReply('Sí manejamos óxido nitroso.', ctx), ctx);
+    expect(porProducto).toContain('óxido nitroso');
+    expect(porProducto).not.toContain('Ya tengo la información necesaria');
+
+    // Una promesa de entrega indebida sí usa el texto del tenant.
+    const porEntrega = safeFallbackFor(
+      inspectReply('Ya envié su solicitud al área.', unauthorized),
+      unauthorized,
+    );
+    expect(porEntrega).toBe(config.company.assistant.routing_failed_message);
   });
 });
 

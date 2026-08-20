@@ -34,7 +34,7 @@ import {
 } from '../workflows/field-engine';
 import { enabledWorkflows, workflowForIntent } from '../workflows/workflow-engine';
 import { recordUsage } from '../usage/usage.service';
-import { buildCorrectionInstruction, inspectReply } from './reply-guard';
+import { buildCorrectionInstruction, inspectReply, safeFallbackFor } from './reply-guard';
 import { channelKnownFacts, snapshotConversation } from './state.service';
 
 export interface EngineInput {
@@ -332,9 +332,13 @@ export async function processTurn(input: EngineInput): Promise<EngineResult> {
       log.warn('El reintento correctivo falló', { tenant: tenantId });
     }
 
-    // Si aún rompe la regla, no mandamos algo que miente: mandamos el texto seguro.
-    if (!inspectReply(ai.reply, guardCtx).ok) {
-      ai = { ...ai, reply: config.company.assistant.routing_failed_message };
+    // Si aún rompe la regla, no mandamos algo que miente: mandamos un texto
+    // seguro ACORDE a lo que se bloqueó. Un genérico ("ya tengo la información
+    // necesaria") ante un producto sin confirmar suena a que todo va bien
+    // justo cuando no lo está.
+    const finalCheck = inspectReply(ai.reply, guardCtx);
+    if (!finalCheck.ok) {
+      ai = { ...ai, reply: safeFallbackFor(finalCheck, guardCtx) };
     }
   }
 

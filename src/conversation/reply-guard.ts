@@ -269,3 +269,33 @@ export function buildCorrectionInstruction(result: GuardResult): string {
     'Reescribe únicamente el campo `reply`. Mantén el resto de la extracción igual.',
   ].join('\n');
 }
+
+/**
+ * Texto de respaldo cuando el modelo no logra una respuesta admisible ni tras
+ * la corrección.
+ *
+ * Tiene que encajar con lo que se bloqueó. Un genérico como "ya tengo la
+ * información necesaria" ante un producto sin confirmar es peor que decir nada:
+ * suena a que todo va bien cuando justamente no lo está, y es exactamente la
+ * clase de afirmación engañosa que el guardián existe para evitar.
+ */
+export function safeFallbackFor(result: GuardResult, ctx: GuardContext): string {
+  const unverified = result.violations.find((v) => v.kind === 'UNVERIFIED_CLAIM');
+  if (unverified) {
+    return (
+      `Sobre "${unverified.match}" prefiero no confirmarle nada sin verificarlo, ` +
+      'para no darle información equivocada. Dejo su consulta anotada para que se lo ' +
+      'confirmen con precisión. Si gusta, dígame qué necesita y le ayudo con lo que sí ' +
+      'tenemos disponible.'
+    );
+  }
+
+  const claimedDelivery = result.violations.some(
+    (v) => v.kind === 'UNAUTHORIZED_DELIVERY_CLAIM',
+  );
+  if (claimedDelivery) {
+    return ctx.config.company.assistant.routing_failed_message;
+  }
+
+  return ctx.config.company.assistant.fallback_message;
+}
