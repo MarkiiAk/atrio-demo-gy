@@ -3,7 +3,7 @@ import type { ActiveCaseView } from '../prompts/build-system-prompt';
 import { activeCases, lastRoutingOutcome, type CaseWithData } from '../repositories/case.repository';
 import type { ChannelContext } from '../workflows/field-engine';
 import { evaluateFields } from '../workflows/field-engine';
-import { verifyCaseFields } from '../knowledge/knowledge-verifier';
+import { findSubstitutedFields, verifyCaseFields } from '../knowledge/knowledge-verifier';
 import { folioFor } from '../panel/labels';
 
 export interface ConversationSnapshot {
@@ -21,6 +21,8 @@ export function snapshotConversation(
   channel: ChannelContext,
   /** Casos canalizados en ESTE turno: sólo ellos pueden confirmarse ahora. */
   justRoutedCaseIds: ReadonlySet<number> = new Set(),
+  /** Lo que la persona escribió, para detectar datos sustituidos. */
+  userMessages: string[] = [],
 ): ConversationSnapshot {
   const cases = activeCases(conversationId);
   const views: ActiveCaseView[] = [];
@@ -55,10 +57,20 @@ export function snapshotConversation(
       confirmationSemantics: semantics,
       // Se comprueba contra el conocimiento en disco, no contra lo que el
       // modelo crea: que el cliente afirme que vendemos algo no lo vuelve cierto.
-      unverified: verifyCaseFields(config, c.row.workflow_key, status.known).map((v) => ({
-        field: v.field,
-        value: v.value,
-      })),
+      unverified: [
+        ...verifyCaseFields(config, c.row.workflow_key, status.known).map((v) => ({
+          field: v.field,
+          value: v.value,
+          reason: 'no aparece en la documentación de la empresa' as const,
+        })),
+        ...findSubstitutedFields(config, c.row.workflow_key, status.known, userMessages).map(
+          (v) => ({
+            field: v.field,
+            value: v.value,
+            reason: 'NO es lo que la persona pidió' as const,
+          }),
+        ),
+      ],
     });
   }
 

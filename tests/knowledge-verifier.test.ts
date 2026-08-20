@@ -4,7 +4,12 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { writeTenant } from './helpers/fixtures';
 import { clearTenantCache, requireTenantConfig } from '../src/tenants/tenant-loader';
-import { clearVerifierCache, verifyCaseFields, verifyTerm } from '../src/knowledge/knowledge-verifier';
+import {
+  clearVerifierCache,
+  findSubstitutedFields,
+  verifyCaseFields,
+  verifyTerm,
+} from '../src/knowledge/knowledge-verifier';
 import { getVectorStoreId } from '../src/knowledge/vector-store.service';
 import { ensureTenantRow, getTenantConfig } from '../src/db';
 import { tenantCacheDir, websiteCacheDir } from '../src/knowledge/knowledge-manifest';
@@ -168,6 +173,95 @@ describe('verificación de los campos de un caso', () => {
     });
     // `quantity` no está en verify_against_knowledge, así que no se verifica.
     expect(bueno).toHaveLength(0);
+  });
+
+  it('detecta cuando el modelo SUSTITUYE lo que la persona pidió', () => {
+    // Caso real en producción: el cliente pidió cotizar "acetona" —que no se
+    // vende— y el modelo registró "acetato", que sí está en el catálogo. La
+    // verificación contra catálogo lo aprobó y a Ventas le llegó una cotización
+    // de un producto que nadie pidió.
+    writeTenant('sustitucion', {
+      workflows: `workflows:
+  SALES_QUOTE:
+    enabled: true
+    department: SALES
+    strategy: qualify_then_route
+    intents: [SALES_QUOTE]
+    fields:
+      essential: [product, quantity]
+      useful: []
+      optional: []
+    field_labels:
+      product: "producto"
+      quantity: "cantidad"
+    routing:
+      require_all_essential: true
+      satisfied_by_channel: []
+    cannot_do: []
+    verify_against_knowledge:
+      - product
+`,
+    });
+    clearTenantCache();
+    seedKnowledge('sustitucion');
+    const config = requireTenantConfig('sustitucion');
+
+    const mensajes = ['Hola, quisiera cotizar 1000 litros de acetona para Monterrey'];
+
+    // "acetato" existe en el catálogo, pero la persona NUNCA lo dijo.
+    const sustituido = findSubstitutedFields(
+      config,
+      'SALES_QUOTE',
+      { product: 'acetato', quantity: '1000 litros' },
+      mensajes,
+    );
+    expect(sustituido).toHaveLength(1);
+    expect(sustituido[0].field).toBe('product');
+
+    // Lo que sí dijo pasa sin problema, aunque no esté en catálogo: de eso se
+    // encarga la otra comprobación.
+    expect(
+      findSubstitutedFields(config, 'SALES_QUOTE', { product: 'acetona' }, mensajes),
+    ).toEqual([]);
+  });
+
+  it('tolera diferencias de forma entre lo dicho y lo registrado', () => {
+    writeTenant('sustitucion-forma', {
+      workflows: `workflows:
+  SALES_QUOTE:
+    enabled: true
+    department: SALES
+    strategy: qualify_then_route
+    intents: [SALES_QUOTE]
+    fields:
+      essential: [product]
+      useful: []
+      optional: []
+    field_labels:
+      product: "producto"
+    routing:
+      require_all_essential: true
+      satisfied_by_channel: []
+    cannot_do: []
+    verify_against_knowledge:
+      - product
+`,
+    });
+    clearTenantCache();
+    seedKnowledge('sustitucion-forma');
+    const config = requireTenantConfig('sustitucion-forma');
+
+    // Mayúsculas, acentos y frase completa no cuentan como sustitución.
+    for (const [dicho, registrado] of [
+      ['necesito TOLUENO por favor', 'Tolueno'],
+      ['quiero alcohol isopropilico', 'Alcohol Isopropílico'],
+      ['me interesa el xileno', 'xileno en tambos'],
+    ]) {
+      expect(
+        findSubstitutedFields(config, 'SALES_QUOTE', { product: registrado }, [dicho]),
+        `no debió marcar sustitución: "${dicho}" -> "${registrado}"`,
+      ).toEqual([]);
+    }
   });
 
   it('un workflow sin campos verificables nunca bloquea', () => {

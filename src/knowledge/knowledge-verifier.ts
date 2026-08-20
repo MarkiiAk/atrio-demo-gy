@@ -161,3 +161,49 @@ export function verifyCaseFields(
   }
   return out;
 }
+
+/**
+ * Campos verificables cuyo valor NO aparece en lo que la persona escribió.
+ *
+ * Detecta una sustitución silenciosa. Caso real: alguien pidió cotizar
+ * "acetona" —que la empresa no vende— y el modelo registró "acetato", que sí
+ * está en el catálogo. La verificación contra el catálogo lo aprobó, y a Ventas
+ * le llegó la cotización de un producto que nadie pidió.
+ *
+ * Existir en el catálogo no basta: el dato también tiene que ser lo que la
+ * persona dijo. Un producto plausible en el lugar del pedido real es peor que un
+ * hueco, porque nadie lo cuestiona.
+ */
+export function findSubstitutedFields(
+  config: TenantConfig,
+  workflowKey: string,
+  fields: Record<string, string>,
+  userMessages: string[],
+): Array<{ field: string; value: string }> {
+  const wf = config.workflows.workflows[workflowKey];
+  if (!wf || wf.verify_against_knowledge.length === 0) return [];
+
+  const said = normalize(userMessages.join(' \n '));
+  if (!said) return [];
+
+  const out: Array<{ field: string; value: string }> = [];
+  for (const field of wf.verify_against_knowledge) {
+    const value = fields[field];
+    if (!value) continue;
+
+    // Basta con que la palabra significativa más larga del valor aparezca en la
+    // conversación: así "Tolueno" contra "quiero tolueno" pasa, y no se exige
+    // una coincidencia literal de la frase completa.
+    const words = normalize(value)
+      .split(/\s+/)
+      .filter((w) => w.length >= 4 && !STOPWORDS.has(w))
+      .sort((a, b) => b.length - a.length);
+
+    if (words.length === 0) continue;
+    const mentioned = words.some((w) =>
+      new RegExp(`(?<![\\p{L}\\p{N}])${w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}`, 'u').test(said),
+    );
+    if (!mentioned) out.push({ field, value });
+  }
+  return out;
+}

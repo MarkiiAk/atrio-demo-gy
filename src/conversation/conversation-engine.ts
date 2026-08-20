@@ -3,7 +3,7 @@ import { log, pii, snip } from '../lib/logger';
 import { runAssistantTurn, OpenAiUnavailableError, type TurnResult } from '../ai/openai.service';
 import type { AiTurnOutput } from '../ai/ai-schema';
 import { getVectorStoreId } from '../knowledge/vector-store.service';
-import { verifyCaseFields, verifyTerm } from '../knowledge/knowledge-verifier';
+import { findSubstitutedFields, verifyCaseFields, verifyTerm } from '../knowledge/knowledge-verifier';
 import { recordGap } from '../onboarding/gap.service';
 import { buildSystemPrompt, buildTurnHint, type ActiveCaseView } from '../prompts/build-system-prompt';
 import {
@@ -163,8 +163,9 @@ export async function processTurn(input: EngineInput): Promise<EngineResult> {
   applyConversationSignals(conversation.id, ai);
 
   // ── 4. Casos: crear / actualizar ───────────────────────────────────────────
-  const touched = materializeCases(config, contact, conversation, ai, channel, historyUserMessages(conversation.id, input.newMessages));
-  snapshot = snapshotConversation(config, conversation.id, channel);
+  const userMessages = historyUserMessages(conversation.id, input.newMessages);
+  const touched = materializeCases(config, contact, conversation, ai, channel, userMessages);
+  snapshot = snapshotConversation(config, conversation.id, channel, new Set(), userMessages);
   for (const v of snapshot.views) debug.missingEssential[v.workflowKey] = v.status.missingEssential;
 
   // Lo que la persona pidió y no está en la documentación es información que el
@@ -209,9 +210,18 @@ export async function processTurn(input: EngineInput): Promise<EngineResult> {
     const decision = evaluateEligibility(config, caseData, {
       essentialComplete: status.essentialComplete,
       escalationSignal,
-      unverifiedFields: verifyCaseFields(config, caseData.row.workflow_key, status.known).map(
-        (v) => v.field,
-      ),
+      // Dos comprobaciones distintas: que el dato exista en el catálogo, y que
+      // sea lo que la persona realmente pidió. Un producto sustituido por otro
+      // parecido pasa la primera y falla la segunda.
+      unverifiedFields: [
+        ...verifyCaseFields(config, caseData.row.workflow_key, status.known).map((v) => v.field),
+        ...findSubstitutedFields(
+          config,
+          caseData.row.workflow_key,
+          status.known,
+          userMessages,
+        ).map((v) => v.field),
+      ],
     });
     if (!decision.eligible) {
       if (decision.reason.startsWith('sin confirmar')) {
@@ -253,7 +263,7 @@ export async function processTurn(input: EngineInput): Promise<EngineResult> {
   // podía confirmar nada. Ahora que sí ocurrió, se regenera con el estado real:
   // así el asistente confirma después del hecho, nunca antes.
   if (routedSomething || blockedByVerification) {
-    snapshot = snapshotConversation(config, conversation.id, channel, justRoutedCaseIds);
+    snapshot = snapshotConversation(config, conversation.id, channel, justRoutedCaseIds, userMessages);
     systemPrompt = buildPrompt(snapshot.views);
     debug.systemPrompt = systemPrompt;
     try {
