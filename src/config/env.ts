@@ -109,8 +109,32 @@ function resolveDbFile(url: string): string {
 
 export type AppMode = 'demo' | 'production';
 
+/**
+ * URL pública del servicio, sin slash final.
+ *
+ * La firma de Twilio se calcula sobre la URL EXACTA a la que llegó el POST, así
+ * que un dedazo aquí rechaza todos los webhooks con un 403 difícil de diagnosticar.
+ * Cuando el host ya publica su propio dominio, se toma de ahí en vez de pedirle
+ * a alguien que lo copie a mano.
+ */
+function resolvePublicBaseUrl(explicit: string): string {
+  const candidate =
+    explicit.trim() ||
+    process.env.RENDER_EXTERNAL_URL?.trim() ||
+    (process.env.RAILWAY_PUBLIC_DOMAIN?.trim()
+      ? `https://${process.env.RAILWAY_PUBLIC_DOMAIN.trim()}`
+      : '') ||
+    (process.env.FLY_APP_NAME?.trim() ? `https://${process.env.FLY_APP_NAME.trim()}.fly.dev` : '') ||
+    '';
+
+  if (!candidate) return '';
+  const withScheme = /^https?:\/\//i.test(candidate) ? candidate : `https://${candidate}`;
+  return withScheme.replace(/\/+$/, '');
+}
+
 export const env = {
   ...raw,
+  PUBLIC_BASE_URL: resolvePublicBaseUrl(raw.PUBLIC_BASE_URL),
   DB_FILE: resolveDbFile(raw.DATABASE_URL),
   /** Enmascarar PII en logs: explícito si se configuró, si no, sólo en producción. */
   REDACT_PII:

@@ -4,8 +4,22 @@ dist/
 .env.*
 !.env.example
 data/
-.cache/
 *.log
 coverage/
 .DS_Store
 Thumbs.db
+
+# El caché de conocimiento SÍ va al repo.
+#
+# No es un caché descartable: es el estado del onboarding de cada tenant, y la
+# aplicación lo lee para verificar afirmaciones ("¿manejamos este producto?")
+# sin gastar una llamada a la API. Si no viaja al despliegue, esa verificación
+# se queda sin corpus, devuelve "no hay con qué comparar" y el asistente vuelve
+# a aceptar productos que la empresa no vende.
+#
+# Es contenido público del sitio del cliente, en texto plano y de unos cientos
+# de KB, así que no hay problema en versionarlo.
+# git no permite reincluir hijos de un directorio excluido, así que se excluye
+# el contenido de .cache/ y se reabre el subárbol de knowledge completo.
+.cache/*
+!.cache/knowledge

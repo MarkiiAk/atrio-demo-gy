@@ -337,19 +337,61 @@ El modo demo relaja la *configuración pendiente*, nunca la honestidad de las re
 
 ## Despliegue
 
-```bash
-# Render — usa render.yaml
-#   Necesita el plan starter: el free NO tiene disco persistente y SQLite
-#   perdería el estado en cada redeploy.
+### Railway (recomendado)
 
-# Railway / Fly.io / Cloud Run — usa el Dockerfile
+No duerme, tiene volumen persistente y el plan gratuito incluye crédito mensual
+suficiente para un piloto. Usa el `Dockerfile` y el `railway.json` del repo.
+
+1. [railway.app](https://railway.app) → **New Project → Deploy from GitHub repo**
+2. **Settings → Variables**: pega los cuatro secretos (`OPENAI_API_KEY`,
+   `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, `TWILIO_WHATSAPP_FROM`) más
+   `OPENAI_MODEL`, `APP_MODE=demo`, `NODE_ENV=production` y
+   `DATABASE_URL=file:/var/data/app.db`
+3. **Settings → Volumes**: monta un volumen en `/var/data` (sin esto la base se
+   borra en cada redeploy)
+4. **Settings → Networking → Generate Domain**
+
+`PUBLIC_BASE_URL` **no hace falta configurarla**: se deriva sola de
+`RAILWAY_PUBLIC_DOMAIN`. Eso importa porque la firma de Twilio se calcula sobre
+la URL exacta, y un dedazo ahí rechaza todos los webhooks con un 403 opaco.
+
+### Render
+
+El `render.yaml` está listo como Blueprint. Ojo con el plan:
+
+- **free**: sin disco persistente y el servicio **duerme a los 15 min**, con
+  ~50 s de espera en el primer acceso. Para un link que un cliente abre cuando
+  se le ocurre, esos 50 s de pantalla en blanco arruinan la demostración.
+- **starter**: descomenta el bloque `disk` del `render.yaml` y cambia
+  `DATABASE_URL` a `file:/var/data/app.db`.
+
+### Cualquier host con contenedores
+
+```bash
 docker build -t atrio .
 docker run -p 3000:3000 --env-file .env -v atrio-data:/var/data atrio
 ```
 
-Tras desplegar: copia la URL pública a `PUBLIC_BASE_URL` **y** al webhook de Twilio.
+### Después de desplegar
 
-**Por qué no Vercel:** ATRIO necesita un proceso vivo (el worker de cola, con debounce y serialización por conversación) y un disco persistente para SQLite. En serverless el estado se pierde entre invocaciones y el asistente olvidaría la conversación a media charla. Migrar a Vercel es posible, pero requiere Postgres serverless y mover el worker a `waitUntil`.
+1. Copia la URL pública al webhook de Twilio:
+   **Messaging → Senders → WhatsApp senders → tu número → "When a message comes in"**
+   → `https://TU-URL/webhooks/twilio/whatsapp` (HTTP **POST**)
+2. Comprueba `https://TU-URL/health`: debe listar el tenant y `publicBaseUrl`
+   con la URL correcta.
+
+Las dos URLs que se le comparten al cliente:
+
+| | |
+|---|---|
+| `https://TU-URL/` | chat de prueba en el navegador |
+| `https://TU-URL/panel.html` | panel de administración |
+
+**Por qué no Vercel:** ATRIO necesita un proceso vivo (el worker de cola, con
+debounce y serialización por conversación) y disco para SQLite. En serverless el
+estado se pierde entre invocaciones: el asistente olvidaría la conversación a
+media charla, que es justo lo que hace inservible a un asistente. Migrarlo es
+posible, pero exige Postgres serverless y mover el worker a `waitUntil`.
 
 ---
 

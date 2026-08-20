@@ -40,6 +40,11 @@ COPY src/db/schema.sql ./src/db/schema.sql
 COPY public ./public
 COPY onboarding ./onboarding
 
+# Conocimiento del tenant. La verificación de afirmaciones ("¿manejamos este
+# producto?") lo lee de disco: sin él, esa comprobación se queda sin corpus y
+# el asistente vuelve a aceptar productos fuera de catálogo.
+COPY .cache/knowledge ./.cache/knowledge
+
 # Datos persistentes (SQLite + casos canalizados). Montar un volumen aquí.
 RUN mkdir -p /var/data
 ENV DATABASE_URL=file:/var/data/app.db

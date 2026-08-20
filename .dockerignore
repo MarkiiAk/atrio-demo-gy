@@ -1,7 +1,6 @@
 node_modules
 dist
 data
-.cache
 .env
 .env.*
 !.env.example
@@ -10,3 +9,9 @@ tests
 .git
 .gitignore
 README.md
+
+# Igual que en .gitignore: el conocimiento del tenant SÍ entra en la imagen.
+# La verificación de afirmaciones lo lee de disco, y sin él el asistente
+# aceptaría productos que la empresa no vende.
+.cache/*
+!.cache/knowledge
