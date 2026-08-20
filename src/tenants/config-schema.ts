@@ -97,6 +97,12 @@ export type DepartmentsConfig = z.infer<typeof DepartmentsSchema>;
 
 export const WorkflowSchema = z.object({
   enabled: z.boolean().default(true),
+  /**
+   * Nombre para personas. Lo que se ve en el panel de administración.
+   * Sin esto se mostraría la clave técnica (`SALES_QUOTE`), que no significa
+   * nada para quien no escribió el código.
+   */
+  display_name: z.string().min(1).optional(),
   department: Key,
   /** Sólo documental: cómo se comporta el workflow. La app no ramifica por esto. */
   strategy: z
@@ -135,6 +141,16 @@ export const WorkflowSchema = z.object({
    * verifica contra el conocimiento en disco y avisa cuando no cuadra.
    */
   verify_against_knowledge: z.array(z.string().min(1)).default([]),
+  /**
+   * Campos que describen el asunto en palabras de la propia persona
+   * (el motivo de una queja, qué pasó con la entrega, el daño observado).
+   *
+   * Si el modelo no los extrae, la aplicación los rellena con lo que la persona
+   * escribió. Sin esto el asistente entra en un bucle pidiendo "descríbame el
+   * problema" a alguien que acaba de describirlo, que es la forma más rápida de
+   * hacer que un cliente pierda la paciencia.
+   */
+  describe_fields: z.array(z.string().min(1)).default([]),
 });
 export type WorkflowConfig = z.infer<typeof WorkflowSchema>;
 
@@ -146,7 +162,7 @@ export type WorkflowsConfig = z.infer<typeof WorkflowsSchema>;
 // ── routing.yaml ─────────────────────────────────────────────────────────────
 
 export const RoutingTargetSchema = z.object({
-  type: z.enum(['LOG', 'EMAIL', 'WEBHOOK', 'CRM', 'HUMAN_INBOX']).default('LOG'),
+  type: z.enum(['LOG', 'EMAIL', 'WHATSAPP', 'WEBHOOK', 'CRM', 'HUMAN_INBOX']).default('LOG'),
   to: z.array(z.string()).default([]),
   url: z.string().optional().default(''),
   /**

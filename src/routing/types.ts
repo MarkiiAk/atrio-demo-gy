@@ -6,6 +6,8 @@ export interface CaseBrief {
   tenantId: string;
   tenantName: string;
   caseId: number;
+  /** Folio legible que se le dio a la persona. */
+  folio: string;
   conversationId: number;
   workflowKey: string;
   departmentKey: string | null;

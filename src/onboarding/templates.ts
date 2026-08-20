@@ -27,6 +27,7 @@ export const WORKFLOW_LIBRARY: Record<
   string,
   {
     department: string;
+    displayName: string;
     strategy: string;
     intents: string[];
     description: string;
@@ -38,9 +39,11 @@ export const WORKFLOW_LIBRARY: Record<
     cannotDo: string[];
     satisfiedByChannel: string[];
     verifyAgainstKnowledge: string[];
+    describeFields: string[];
   }
 > = {
   SALES_QUOTE: {
+    displayName: 'Cotizaciones',
     department: 'SALES',
     strategy: 'qualify_then_route',
     intents: ['SALES_QUOTE'],
@@ -66,9 +69,11 @@ export const WORKFLOW_LIBRARY: Record<
     cannotDo: ['dar precios o cotizaciones con monto', 'confirmar disponibilidad de inventario'],
     satisfiedByChannel: ['contact_phone', 'contact_name'],
     verifyAgainstKnowledge: ['product'],
+    describeFields: []
   },
 
   SUPPLIER: {
+    displayName: 'Proveedores que se ofrecen',
     department: 'PURCHASES',
     strategy: 'collect_then_route',
     intents: ['SUPPLIER'],
@@ -94,9 +99,11 @@ export const WORKFLOW_LIBRARY: Record<
     ],
     satisfiedByChannel: ['contact_phone', 'contact_name'],
     verifyAgainstKnowledge: [],
+    describeFields: ['offering']
   },
 
   HR: {
+    displayName: 'Solicitudes de empleo',
     department: 'HUMAN_RESOURCES',
     strategy: 'answer_then_optional_route',
     intents: ['HR'],
@@ -116,9 +123,11 @@ export const WORKFLOW_LIBRARY: Record<
     cannotDo: ['confirmar vacantes disponibles', 'agendar entrevistas'],
     satisfiedByChannel: ['contact_phone', 'contact_name'],
     verifyAgainstKnowledge: [],
+    describeFields: []
   },
 
   INVOICE: {
+    displayName: 'Facturación',
     department: 'ADMINISTRATION',
     strategy: 'collect_then_route',
     intents: ['INVOICE'],
@@ -139,9 +148,11 @@ export const WORKFLOW_LIBRARY: Record<
     cannotDo: ['emitir, reenviar o cancelar facturas', 'consultar el estado de una factura'],
     satisfiedByChannel: ['contact_phone', 'contact_name'],
     verifyAgainstKnowledge: [],
+    describeFields: ['issue_description']
   },
 
   ORDER_STATUS: {
+    displayName: 'Seguimiento de pedidos',
     department: 'CUSTOMER_SERVICE',
     strategy: 'collect_then_route',
     intents: ['ORDER_STATUS'],
@@ -160,9 +171,11 @@ export const WORKFLOW_LIBRARY: Record<
     cannotDo: ['consultar el estatus real de un pedido', 'dar fechas de entrega'],
     satisfiedByChannel: ['contact_phone', 'contact_name'],
     verifyAgainstKnowledge: [],
+    describeFields: []
   },
 
   DELIVERY_ISSUE: {
+    displayName: 'Problemas de entrega',
     department: 'LOGISTICS',
     strategy: 'collect_then_route',
     intents: ['DELIVERY_ISSUE'],
@@ -183,9 +196,11 @@ export const WORKFLOW_LIBRARY: Record<
     cannotDo: ['reprogramar una entrega', 'contactar al transportista'],
     satisfiedByChannel: ['contact_phone', 'contact_name'],
     verifyAgainstKnowledge: [],
+    describeFields: ['issue_description']
   },
 
   PRODUCT_DAMAGE: {
+    displayName: 'Producto dañado',
     department: 'CUSTOMER_SERVICE',
     strategy: 'collect_then_route',
     intents: ['PRODUCT_DAMAGE'],
@@ -212,9 +227,11 @@ export const WORKFLOW_LIBRARY: Record<
     ],
     satisfiedByChannel: ['contact_phone', 'contact_name'],
     verifyAgainstKnowledge: ['product'],
+    describeFields: ['damage_description']
   },
 
   COMPLAINT: {
+    displayName: 'Quejas',
     department: 'CUSTOMER_SERVICE',
     strategy: 'collect_then_route',
     intents: ['COMPLAINT'],
@@ -235,9 +252,11 @@ export const WORKFLOW_LIBRARY: Record<
     cannotDo: ['ofrecer compensaciones', 'asignar culpas'],
     satisfiedByChannel: ['contact_phone', 'contact_name'],
     verifyAgainstKnowledge: [],
+    describeFields: ['complaint_description']
   },
 
   SUGGESTION: {
+    displayName: 'Sugerencias',
     department: 'CUSTOMER_SERVICE',
     strategy: 'collect_then_route',
     intents: ['SUGGESTION'],
@@ -254,9 +273,11 @@ export const WORKFLOW_LIBRARY: Record<
     cannotDo: ['comprometer que la sugerencia se implementará'],
     satisfiedByChannel: [],
     verifyAgainstKnowledge: [],
+    describeFields: ['suggestion']
   },
 
   GENERAL_INFORMATION: {
+    displayName: 'Preguntas generales',
     department: 'CUSTOMER_SERVICE',
     strategy: 'answer_then_optional_route',
     intents: ['GENERAL_INFORMATION'],
@@ -269,6 +290,7 @@ export const WORKFLOW_LIBRARY: Record<
     cannotDo: [],
     satisfiedByChannel: [],
     verifyAgainstKnowledge: [],
+    describeFields: []
   },
 };
 
@@ -382,6 +404,8 @@ export function workflowsYaml(enabled: string[]): string {
 
       return `  ${key}:
     enabled: true
+    # Nombre que se ve en el panel de administración.
+    display_name: ${q(wf.displayName)}
     department: ${wf.department}
     strategy: ${wf.strategy}
     description: ${q(wf.description)}
@@ -413,7 +437,12 @@ ${labels || '      {}'}
     # Campos que la APLICACIÓN verifica contra la documentación autorizada antes
     # de que el asistente los trate como algo que la empresa ofrece. Evita que
     # un cliente afirme "ustedes venden X" y el asistente se lo crea.
-    verify_against_knowledge:${list(wf.verifyAgainstKnowledge, '      ')}`;
+    verify_against_knowledge:${list(wf.verifyAgainstKnowledge, '      ')}
+
+    # Campos que describen el asunto en palabras de la propia persona. Si el
+    # modelo no los extrae, la aplicación los rellena con lo que ella escribió,
+    # para no volver a preguntar algo que acaba de decir.
+    describe_fields:${list(wf.describeFields, '      ')}`;
     })
     .filter(Boolean)
     .join('\n\n');

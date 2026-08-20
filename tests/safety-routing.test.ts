@@ -411,6 +411,7 @@ tones: {}
       activeCases: [
         {
           caseId: 1,
+          folio: 'COT-0001',
           workflowKey: 'SALES_QUOTE',
           departmentKey: 'SALES',
           status,
@@ -439,6 +440,7 @@ tones: {}
       activeCases: [
         {
           caseId: 1,
+          folio: 'COT-0001',
           workflowKey: 'SALES_QUOTE',
           departmentKey: 'SALES',
           status,
@@ -455,6 +457,7 @@ tones: {}
       activeCases: [
         {
           caseId: 1,
+          folio: 'COT-0001',
           workflowKey: 'SALES_QUOTE',
           departmentKey: 'SALES',
           status,
@@ -474,6 +477,7 @@ tones: {}
       activeCases: [
         {
           caseId: 1,
+          folio: 'COT-0001',
           workflowKey: 'SALES_QUOTE',
           departmentKey: 'SALES',
           status,

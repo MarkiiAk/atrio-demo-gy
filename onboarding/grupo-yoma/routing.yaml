@@ -1,45 +1,63 @@
 # A dónde va cada caso una vez que la aplicación decide que está listo.
-# Adapters disponibles hoy: LOG (siempre), EMAIL (si SMTP_ENABLED=true).
+#
+# Adapters disponibles hoy:
+#   LOG       siempre; deja el caso en archivo y consola. NO avisa a nadie.
+#   WHATSAPP  manda un mensaje al número responsable del área.
+#   EMAIL     requiere SMTP_ENABLED=true.
 # WEBHOOK / CRM / HUMAN_INBOX están declarados pero no implementados: caen a LOG.
+#
+# `confirmation_semantics` define qué puede decirle el asistente al cliente:
+#   REGISTERED_ONLY    "quedó registrada" — nadie la recibió todavía.
+#   DELIVERED_TO_TEAM  "ya está con el área" — sólo válido si el adapter
+#                      realmente entrega a una persona (WHATSAPP o EMAIL).
+#
+# DEMO: todas las áreas apuntan al mismo responsable. En producción cada área
+# lleva su propio número y basta cambiar estas líneas.
+#
+# ⚠ WhatsApp sólo permite texto libre dentro de las 24 h siguientes a que ESE
+#   número le escribió al asistente. Si la ventana está cerrada, Twilio rechaza
+#   el aviso (error 63016) y el caso queda como "No se pudo enviar" en el panel;
+#   el asistente entonces NO le confirma al cliente que ya llegó a alguien.
 routing:
   SALES:
-    type: LOG
-    to: []
-    # Con LOG nadie recibe nada todavía: el asistente sólo puede confirmar registro.
-    confirmation_semantics: REGISTERED_ONLY
+    type: WHATSAPP
+    to:
+      - "+5215519330800"
+    confirmation_semantics: DELIVERED_TO_TEAM
 
   PURCHASES:
-    type: LOG
-    to: []
-    # Con LOG nadie recibe nada todavía: el asistente sólo puede confirmar registro.
-    confirmation_semantics: REGISTERED_ONLY
+    type: WHATSAPP
+    to:
+      - "+5215519330800"
+    confirmation_semantics: DELIVERED_TO_TEAM
 
   HUMAN_RESOURCES:
-    type: LOG
-    to: []
-    # Con LOG nadie recibe nada todavía: el asistente sólo puede confirmar registro.
-    confirmation_semantics: REGISTERED_ONLY
+    type: WHATSAPP
+    to:
+      - "+5215519330800"
+    confirmation_semantics: DELIVERED_TO_TEAM
 
   CUSTOMER_SERVICE:
-    type: LOG
-    to: []
-    # Con LOG nadie recibe nada todavía: el asistente sólo puede confirmar registro.
-    confirmation_semantics: REGISTERED_ONLY
+    type: WHATSAPP
+    to:
+      - "+5215519330800"
+    confirmation_semantics: DELIVERED_TO_TEAM
 
   ADMINISTRATION:
-    type: LOG
-    to: []
-    # Con LOG nadie recibe nada todavía: el asistente sólo puede confirmar registro.
-    confirmation_semantics: REGISTERED_ONLY
+    type: WHATSAPP
+    to:
+      - "+5215519330800"
+    confirmation_semantics: DELIVERED_TO_TEAM
 
   LOGISTICS:
-    type: LOG
-    to: []
-    # Con LOG nadie recibe nada todavía: el asistente sólo puede confirmar registro.
-    confirmation_semantics: REGISTERED_ONLY
+    type: WHATSAPP
+    to:
+      - "+5215519330800"
+    confirmation_semantics: DELIVERED_TO_TEAM
 
 # Destino usado cuando un caso no tiene área resoluble.
 fallback:
-  type: LOG
-  to: []
-  confirmation_semantics: REGISTERED_ONLY
+  type: WHATSAPP
+  to:
+    - "+5215519330800"
+  confirmation_semantics: DELIVERED_TO_TEAM

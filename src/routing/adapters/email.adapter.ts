@@ -21,7 +21,7 @@ function getTransport(): Transporter {
 
 function renderBody(brief: CaseBrief): string {
   const lines: string[] = [];
-  lines.push(`Nuevo caso #${brief.caseId} — ${brief.workflowKey}`);
+  lines.push(`Nuevo caso ${brief.folio} — ${brief.workflowKey}`);
   lines.push(`Empresa: ${brief.tenantName}`);
   lines.push(`Área: ${brief.departmentName}`);
   lines.push(`Urgencia: ${brief.urgency}`);
@@ -72,7 +72,7 @@ export const emailAdapter: RoutingAdapter = {
       const info = await getTransport().sendMail({
         from: env.SMTP_FROM,
         to: recipients.join(', '),
-        subject: `[${brief.tenantName}] Caso #${brief.caseId} — ${brief.workflowKey} (${brief.urgency})`,
+        subject: `[${brief.tenantName}] ${brief.folio} — ${brief.workflowKey} (${brief.urgency})`,
         text: renderBody(brief),
       });
       return { outcome: 'SUCCESS', detail: `enviado a ${recipients.length} destinatario(s) [${info.messageId}]` };

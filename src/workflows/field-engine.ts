@@ -121,6 +121,39 @@ export function channelSatisfiedFields(wf: WorkflowConfig, ctx: ChannelContext):
   return out;
 }
 
+/**
+ * Rellena los campos descriptivos con lo que la persona escribió, cuando el
+ * modelo no los extrajo.
+ *
+ * No es adivinar: es tomar textualmente lo que dijo. Si alguien abre con "mi
+ * pedido lleva 3 días de retraso", el motivo del asunto ya está dicho y volver
+ * a preguntarlo es el error más irritante que puede cometer una recepción.
+ *
+ * Se usa el primer mensaje con contenido real, porque es donde la gente explica
+ * el problema antes de empezar a contestar preguntas.
+ */
+export function fillDescriptiveFields(
+  wf: WorkflowConfig,
+  known: FieldMap,
+  userMessages: string[],
+): FieldMap {
+  if (wf.describe_fields.length === 0) return {};
+
+  const source = userMessages
+    .map((m) => m.trim())
+    .filter((m) => m.length >= 15)
+    .find((m) => !/^\s*\(/.test(m));
+  if (!source) return {};
+
+  const out: FieldMap = {};
+  for (const field of wf.describe_fields) {
+    if (!allFields(wf).includes(field)) continue;
+    if (isMeaningful(known[field])) continue;
+    out[field] = source.length > 400 ? `${source.slice(0, 397)}…` : source;
+  }
+  return out;
+}
+
 export interface FieldStatus {
   known: FieldMap;
   missingEssential: string[];

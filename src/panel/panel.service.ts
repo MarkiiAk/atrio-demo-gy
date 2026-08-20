@@ -2,44 +2,50 @@ import { getDb } from '../db';
 import { knowledgeStatus } from '../knowledge/knowledge.service';
 import { buildGapReport } from '../onboarding/gap.service';
 import { getTenantConfig } from '../tenants/tenant-loader';
-import { buildUsageReport } from '../usage/usage.service';
 import { departmentName, fieldLabel } from '../workflows/workflow-engine';
-import type { CaseStatus, Urgency } from '../types/domain';
+import {
+  caseStatusView,
+  channelLabel,
+  folioFor,
+  gapLabel,
+  humanDate,
+  sentimentLabel,
+  urgencyLabel,
+  workflowLabel,
+} from './labels';
 
 /**
  * Lecturas para el panel de administración.
  *
- * Todo va scopeado por tenant en la propia consulta: el panel no puede
- * enseñar datos de otro cliente aunque alguien manipule un id.
+ * Este panel lo usa una persona de administración del cliente, así que la capa
+ * de datos entrega ya el vocabulario de negocio: nada de claves internas
+ * (`SALES_QUOTE`), estados en inglés ni métricas de ingeniería (tokens,
+ * latencia, ids de vector store). Esas siguen disponibles en los comandos de
+ * CLI, que son para nosotros.
+ *
+ * Todo va scopeado por tenant en la propia consulta: el panel no puede enseñar
+ * datos de otro cliente aunque alguien manipule un id.
  */
 
+/** ¿El destino de esta área entrega a una persona, o sólo deja registro? */
+function deliversToTeam(tenantId: string, departmentKey: string | null): boolean {
+  const config = getTenantConfig(tenantId);
+  const target =
+    config.routing.routing[departmentKey ?? ''] ?? config.routing.fallback ?? null;
+  return target?.confirmation_semantics === 'DELIVERED_TO_TEAM';
+}
+
 export interface PanelSummary {
-  tenant: { id: string; name: string; assistantName: string; mode: string };
-  totals: {
-    conversations: number;
-    contacts: number;
-    messagesIn: number;
-    messagesOut: number;
-    cases: number;
-    casesRouted: number;
-    casesBlocked: number;
-    gaps: number;
+  tenant: { id: string; name: string; assistantName: string; isDemo: boolean };
+  headline: Array<{ label: string; value: string; sub: string }>;
+  attention: {
+    pendingCases: number;
+    unhappyConversations: number;
+    unanswered: number;
   };
-  knowledge: {
-    vectorStoreId: string | null;
-    websitePages: number;
-    publicDocs: number;
-    customerSafeDocs: number;
-    lastSyncAt: string | null;
-  };
-  usage: {
-    openaiCalls: number;
-    totalTokens: number;
-    avgLatencyMs: number;
-    tokensPerConversation: number;
-  };
-  byDepartment: Array<{ key: string; name: string; cases: number; routed: number }>;
-  byWorkflow: Array<{ key: string; cases: number; routed: number }>;
+  byDepartment: Array<{ name: string; total: number; ready: number; pending: number }>;
+  byType: Array<{ name: string; total: number; ready: number; pending: number }>;
+  knowledge: { sources: number; lastUpdate: string; website: number; documents: number };
 }
 
 export function panelSummary(tenantId: string): PanelSummary {
@@ -50,37 +56,29 @@ export function panelSummary(tenantId: string): PanelSummary {
     .prepare(
       `SELECT
          (SELECT COUNT(*) FROM conversations WHERE tenant_id = @t) AS conversations,
-         (SELECT COUNT(*) FROM contacts      WHERE tenant_id = @t) AS contacts,
-         (SELECT COUNT(*) FROM messages      WHERE tenant_id = @t AND direction = 'INBOUND')  AS messages_in,
-         (SELECT COUNT(*) FROM messages      WHERE tenant_id = @t AND direction = 'OUTBOUND') AS messages_out,
+         (SELECT COUNT(*) FROM contacts      WHERE tenant_id = @t) AS people,
+         (SELECT COUNT(*) FROM messages      WHERE tenant_id = @t AND direction = 'INBOUND') AS messages_in,
          (SELECT COUNT(*) FROM cases         WHERE tenant_id = @t) AS cases,
-         (SELECT COUNT(*) FROM cases         WHERE tenant_id = @t AND status = 'ROUTED') AS cases_routed,
-         (SELECT COUNT(*) FROM cases         WHERE tenant_id = @t AND status IN ('OPEN','READY','ROUTING_FAILED')) AS cases_blocked,
-         (SELECT COALESCE(SUM(frequency),0) FROM onboarding_gaps WHERE tenant_id = @t) AS gaps`,
+         (SELECT COUNT(*) FROM cases         WHERE tenant_id = @t AND status = 'ROUTED') AS ready,
+         (SELECT COUNT(*) FROM cases         WHERE tenant_id = @t AND status IN ('OPEN','READY','ROUTING_FAILED')) AS pending,
+         (SELECT COUNT(*) FROM conversations WHERE tenant_id = @t AND last_sentiment IN ('ANGRY','FRUSTRATED')) AS unhappy,
+         (SELECT COALESCE(SUM(frequency),0) FROM onboarding_gaps
+            WHERE tenant_id = @t AND gap_type = 'UNANSWERED_KNOWLEDGE') AS unanswered`,
     )
     .get({ t: tenantId }) as Record<string, number>;
 
-  const byDept = db
-    .prepare(
-      `SELECT department_key AS k,
-              COUNT(*) AS cases,
-              SUM(CASE WHEN status = 'ROUTED' THEN 1 ELSE 0 END) AS routed
-         FROM cases WHERE tenant_id = ? AND department_key IS NOT NULL
-        GROUP BY department_key ORDER BY cases DESC`,
-    )
-    .all(tenantId) as Array<{ k: string; cases: number; routed: number }>;
+  const group = (column: 'department_key' | 'workflow_key') =>
+    db
+      .prepare(
+        `SELECT ${column} AS k,
+                COUNT(*) AS total,
+                SUM(CASE WHEN status = 'ROUTED' THEN 1 ELSE 0 END) AS ready,
+                SUM(CASE WHEN status IN ('OPEN','READY','ROUTING_FAILED') THEN 1 ELSE 0 END) AS pending
+           FROM cases WHERE tenant_id = ? AND ${column} IS NOT NULL
+          GROUP BY ${column} ORDER BY total DESC`,
+      )
+      .all(tenantId) as Array<{ k: string; total: number; ready: number; pending: number }>;
 
-  const byWf = db
-    .prepare(
-      `SELECT workflow_key AS k,
-              COUNT(*) AS cases,
-              SUM(CASE WHEN status = 'ROUTED' THEN 1 ELSE 0 END) AS routed
-         FROM cases WHERE tenant_id = ?
-        GROUP BY workflow_key ORDER BY cases DESC`,
-    )
-    .all(tenantId) as Array<{ k: string; cases: number; routed: number }>;
-
-  const usage = buildUsageReport(tenantId, 30);
   const k = knowledgeStatus(config);
 
   return {
@@ -88,51 +86,69 @@ export function panelSummary(tenantId: string): PanelSummary {
       id: tenantId,
       name: config.company.company.name,
       assistantName: config.company.assistant.display_name,
-      mode: process.env.APP_MODE ?? 'demo',
+      isDemo: (process.env.APP_MODE ?? 'demo') === 'demo',
     },
-    totals: {
-      conversations: t.conversations,
-      contacts: t.contacts,
-      messagesIn: t.messages_in,
-      messagesOut: t.messages_out,
-      cases: t.cases,
-      casesRouted: t.cases_routed,
-      casesBlocked: t.cases_blocked,
-      gaps: t.gaps,
+    headline: [
+      {
+        label: 'Personas atendidas',
+        value: String(t.people),
+        sub: `${t.conversations} ${t.conversations === 1 ? 'conversación' : 'conversaciones'}`,
+      },
+      {
+        label: 'Mensajes recibidos',
+        value: String(t.messages_in),
+        sub: 'sin que nadie tuviera que contestar',
+      },
+      {
+        label: 'Solicitudes capturadas',
+        value: String(t.cases),
+        sub: `${t.ready} listas para atender`,
+      },
+      {
+        label: 'Pendientes de dar seguimiento',
+        value: String(t.pending),
+        sub: t.pending > 0 ? 'requieren que alguien las tome' : 'todo al día',
+      },
+    ],
+    attention: {
+      pendingCases: t.pending,
+      unhappyConversations: t.unhappy,
+      unanswered: t.unanswered,
     },
-    knowledge: k,
-    usage: {
-      openaiCalls: usage.openaiCalls,
-      totalTokens: usage.totalTokens,
-      avgLatencyMs: usage.avgLatencyMs,
-      tokensPerConversation:
-        usage.conversations > 0 ? Math.round(usage.totalTokens / usage.conversations) : 0,
-    },
-    byDepartment: byDept.map((d) => ({
-      key: d.k,
+    byDepartment: group('department_key').map((d) => ({
       name: departmentName(config, d.k),
-      cases: d.cases,
-      routed: d.routed,
+      total: d.total,
+      ready: d.ready,
+      pending: d.pending,
     })),
-    byWorkflow: byWf.map((w) => ({ key: w.k, cases: w.cases, routed: w.routed })),
+    byType: group('workflow_key').map((w) => ({
+      name: workflowLabel(config, w.k),
+      total: w.total,
+      ready: w.ready,
+      pending: w.pending,
+    })),
+    knowledge: {
+      sources: k.websitePages + k.publicDocs + k.customerSafeDocs,
+      lastUpdate: humanDate(k.lastSyncAt),
+      website: k.websitePages,
+      documents: k.publicDocs + k.customerSafeDocs,
+    },
   };
 }
 
 export interface PanelCase {
   id: number;
-  workflowKey: string;
+  folio: string;
+  type: string;
   department: string;
-  status: CaseStatus;
-  urgency: Urgency;
-  createdAt: string;
-  routedAt: string | null;
+  status: { label: string; tone: string; hint: string };
+  urgency: { label: string; tone: string } | null;
+  received: string;
   conversationId: number;
-  contactName: string | null;
-  contactPhone: string | null;
-  channel: string;
-  intents: Array<{ intent: string; confidence: number }>;
-  fields: Array<{ key: string; label: string; value: string }>;
-  routing: { adapter: string; outcome: string; detail: string | null } | null;
+  person: { name: string | null; phone: string | null; channel: string };
+  summary: string;
+  fields: Array<{ label: string; value: string }>;
+  note: string | null;
 }
 
 export function panelCases(tenantId: string, limit = 50): PanelCase[] {
@@ -156,55 +172,67 @@ export function panelCases(tenantId: string, limit = 50): PanelCase[] {
     const fields = db
       .prepare(`SELECT field_key, field_value FROM case_data WHERE case_id = ? ORDER BY id`)
       .all(r.id) as Array<{ field_key: string; field_value: string }>;
-    const intents = db
-      .prepare(`SELECT intent, confidence FROM case_intents WHERE case_id = ? ORDER BY confidence DESC`)
-      .all(r.id) as Array<{ intent: string; confidence: number }>;
     const routing = db
-      .prepare(
-        `SELECT adapter, outcome, detail FROM routing_events WHERE case_id = ? ORDER BY id DESC LIMIT 1`,
-      )
-      .get(r.id) as { adapter: string; outcome: string; detail: string | null } | undefined;
+      .prepare(`SELECT outcome, detail FROM routing_events WHERE case_id = ? ORDER BY id DESC LIMIT 1`)
+      .get(r.id) as { outcome: string; detail: string | null } | undefined;
+
+    const labelled = fields.map((f) => ({
+      label: wf ? fieldLabel(wf, f.field_key) : f.field_key,
+      value: f.field_value,
+    }));
+
+    // Qué le falta, dicho en palabras de la persona que atiende.
+    let note: string | null = null;
+    if (r.status !== 'ROUTED' && wf) {
+      const known = new Set(fields.map((f) => f.field_key));
+      const missing = wf.fields.essential.filter((f) => !known.has(f));
+      if (missing.length > 0) {
+        note = `Falta por confirmar: ${missing.map((f) => fieldLabel(wf, f)).join(', ')}.`;
+      }
+    }
+    if (routing?.outcome === 'FAILED' || routing?.outcome === 'SKIPPED') {
+      note = 'La información está completa, pero no se pudo avisar al área. Requiere revisión.';
+    }
 
     return {
       id: r.id,
-      workflowKey: r.workflow_key,
+      folio: folioFor(r.workflow_key, r.id),
+      type: workflowLabel(config, r.workflow_key),
       department: departmentName(config, r.department_key),
-      status: r.status,
-      urgency: r.urgency,
-      createdAt: r.created_at,
-      routedAt: r.routed_at,
+      status: caseStatusView(r.status, deliversToTeam(tenantId, r.department_key)),
+      urgency: urgencyLabel(r.urgency),
+      received: humanDate(r.created_at),
       conversationId: r.conversation_id,
-      contactName: r.display_name,
-      contactPhone: r.primary_phone,
-      channel: r.channel,
-      intents,
-      fields: fields.map((f) => ({
-        key: f.field_key,
-        label: wf ? fieldLabel(wf, f.field_key) : f.field_key,
-        value: f.field_value,
-      })),
-      routing: routing ?? null,
+      person: {
+        name: r.display_name,
+        phone: r.primary_phone,
+        channel: channelLabel(r.channel),
+      },
+      summary: labelled
+        .slice(0, 3)
+        .map((f) => `${f.label}: ${f.value}`)
+        .join(' · '),
+      fields: labelled,
+      note,
     };
   });
 }
 
 export interface PanelConversation {
   id: number;
+  person: { name: string | null; phone: string | null };
   channel: string;
-  status: string;
-  contactName: string | null;
-  contactPhone: string | null;
-  lastMessageAt: string | null;
-  messageCount: number;
-  caseCount: number;
-  lastSentiment: string | null;
+  mood: { label: string; tone: string } | null;
+  lastActivity: string;
+  messages: number;
+  requests: number;
   preview: string | null;
 }
 
 export function panelConversations(tenantId: string, limit = 50): PanelConversation[] {
   const rows = getDb()
     .prepare(
-      `SELECT cv.id, cv.channel, cv.status, cv.last_message_at, cv.last_sentiment,
+      `SELECT cv.id, cv.channel, cv.last_message_at, cv.last_sentiment,
               ct.display_name, ct.primary_phone,
               (SELECT COUNT(*) FROM messages m WHERE m.conversation_id = cv.id) AS message_count,
               (SELECT COUNT(*) FROM cases k    WHERE k.conversation_id = cv.id) AS case_count,
@@ -220,102 +248,114 @@ export function panelConversations(tenantId: string, limit = 50): PanelConversat
 
   return rows.map((r) => ({
     id: r.id,
-    channel: r.channel,
-    status: r.status,
-    contactName: r.display_name,
-    contactPhone: r.primary_phone,
-    lastMessageAt: r.last_message_at,
-    messageCount: r.message_count,
-    caseCount: r.case_count,
-    lastSentiment: r.last_sentiment,
+    person: { name: r.display_name, phone: r.primary_phone },
+    channel: channelLabel(r.channel),
+    mood: sentimentLabel(r.last_sentiment),
+    lastActivity: humanDate(r.last_message_at),
+    messages: r.message_count,
+    requests: r.case_count,
     preview: r.preview,
   }));
 }
 
 export interface PanelMessage {
-  id: number;
-  direction: string;
-  body: string | null;
-  kind: string;
-  createdAt: string;
+  from: 'persona' | 'asistente';
+  text: string;
+  at: string;
 }
 
-/** Transcripción de una conversación. Comprueba el tenant en la consulta. */
 export function panelTranscript(tenantId: string, conversationId: number): PanelMessage[] {
-  return getDb()
+  const rows = getDb()
     .prepare(
-      `SELECT m.id, m.direction, m.body, m.kind, m.created_at AS createdAt
+      `SELECT m.direction, m.body, m.created_at
          FROM messages m
          JOIN conversations cv ON cv.id = m.conversation_id
         WHERE m.conversation_id = ? AND cv.tenant_id = ?
         ORDER BY m.id ASC`,
     )
-    .all(conversationId, tenantId) as PanelMessage[];
+    .all(conversationId, tenantId) as Array<Record<string, any>>;
+
+  return rows.map((r) => ({
+    from: r.direction === 'INBOUND' ? 'persona' : 'asistente',
+    text: r.body ?? '',
+    at: humanDate(r.created_at),
+  }));
 }
 
 export interface PanelGap {
-  gapType: string;
-  intent: string;
+  category: string;
+  categoryHint: string;
   topic: string;
-  missingInformation: string | null;
-  frequency: number;
-  lastSeenAt: string;
+  action: string | null;
+  times: number;
+  lastSeen: string;
 }
 
 export function panelGaps(tenantId: string, limit = 60): PanelGap[] {
-  const report = buildGapReport(tenantId);
-  return Object.values(report.byType)
+  return Object.values(buildGapReport(tenantId).byType)
     .flat()
     .sort((a, b) => b.frequency - a.frequency)
     .slice(0, limit)
-    .map((g) => ({
-      gapType: g.gap_type,
-      intent: g.intent,
-      topic: g.topic,
-      missingInformation: g.missing_information,
-      frequency: g.frequency,
-      lastSeenAt: g.last_seen_at,
-    }));
+    .map((g) => {
+      const l = gapLabel(g.gap_type);
+      return {
+        category: l.label,
+        categoryHint: l.hint,
+        topic: g.topic.charAt(0).toUpperCase() + g.topic.slice(1),
+        action: g.missing_information,
+        times: g.frequency,
+        lastSeen: humanDate(g.last_seen_at),
+      };
+    });
 }
 
-export interface PanelConfigView {
-  workflows: Array<{
-    key: string;
-    enabled: boolean;
+export interface PanelCapabilities {
+  assistantName: string;
+  tone: string;
+  treatment: string;
+  handles: Array<{
+    name: string;
     department: string;
-    intents: string[];
-    essential: string[];
-    verifiedFields: string[];
+    asksFor: string[];
+    verifies: string[];
     cannotDo: string[];
   }>;
-  routing: Array<{ department: string; name: string; type: string; semantics: string }>;
-  personality: { style: string[]; pronoun: string; maxQuestions: number; banned: string[] };
+  routing: Array<{ department: string; behaviour: string }>;
+  neverDoes: string[];
 }
 
-/** Vista de sólo lectura de la configuración: qué sabe hacer el asistente. */
-export function panelConfig(tenantId: string): PanelConfigView {
+/** "Qué sabe hacer": la configuración explicada, sin YAML ni claves. */
+export function panelCapabilities(tenantId: string): PanelCapabilities {
   const config = getTenantConfig(tenantId);
-  return {
-    workflows: Object.entries(config.workflows.workflows).map(([key, wf]) => ({
-      key,
-      enabled: wf.enabled,
+
+  const handles = Object.entries(config.workflows.workflows)
+    .filter(([, wf]) => wf.enabled)
+    .map(([key, wf]) => ({
+      name: workflowLabel(config, key),
       department: departmentName(config, wf.department),
-      intents: wf.intents,
-      essential: wf.fields.essential,
-      verifiedFields: wf.verify_against_knowledge,
+      asksFor: wf.fields.essential.map((f) => fieldLabel(wf, f)),
+      verifies: wf.verify_against_knowledge.map((f) => fieldLabel(wf, f)),
       cannotDo: wf.cannot_do,
-    })),
+    }));
+
+  return {
+    assistantName: config.company.assistant.display_name,
+    tone: config.personality.base.style.join(', '),
+    treatment: config.personality.base.pronoun_style === 'usted' ? 'de usted' : 'de tú',
+    handles,
     routing: Object.entries(config.routing.routing).map(([dept, target]) => ({
-      department: dept,
-      name: departmentName(config, dept),
-      type: target.type,
-      semantics: target.confirmation_semantics,
+      department: departmentName(config, dept),
+      behaviour:
+        target.confirmation_semantics === 'DELIVERED_TO_TEAM'
+          ? 'Se avisa al área y se le confirma al cliente'
+          : 'Queda registrada para que el área la revise',
     })),
-    personality: {
-      style: config.personality.base.style,
-      pronoun: config.personality.base.pronoun_style,
-      maxQuestions: config.personality.base.max_questions_per_reply,
-      banned: config.personality.base.banned_phrases,
-    },
+    neverDoes: [
+      'Inventar información que no esté respaldada',
+      'Dar precios o comprometer condiciones comerciales',
+      'Afirmar que se manejan productos que no están en el catálogo',
+      'Decirle al cliente que ya se envió algo cuando todavía no ocurrió',
+      ...new Set(handles.flatMap((h) => h.cannotDo)),
+    ],
   };
 }

@@ -115,6 +115,14 @@ export function validateTenant(config: TenantConfig, mode: AppMode): ValidationI
         message: 'destino EMAIL sin destinatarios reales',
       });
     }
+    if (target.type === 'WHATSAPP' && target.to.filter((t) => !isTodo(t)).length === 0) {
+      issues.push({
+        severity: mode === 'production' ? 'ERROR' : 'WARNING',
+        file: 'routing.yaml',
+        path: `routing.${dept}.to`,
+        message: 'destino WHATSAPP sin números responsables',
+      });
+    }
     if (target.type === 'WEBHOOK' && (!target.url || isTodo(target.url))) {
       issues.push({
         severity: mode === 'production' ? 'ERROR' : 'WARNING',

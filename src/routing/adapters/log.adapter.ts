@@ -21,7 +21,7 @@ export const logAdapter: RoutingAdapter = {
 
     log.block('CASE ROUTED (LOG)', [
       ['Tenant', brief.tenantName],
-      ['Caso', `#${brief.caseId} ${brief.workflowKey}`],
+      ['Folio', `${brief.folio} (${brief.workflowKey})`],
       ['Área', brief.departmentName],
       ['Urgencia', brief.urgency],
       ['Contacto', brief.contact.name ?? '(sin nombre)'],

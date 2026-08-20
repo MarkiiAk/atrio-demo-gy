@@ -2,6 +2,8 @@
 workflows:
   SALES_QUOTE:
     enabled: true
+    # Nombre que se ve en el panel de administración.
+    display_name: "Cotizaciones"
     department: SALES
     strategy: qualify_then_route
     description: "Solicitudes de cotización o compra"
@@ -53,8 +55,12 @@ workflows:
     verify_against_knowledge:
       - product
 
+    describe_fields: []
+
   SUPPLIER:
     enabled: true
+    # Nombre que se ve en el panel de administración.
+    display_name: "Proveedores que se ofrecen"
     department: PURCHASES
     strategy: collect_then_route
     description: "Empresas que ofrecen productos o servicios"
@@ -105,8 +111,13 @@ workflows:
       - comprometer una reunión o una respuesta
     verify_against_knowledge: []
 
+    describe_fields:
+      - offering
+
   HR:
     enabled: true
+    # Nombre que se ve en el panel de administración.
+    display_name: "Solicitudes de empleo"
     department: HUMAN_RESOURCES
     strategy: answer_then_optional_route
     description: "Postulaciones y consultas de empleo"
@@ -151,8 +162,12 @@ workflows:
       - agendar entrevistas
     verify_against_knowledge: []
 
+    describe_fields: []
+
   INVOICE:
     enabled: true
+    # Nombre que se ve en el panel de administración.
+    display_name: "Facturación"
     department: ADMINISTRATION
     strategy: collect_then_route
     description: "Facturación y comprobantes"
@@ -199,8 +214,13 @@ workflows:
       - consultar el estado de una factura
     verify_against_knowledge: []
 
+    describe_fields:
+      - issue_description
+
   ORDER_STATUS:
     enabled: true
+    # Nombre que se ve en el panel de administración.
+    display_name: "Seguimiento de pedidos"
     department: CUSTOMER_SERVICE
     strategy: collect_then_route
     description: "Seguimiento de pedidos"
@@ -243,8 +263,12 @@ workflows:
       - dar fechas de entrega
     verify_against_knowledge: []
 
+    describe_fields: []
+
   DELIVERY_ISSUE:
     enabled: true
+    # Nombre que se ve en el panel de administración.
+    display_name: "Problemas de entrega"
     department: LOGISTICS
     strategy: collect_then_route
     description: "Problemas de entrega"
@@ -291,8 +315,13 @@ workflows:
       - contactar al transportista
     verify_against_knowledge: []
 
+    describe_fields:
+      - issue_description
+
   PRODUCT_DAMAGE:
     enabled: true
+    # Nombre que se ve en el panel de administración.
+    display_name: "Producto dañado"
     department: CUSTOMER_SERVICE
     strategy: collect_then_route
     description: "Producto dañado o en mal estado"
@@ -346,8 +375,13 @@ workflows:
     verify_against_knowledge:
       - product
 
+    describe_fields:
+      - damage_description
+
   COMPLAINT:
     enabled: true
+    # Nombre que se ve en el panel de administración.
+    display_name: "Quejas"
     department: CUSTOMER_SERVICE
     strategy: collect_then_route
     description: "Quejas e inconformidades"
@@ -394,8 +428,13 @@ workflows:
       - asignar culpas
     verify_against_knowledge: []
 
+    describe_fields:
+      - complaint_description
+
   SUGGESTION:
     enabled: true
+    # Nombre que se ve en el panel de administración.
+    display_name: "Sugerencias"
     department: CUSTOMER_SERVICE
     strategy: collect_then_route
     description: "Sugerencias y comentarios"
@@ -431,8 +470,13 @@ workflows:
       - comprometer que la sugerencia se implementará
     verify_against_knowledge: []
 
+    describe_fields:
+      - suggestion
+
   GENERAL_INFORMATION:
     enabled: true
+    # Nombre que se ve en el panel de administración.
+    display_name: "Preguntas generales"
     department: CUSTOMER_SERVICE
     strategy: answer_then_optional_route
     description: "Preguntas informativas respondibles con la documentación autorizada"
@@ -465,3 +509,5 @@ workflows:
     cannot_do: []
 
     verify_against_knowledge: []
+
+    describe_fields: []

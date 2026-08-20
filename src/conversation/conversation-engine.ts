@@ -26,6 +26,7 @@ import type { TenantConfig } from '../tenants/config-schema';
 import type { ContactRow, ConversationRow, Sentiment } from '../types/domain';
 import {
   evaluateFields,
+  fillDescriptiveFields,
   mergeFields,
   nextFocus,
   resolveFieldKey,
@@ -162,7 +163,7 @@ export async function processTurn(input: EngineInput): Promise<EngineResult> {
   applyConversationSignals(conversation.id, ai);
 
   // ── 4. Casos: crear / actualizar ───────────────────────────────────────────
-  const touched = materializeCases(config, contact, conversation, ai, channel);
+  const touched = materializeCases(config, contact, conversation, ai, channel, historyUserMessages(conversation.id, input.newMessages));
   snapshot = snapshotConversation(config, conversation.id, channel);
   for (const v of snapshot.views) debug.missingEssential[v.workflowKey] = v.status.missingEssential;
 
@@ -398,6 +399,15 @@ function buildHistory(
   return history;
 }
 
+/** Mensajes que escribió la persona, del más viejo al más nuevo. */
+function historyUserMessages(conversationId: number, newMessages: string[]): string[] {
+  const previous = recentMessages(conversationId, MAX_HISTORY)
+    .filter((m) => m.direction === 'INBOUND' && (m.body ?? '').trim() !== '')
+    .map((m) => m.body as string);
+  const extra = newMessages.filter((m) => !previous.includes(m));
+  return [...previous, ...extra];
+}
+
 function applyConversationSignals(conversationId: number, ai: AiTurnOutput): void {
   updateConversationState(conversationId, {
     sentiment: ai.customer_sentiment as Sentiment,
@@ -415,6 +425,7 @@ function materializeCases(
   conversation: ConversationRow,
   ai: AiTurnOutput,
   channel: ChannelContext,
+  userMessages: string[],
 ): CaseWithData[] {
   const touched = new Map<number, CaseWithData>();
   const MIN_CONFIDENCE = 0.35;
@@ -475,9 +486,11 @@ function materializeCases(
     target.fields = merged;
     upsertCaseFields(target.row.id, Object.fromEntries(changed.map((k) => [k, merged[k]])), 'LLM');
 
-    // Si el caso ya estaba canalizado y llega información nueva, vuelve a estar
-    // vivo: el área interna debe recibir la versión completa, no la parcial.
-    if (target.row.status === 'ROUTED') {
+    // Si el caso ya estaba canalizado y llega información ESENCIAL nueva, vuelve
+    // a estar vivo para que el área reciba la versión completa. Con datos
+    // secundarios no se reabre: volver a avisar en cada turno convierte el canal
+    // interno en spam y el responsable deja de leerlo.
+    if (target.row.status === 'ROUTED' && changed.some((k) => wf.fields.essential.includes(k))) {
       setCaseStatus(target.row.id, 'OPEN');
       target.row.status = 'OPEN';
     }
@@ -488,6 +501,14 @@ function materializeCases(
   for (const c of touched.values()) {
     const wf = config.workflows.workflows[c.row.workflow_key];
     if (!wf) continue;
+
+    // Lo que la persona ya describió con sus palabras, si el modelo lo omitió.
+    const described = fillDescriptiveFields(wf, c.fields, userMessages);
+    if (Object.keys(described).length > 0) {
+      upsertCaseFields(c.row.id, described, 'USER');
+      c.fields = { ...c.fields, ...described };
+    }
+
     const status = evaluateFields(wf, c.fields, channel);
     const fromChannel: Record<string, string> = {};
     for (const [k, v] of Object.entries(status.known)) {

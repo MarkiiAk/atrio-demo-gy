@@ -44,7 +44,7 @@ export type CaseStatus = 'OPEN' | 'READY' | 'ROUTED' | 'ROUTING_FAILED' | 'CLOSE
 
 export type JobStatus = 'PENDING' | 'PROCESSING' | 'COMPLETED' | 'FAILED';
 
-export type RoutingAdapterType = 'LOG' | 'EMAIL' | 'WEBHOOK' | 'CRM' | 'HUMAN_INBOX';
+export type RoutingAdapterType = 'LOG' | 'EMAIL' | 'WHATSAPP' | 'WEBHOOK' | 'CRM' | 'HUMAN_INBOX';
 export type RoutingOutcome = 'SUCCESS' | 'FAILED' | 'SKIPPED';
 
 // ── Filas persistidas ────────────────────────────────────────────────────────

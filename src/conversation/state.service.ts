@@ -4,6 +4,7 @@ import { activeCases, lastRoutingOutcome, type CaseWithData } from '../repositor
 import type { ChannelContext } from '../workflows/field-engine';
 import { evaluateFields } from '../workflows/field-engine';
 import { verifyCaseFields } from '../knowledge/knowledge-verifier';
+import { folioFor } from '../panel/labels';
 
 export interface ConversationSnapshot {
   cases: CaseWithData[];
@@ -42,6 +43,7 @@ export function snapshotConversation(
 
     views.push({
       caseId: c.row.id,
+      folio: folioFor(c.row.workflow_key, c.row.id),
       workflowKey: c.row.workflow_key,
       departmentKey: c.row.department_key,
       status,

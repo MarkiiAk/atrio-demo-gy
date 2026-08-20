@@ -7,13 +7,16 @@ import { setCaseStatus } from '../repositories/case.repository';
 import { recentMessages } from '../repositories/conversation.repository';
 import type { RoutingAdapterType } from '../types/domain';
 import { departmentName, fieldLabel, getWorkflow } from '../workflows/workflow-engine';
+import { folioFor } from '../panel/labels';
 import { logAdapter } from './adapters/log.adapter';
 import { emailAdapter } from './adapters/email.adapter';
+import { whatsappAdapter } from './adapters/whatsapp.adapter';
 import type { AdapterResult, CaseBrief, RoutingAdapter } from './types';
 
 const ADAPTERS: Partial<Record<RoutingAdapterType, RoutingAdapter>> = {
   LOG: logAdapter,
   EMAIL: emailAdapter,
+  WHATSAPP: whatsappAdapter,
 };
 
 export interface RoutingDecision {
@@ -193,6 +196,7 @@ function buildBrief(
     tenantId: config.tenantId,
     tenantName: config.company.company.name,
     caseId: caseData.row.id,
+    folio: folioFor(caseData.row.workflow_key, caseData.row.id),
     conversationId: caseData.row.conversation_id,
     workflowKey: caseData.row.workflow_key,
     departmentKey: caseData.row.department_key,

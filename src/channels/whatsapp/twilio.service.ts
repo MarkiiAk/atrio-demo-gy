@@ -31,6 +31,82 @@ export interface SendResult {
   status: string;
 }
 
+/** Estados de Twilio que todavía no dicen nada sobre la entrega. */
+const PENDING_STATUSES = new Set(['queued', 'accepted', 'scheduled', 'sending']);
+/** Estados que confirman que el mensaje salió de Twilio hacia WhatsApp. */
+const DELIVERED_STATUSES = new Set(['sent', 'delivered', 'read']);
+
+export interface ConfirmedSend extends SendResult {
+  /** `true` sólo si Twilio confirmó que el mensaje salió. */
+  delivered: boolean;
+  errorCode: number | null;
+  errorMessage: string | null;
+}
+
+/**
+ * Espera a que Twilio resuelva el estado de un mensaje.
+ *
+ * `messages.create()` devuelve `queued`: eso significa "lo acepté", NO "llegó".
+ * Tratar el SID como entrega hizo que el asistente le confirmara a un cliente
+ * que su caso ya estaba con el área cuando en realidad el aviso terminó
+ * `undelivered` (error 63016, ventana de 24 h cerrada). Antes de autorizar esa
+ * confirmación hay que preguntarle a Twilio cómo acabó.
+ */
+export async function confirmDelivery(
+  sid: string,
+  timeoutMs = 8000,
+  intervalMs = 900,
+): Promise<ConfirmedSend> {
+  const deadline = Date.now() + timeoutMs;
+  let last: { status: string; errorCode: number | null; errorMessage: string | null } = {
+    status: 'queued',
+    errorCode: null,
+    errorMessage: null,
+  };
+
+  while (Date.now() < deadline) {
+    try {
+      const m = await getClient().messages(sid).fetch();
+      last = {
+        status: m.status ?? 'unknown',
+        errorCode: m.errorCode ?? null,
+        errorMessage: m.errorMessage ?? null,
+      };
+      if (!PENDING_STATUSES.has(last.status)) break;
+    } catch (e) {
+      log.warn('No se pudo consultar el estado del mensaje', { sid, error: e });
+      break;
+    }
+    await new Promise((r) => setTimeout(r, intervalMs));
+  }
+
+  return {
+    sid,
+    status: last.status,
+    // Un estado que sigue pendiente NO cuenta como entregado: ante la duda,
+    // el asistente no promete nada.
+    delivered: DELIVERED_STATUSES.has(last.status),
+    errorCode: last.errorCode,
+    errorMessage: last.errorMessage,
+  };
+}
+
+/** Explicación legible de los errores de WhatsApp que más se dan. */
+export function explainTwilioError(code: number | null): string {
+  switch (code) {
+    case 63016:
+      return 'fuera de la ventana de 24 h de WhatsApp: ese número debe escribirle primero al asistente, o hace falta una plantilla aprobada';
+    case 63015:
+      return 'el número no tiene WhatsApp activo';
+    case 63003:
+      return 'destinatario no encontrado en WhatsApp';
+    case 21610:
+      return 'el destinatario se dio de baja de estos mensajes';
+    default:
+      return code ? `error ${code} de Twilio` : 'sin detalle del proveedor';
+  }
+}
+
 /** WhatsApp corta los mensajes largos; partimos por límite seguro en frontera de palabra. */
 export function splitForWhatsApp(text: string, limit = 1500): string[] {
   const clean = text.trim();

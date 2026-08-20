@@ -7,6 +7,12 @@ import { departmentName, enabledWorkflows, fieldLabel, toneFor } from '../workfl
 
 export interface ActiveCaseView {
   caseId: number;
+  /**
+   * Folio que se le puede dar a la persona. Un número de seguimiento es lo que
+   * convierte un "ya quedó registrado" en algo verificable, y es lo primero que
+   * daría cualquier recepción competente.
+   */
+  folio: string;
   workflowKey: string;
   departmentKey: string | null;
   status: FieldStatus;
@@ -220,6 +226,12 @@ export function buildSystemPrompt(ctx: PromptContext): string {
       ...wfLines,
       '',
       'Un mismo mensaje puede contener VARIOS motivos a la vez. Detéctalos todos; no obligues a la persona a elegir uno ni a empezar otra conversación.',
+      '',
+      'PERO un solo hecho es UN solo asunto. Que alguien reclame molesto por un pedido',
+      'retrasado no son dos cosas ("seguimiento de pedido" + "queja"): es un pedido',
+      'retrasado, y el enojo es el tono, no un asunto aparte. Abre un segundo asunto sólo',
+      'cuando haya de verdad dos temas distintos que requieran a dos áreas distintas',
+      '(por ejemplo: una factura que no llegó Y un producto que llegó dañado).',
       'Si el motivo no corresponde a ninguno de los anteriores, clasifícalo como GENERAL_INFORMATION o UNKNOWN y ayuda con lo que sí puedas.',
     ]),
   );
@@ -229,14 +241,40 @@ export function buildSystemPrompt(ctx: PromptContext): string {
 
   // ── Recolección de datos ───────────────────────────────────────────────────
   parts.push(
+    section('Protocolo de atención', [
+      'Actúa como alguien que se hace cargo del asunto, no como alguien que llena un formulario.',
+      '',
+      '1. RECONOCE PRIMERO. Si la persona trae un problema, una molestia o una urgencia,',
+      '   lo primero es reconocerlo y ofrecer una disculpa a nombre de la empresa cuando',
+      '   corresponda. Antes de pedir un solo dato.',
+      '',
+      '2. DI QUÉ VAS A HACER. Una frase: que vas a recabar la información y dejarla con el',
+      '   área correspondiente para que le den seguimiento.',
+      '',
+      '3. EXTRAE LO QUE YA TE DIJO. Antes de pedir nada, relee el mensaje. Si dijo "mi pedido',
+      '   lleva 3 días de retraso", el motivo del asunto YA lo tienes: es "retraso de 3 días',
+      '   en el pedido". Regístralo tú, no se lo vuelvas a preguntar. Volver a pedir algo que',
+      '   la persona acaba de decir es el error más irritante que puedes cometer.',
+      '',
+      '4. PIDE LO QUE FALTE EN UNA SOLA LISTA. Si faltan dos o más datos, ponlos como lista',
+      '   corta, uno por renglón, para que la persona los pueda contestar de un jalón.',
+      '   Pide SÓLO los datos que aparecen listados en el estado de abajo: no inventes',
+      '   campos que no estén ahí.',
+      '',
+      '5. CIERRA CON UN SIGUIENTE PASO CONCRETO. Cuando el asunto quede listo: da el folio,',
+      '   di qué va a pasar, y dile qué puede hacer si no recibe respuesta. Luego pregunta si',
+      '   necesita algo más y despídete con cortesía. No sigas pidiendo datos opcionales.',
+    ]),
+
     section('Cómo recabar información', [
       'Conversa, no interrogues.',
       `Trata como máximo ${p.max_questions_per_reply} tema(s) por respuesta, pero dentro de un mismo tema puedes pedir varios datos juntos: "para la cotización necesito la cantidad y la ciudad de entrega" es UNA pregunta, no dos.`,
-      'Pide todo lo marcado como FALTA (esencial) de una vez. Lo "útil" agrégalo a esa misma petición sólo si es poco y viene al caso. Lo opcional NO lo pidas.',
       'El nombre de la persona pídelo pronto, no al final: es lo primero que preguntaría alguien en una recepción.',
       'Nunca vuelvas a pedir un dato que ya aparece como conocido, ni uno que el canal ya aporta.',
       'Si la persona dice que ya son clientes o que ya tienes sus datos, acéptalo y no lo discutas: no afirmes haber consultado ningún historial, simplemente no vuelvas a pedir lo que ya tienes.',
+      'Si te reclama que ya te dio un dato, asume que tiene razón: búscalo en la conversación, regístralo y sigue adelante. No se lo vuelvas a pedir ni te justifiques.',
       'Cuando el estado indique que un asunto ya tiene lo necesario, deja de preguntar sobre ese asunto.',
+      'Habla en español de México, natural y llano. Nada de "me queda su número", "quedo atento a su amable respuesta" ni construcciones raras.',
       ...(ctx.ambiguityCount >= 2
         ? [
             `La conversación lleva ${ctx.ambiguityCount} turnos ambiguos. Deja de pedir aclaraciones abiertas: ofrece dos o tres opciones concretas, o recaba lo mínimo para que alguien del equipo lo retome.`,
@@ -357,10 +395,12 @@ function buildStateLines(ctx: PromptContext): string[] {
     if (c.routed && c.justRouted && c.confirmationSemantics === 'DELIVERED_TO_TEAM') {
       lines.push(
         'AUTORIZADO (sólo en esta respuesta): confirma UNA vez que el asunto ya quedó con el equipo correspondiente.',
+        `Dale el folio ${c.folio} para que pueda dar seguimiento, y dile qué pasa después.`,
       );
     } else if (c.routed && c.justRouted && c.confirmationSemantics === 'REGISTERED_ONLY') {
       lines.push(
         'AUTORIZADO (sólo en esta respuesta): confirma UNA vez que el asunto quedó registrado para seguimiento. NO afirmes que ya lo recibió una persona ni un área.',
+        `Dale el folio ${c.folio} para que pueda dar seguimiento, y dile qué pasa después.`,
       );
     } else if (c.routed) {
       lines.push(

@@ -7,6 +7,7 @@ import {
   allFields,
   channelSatisfiedFields,
   evaluateFields,
+  fillDescriptiveFields,
   isMeaningful,
   mergeFields,
   nextFocus,
@@ -131,6 +132,54 @@ describe('evaluación de campos esenciales', () => {
     expect(resolveFieldKey(wf, 'color_favorito')).toBeNull();
     expect(resolveFieldKey(wf, '')).toBeNull();
     expect(resolveFieldKey(wf, '   ')).toBeNull();
+  });
+
+  it('rellena el motivo con las palabras de la persona si el modelo lo omitió', () => {
+    // El fallo real: el cliente abrió con "mi pedido lleva 3 días de retraso" y el
+    // asistente le pidió el motivo de la queja tres veces seguidas.
+    writeTenant('describe', {
+      workflows: `workflows:
+  COMPLAINT:
+    enabled: true
+    department: CUSTOMER_SERVICE
+    strategy: collect_then_route
+    intents: [COMPLAINT]
+    fields:
+      essential: [complaint_description]
+      useful: []
+      optional: []
+    field_labels:
+      complaint_description: "motivo de la queja"
+    routing:
+      require_all_essential: true
+      satisfied_by_channel: []
+    cannot_do: []
+    verify_against_knowledge: []
+    describe_fields:
+      - complaint_description
+`,
+    });
+    clearTenantCache();
+    const cfg = requireTenantConfig('describe');
+    const cwf = cfg.workflows.workflows.COMPLAINT;
+
+    const filled = fillDescriptiveFields(cwf, {}, [
+      'Mi pedido ya tiene 3 dias de retraso ya casi esta o seguiran con sus retrasos?',
+    ]);
+    expect(filled.complaint_description).toContain('3 dias de retraso');
+
+    // Si el modelo SÍ lo extrajo, no se sobrescribe.
+    const yaEstaba = fillDescriptiveFields(cwf, { complaint_description: 'retraso de 3 días' }, [
+      'otro texto cualquiera que es más largo que el mínimo',
+    ]);
+    expect(yaEstaba).toEqual({});
+
+    // Un saludo corto no sirve como descripción del problema.
+    expect(fillDescriptiveFields(cwf, {}, ['Hola'])).toEqual({});
+  });
+
+  it('no rellena campos que el workflow no marcó como descriptivos', () => {
+    expect(fillDescriptiveFields(wf, {}, ['Necesito 800 litros de tolueno urgente'])).toEqual({});
   });
 
   it('allFields cubre los tres niveles', () => {

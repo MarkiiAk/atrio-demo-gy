@@ -388,32 +388,12 @@
           scroll();
         }
 
+        // Sin ejemplos sugeridos a propósito: unos botones con frases listas
+        // hacen pensar que las respuestas están precargadas y le quitan todo el
+        // valor a la demostración. Quien prueba debe escribir lo que se le ocurra.
         function renderIntro() {
           var box = el('div', 'intro');
-          var p = el('p', null,
-            'Escríbele como le escribirías por WhatsApp a la recepción de la empresa. ' +
-            'Entiende varias cosas a la vez y no inventa información.');
-          box.appendChild(p);
-
-          var chips = el('div', 'chips');
-          [
-            '¿Qué productos manejan?',
-            '¿En qué presentaciones venden el alcohol isopropílico?',
-            'Necesito cotizar 800 litros de tolueno para Querétaro',
-            'No me llegó mi factura y además me llegaron 3 tambos golpeados',
-            'Somos fabricantes de tambores y queremos ofrecerles nuestros productos'
-          ].forEach(function (t) {
-            var b = el('button', 'chip', t);
-            b.type = 'button';
-            b.addEventListener('click', function () {
-              input.value = t;
-              autosize();
-              form.requestSubmit();
-            });
-            chips.appendChild(b);
-          });
-
-          box.appendChild(chips);
+          box.appendChild(el('p', null, 'Escriba su mensaje como lo haría por WhatsApp.'));
           log.appendChild(box);
           scroll();
         }

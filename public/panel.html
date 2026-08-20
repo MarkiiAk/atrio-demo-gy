@@ -4,195 +4,199 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="robots" content="noindex, nofollow" />
-    <title>Panel — ATRIO</title>
+    <title>Panel</title>
     <style>
       :root {
-        --bg: #f5f6f8;
+        --bg: #f4f6f8;
         --panel: #ffffff;
-        --ink: #16181d;
-        --ink-soft: #626a79;
-        --ink-faint: #8b93a1;
-        --line: #e4e7ec;
+        --ink: #1a1d23;
+        --ink-soft: #5d6675;
+        --ink-faint: #8a929f;
+        --line: #e3e7ec;
         --accent: #0f5c4d;
-        --accent-soft: #e7f2ef;
-        --warn: #9a5b00;
-        --warn-soft: #fdf3e2;
-        --danger: #a52f2f;
-        --danger-soft: #fbeeee;
-        --ok: #1d6b47;
-        --ok-soft: #e6f4ec;
-        --radius: 12px;
-        --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+        --accent-soft: #e8f3f0;
+        --ok: #1c6b47;
+        --ok-soft: #e7f4ed;
+        --warn: #8f5600;
+        --warn-soft: #fdf2e0;
+        --danger: #a32e2e;
+        --danger-soft: #fceded;
+        --radius: 14px;
         --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
       }
       @media (prefers-color-scheme: dark) {
         :root {
-          --bg: #0d0f12;
-          --panel: #16191e;
-          --ink: #eceff4;
-          --ink-soft: #9aa3b2;
-          --ink-faint: #6d7686;
-          --line: #252a32;
-          --accent: #4bbfa4;
-          --accent-soft: #14302a;
-          --warn: #e0a458;
-          --warn-soft: #2e2412;
-          --danger: #e08585;
-          --danger-soft: #2e1818;
-          --ok: #63c894;
-          --ok-soft: #142b1f;
+          --bg: #0e1013; --panel: #171a20; --ink: #edf0f5; --ink-soft: #9aa3b2;
+          --ink-faint: #6e7786; --line: #262b33;
+          --accent: #4bbfa4; --accent-soft: #14302b;
+          --ok: #62c893; --ok-soft: #142b20;
+          --warn: #e0a458; --warn-soft: #2f2513;
+          --danger: #e28686; --danger-soft: #2f1919;
         }
       }
       * { box-sizing: border-box; }
       body {
         margin: 0; background: var(--bg); color: var(--ink);
-        font-family: var(--sans); font-size: 14.5px; line-height: 1.55;
+        font-family: var(--sans); font-size: 15px; line-height: 1.6;
         -webkit-font-smoothing: antialiased;
       }
-      .wrap { max-width: 1180px; margin: 0 auto; padding: 22px 20px 60px; }
+      .wrap { max-width: 1080px; margin: 0 auto; padding: 24px 20px 64px; }
 
       header.top {
-        display: flex; align-items: center; gap: 13px; flex-wrap: wrap;
-        padding-bottom: 16px; border-bottom: 1px solid var(--line); margin-bottom: 20px;
+        display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+        padding-bottom: 18px; border-bottom: 1px solid var(--line); margin-bottom: 22px;
       }
-      .logo {
-        width: 38px; height: 38px; border-radius: 9px; flex: 0 0 auto;
+      .mark {
+        width: 42px; height: 42px; border-radius: 11px; flex: 0 0 auto;
         background: var(--accent); color: #fff; display: grid; place-items: center;
-        font-weight: 700; letter-spacing: .04em; font-size: 13px;
+        font-weight: 700; font-size: 15px;
       }
-      .titles { flex: 1; min-width: 180px; }
-      .titles h1 { margin: 0; font-size: 17px; font-weight: 650; }
-      .titles p { margin: 1px 0 0; font-size: 12.5px; color: var(--ink-soft); }
-      .badge {
-        font-size: 11.5px; padding: 3px 9px; border-radius: 999px;
-        background: var(--accent-soft); color: var(--accent); font-weight: 600;
+      .titles { flex: 1; min-width: 200px; }
+      .titles h1 { margin: 0; font-size: 19px; font-weight: 650; letter-spacing: -.01em; }
+      .titles p { margin: 2px 0 0; font-size: 13.5px; color: var(--ink-soft); }
+      .tag {
+        font-size: 12px; padding: 4px 11px; border-radius: 999px; font-weight: 600;
+        background: var(--warn-soft); color: var(--warn);
       }
-      .badge.demo { background: var(--warn-soft); color: var(--warn); }
 
-      nav.tabs { display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 18px; }
-      nav.tabs button {
+      nav { display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 20px; }
+      nav button {
         appearance: none; border: 1px solid transparent; background: transparent;
-        color: var(--ink-soft); font: inherit; font-size: 13.5px;
-        padding: 7px 14px; border-radius: 8px; cursor: pointer;
+        color: var(--ink-soft); font: inherit; font-size: 14px;
+        padding: 8px 15px; border-radius: 9px; cursor: pointer;
       }
-      nav.tabs button:hover { color: var(--ink); background: var(--panel); }
-      nav.tabs button[aria-selected="true"] {
+      nav button:hover { color: var(--ink); background: var(--panel); }
+      nav button[aria-selected="true"] {
         background: var(--panel); color: var(--ink); border-color: var(--line); font-weight: 600;
       }
 
-      .grid { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(168px, 1fr)); }
+      .cards { display: grid; gap: 13px; grid-template-columns: repeat(auto-fit, minmax(196px, 1fr)); }
       .card {
         background: var(--panel); border: 1px solid var(--line);
-        border-radius: var(--radius); padding: 15px 16px;
+        border-radius: var(--radius); padding: 17px 18px;
       }
-      .card .label { font-size: 12px; color: var(--ink-soft); margin-bottom: 5px; }
-      .card .value { font-size: 25px; font-weight: 650; letter-spacing: -.02em; line-height: 1.1; }
-      .card .sub { font-size: 12px; color: var(--ink-faint); margin-top: 4px; }
+      .card .k { font-size: 13px; color: var(--ink-soft); }
+      .card .v { font-size: 30px; font-weight: 650; letter-spacing: -.025em; line-height: 1.15; margin: 4px 0 2px; }
+      .card .s { font-size: 12.5px; color: var(--ink-faint); }
 
-      section.block { margin-top: 26px; }
-      section.block > h2 {
-        font-size: 13px; text-transform: uppercase; letter-spacing: .06em;
-        color: var(--ink-soft); margin: 0 0 10px; font-weight: 650;
-      }
+      section { margin-top: 30px; }
+      section > h2 { font-size: 16px; font-weight: 650; margin: 0 0 4px; }
+      section > p.lead { margin: 0 0 12px; font-size: 13.5px; color: var(--ink-soft); }
 
       .surface {
         background: var(--panel); border: 1px solid var(--line);
         border-radius: var(--radius); overflow: hidden;
       }
       .scroll { overflow-x: auto; }
-      table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
-      th, td { text-align: left; padding: 10px 14px; border-bottom: 1px solid var(--line); vertical-align: top; }
-      th { font-size: 11.5px; text-transform: uppercase; letter-spacing: .05em; color: var(--ink-soft); font-weight: 600; white-space: nowrap; }
+      table { width: 100%; border-collapse: collapse; font-size: 14px; }
+      th, td { text-align: left; padding: 12px 16px; border-bottom: 1px solid var(--line); vertical-align: top; }
+      th { font-size: 12.5px; color: var(--ink-soft); font-weight: 600; white-space: nowrap; }
       tr:last-child td { border-bottom: 0; }
-      tbody tr.clickable { cursor: pointer; }
-      tbody tr.clickable:hover { background: var(--accent-soft); }
+      tbody tr.click { cursor: pointer; }
+      tbody tr.click:hover { background: var(--accent-soft); }
+      td.num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+      th.num { text-align: right; }
 
-      .pill {
-        display: inline-block; font-size: 11.5px; font-weight: 600;
-        padding: 2px 8px; border-radius: 999px; white-space: nowrap;
+      .chip {
+        display: inline-block; font-size: 12.5px; font-weight: 600;
+        padding: 3px 10px; border-radius: 999px; white-space: nowrap;
       }
-      .pill.ok { background: var(--ok-soft); color: var(--ok); }
-      .pill.warn { background: var(--warn-soft); color: var(--warn); }
-      .pill.danger { background: var(--danger-soft); color: var(--danger); }
-      .pill.mute { background: var(--bg); color: var(--ink-soft); }
+      .chip.ok { background: var(--ok-soft); color: var(--ok); }
+      .chip.warn { background: var(--warn-soft); color: var(--warn); }
+      .chip.danger { background: var(--danger-soft); color: var(--danger); }
+      .chip.mute { background: var(--bg); color: var(--ink-soft); }
 
-      .kv { font-size: 12.5px; color: var(--ink-soft); }
-      .kv b { color: var(--ink); font-weight: 600; }
-      .mono { font-family: var(--mono); font-size: 12px; }
-      .muted { color: var(--ink-faint); }
-      .empty { padding: 34px 18px; text-align: center; color: var(--ink-faint); font-size: 13.5px; }
+      .sub { font-size: 13px; color: var(--ink-soft); margin-top: 3px; }
+      .faint { color: var(--ink-faint); }
+      .empty { padding: 40px 20px; text-align: center; color: var(--ink-faint); }
 
-      .freq {
-        display: inline-block; min-width: 30px; text-align: center;
-        font-family: var(--mono); font-size: 12px; font-weight: 700;
+      .alert {
+        display: flex; gap: 11px; align-items: flex-start;
+        border-radius: var(--radius); padding: 13px 16px; margin-bottom: 12px;
+        font-size: 14px;
+      }
+      .alert.warn { background: var(--warn-soft); color: var(--warn); }
+      .alert.danger { background: var(--danger-soft); color: var(--danger); }
+      .alert.ok { background: var(--ok-soft); color: var(--ok); }
+      .alert b { font-weight: 700; }
+
+      .times {
+        display: inline-block; min-width: 38px; text-align: center;
+        font-size: 13px; font-weight: 700; font-variant-numeric: tabular-nums;
         background: var(--warn-soft); color: var(--warn);
-        padding: 2px 7px; border-radius: 6px;
+        padding: 3px 9px; border-radius: 8px;
       }
+
+      .bar { height: 6px; background: var(--bg); border-radius: 3px; overflow: hidden; min-width: 90px; }
+      .bar i { display: block; height: 100%; background: var(--accent); }
 
       dialog {
         border: 1px solid var(--line); border-radius: var(--radius);
         background: var(--panel); color: var(--ink); padding: 0;
-        max-width: 640px; width: calc(100% - 32px); max-height: 82vh;
+        max-width: 620px; width: calc(100% - 32px); max-height: 84vh;
       }
-      dialog::backdrop { background: rgba(8, 10, 14, .55); }
-      .dlg-head {
-        display: flex; align-items: center; gap: 10px;
-        padding: 14px 18px; border-bottom: 1px solid var(--line); position: sticky; top: 0;
-        background: var(--panel);
+      dialog::backdrop { background: rgba(10, 12, 16, .55); }
+      .dh {
+        display: flex; align-items: center; gap: 10px; padding: 15px 19px;
+        border-bottom: 1px solid var(--line); position: sticky; top: 0; background: var(--panel);
       }
-      .dlg-head h3 { margin: 0; font-size: 15px; flex: 1; }
-      .dlg-body { padding: 16px 18px; overflow-y: auto; }
-      .x {
-        appearance: none; border: 0; background: transparent; color: var(--ink-soft);
-        font-size: 20px; line-height: 1; cursor: pointer; padding: 2px 6px;
-      }
+      .dh h3 { margin: 0; font-size: 16px; flex: 1; }
+      .db { padding: 18px 19px; overflow-y: auto; }
+      .x { appearance: none; border: 0; background: transparent; color: var(--ink-soft);
+           font-size: 22px; line-height: 1; cursor: pointer; padding: 0 4px; }
 
-      .msg { margin-bottom: 9px; display: flex; }
-      .msg.out { justify-content: flex-end; }
-      .msg span {
-        max-width: 82%; padding: 8px 12px; border-radius: 13px; white-space: pre-wrap;
-        background: var(--bg); border: 1px solid var(--line); font-size: 13.5px;
-      }
-      .msg.out span { background: var(--accent); color: #fff; border-color: transparent; }
+      .dl { margin: 0 0 16px; }
+      .dl div { display: flex; gap: 10px; padding: 5px 0; border-bottom: 1px solid var(--line); font-size: 14px; }
+      .dl div:last-child { border-bottom: 0; }
+      .dl dt { flex: 0 0 42%; color: var(--ink-soft); }
+      .dl dd { margin: 0; flex: 1; font-weight: 500; }
 
-      .note {
-        background: var(--warn-soft); color: var(--warn); border-radius: 8px;
-        padding: 10px 13px; font-size: 13px; margin-bottom: 14px;
+      .msg { margin-bottom: 10px; display: flex; flex-direction: column; }
+      .msg.out { align-items: flex-end; }
+      .msg .b {
+        max-width: 84%; padding: 9px 13px; border-radius: 14px; white-space: pre-wrap;
+        background: var(--bg); border: 1px solid var(--line); font-size: 14px;
       }
-      .bar { height: 5px; background: var(--line); border-radius: 3px; overflow: hidden; margin-top: 6px; }
-      .bar i { display: block; height: 100%; background: var(--accent); }
-      a.plain { color: var(--accent); }
+      .msg.out .b { background: var(--accent); color: #fff; border-color: transparent; }
+      .msg .t { font-size: 11.5px; color: var(--ink-faint); margin: 2px 4px 0; }
+
+      ul.plain { margin: 6px 0 0; padding-left: 20px; font-size: 14px; }
+      ul.plain li { margin-bottom: 3px; }
+      .grid2 { display: grid; gap: 13px; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
+      .box { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 16px 18px; }
+      .box h4 { margin: 0 0 6px; font-size: 14.5px; }
+      .box .who { font-size: 13px; color: var(--ink-soft); margin-bottom: 8px; }
     </style>
   </head>
 
   <body>
     <div class="wrap">
       <header class="top">
-        <div class="logo">AT</div>
+        <div class="mark" id="mark">··</div>
         <div class="titles">
           <h1 id="company">Cargando…</h1>
           <p id="assistant">&nbsp;</p>
         </div>
-        <span class="badge" id="mode"></span>
+        <span class="tag" id="tag" hidden>Demostración</span>
       </header>
 
-      <nav class="tabs" role="tablist">
-        <button role="tab" aria-selected="true" data-tab="resumen">Resumen</button>
-        <button role="tab" aria-selected="false" data-tab="casos">Solicitudes</button>
+      <nav role="tablist">
+        <button role="tab" aria-selected="true" data-tab="inicio">Inicio</button>
+        <button role="tab" aria-selected="false" data-tab="solicitudes">Solicitudes</button>
         <button role="tab" aria-selected="false" data-tab="conversaciones">Conversaciones</button>
-        <button role="tab" aria-selected="false" data-tab="gaps">Qué le falta saber</button>
-        <button role="tab" aria-selected="false" data-tab="config">Configuración</button>
+        <button role="tab" aria-selected="false" data-tab="pendientes">Por definir</button>
+        <button role="tab" aria-selected="false" data-tab="asistente">Qué sabe hacer</button>
       </nav>
 
       <main id="view"></main>
     </div>
 
     <dialog id="dlg">
-      <div class="dlg-head">
-        <h3 id="dlg-title">Conversación</h3>
-        <button class="x" id="dlg-close" aria-label="Cerrar">×</button>
+      <div class="dh">
+        <h3 id="dt">Detalle</h3>
+        <button class="x" id="dx" aria-label="Cerrar">×</button>
       </div>
-      <div class="dlg-body" id="dlg-body"></div>
+      <div class="db" id="dbody"></div>
     </dialog>
 
     <script>
@@ -200,16 +204,13 @@
         'use strict';
 
         var view = document.getElementById('view');
-        var params = new URLSearchParams(location.search);
-        var tenant = params.get('tenant') || '';
-        var current = 'resumen';
-        var cache = {};
+        var tenant = new URLSearchParams(location.search).get('tenant') || '';
 
         function api(p) {
           var url = '/api/panel' + p;
           if (tenant) url += (url.indexOf('?') < 0 ? '?' : '&') + 'tenant=' + encodeURIComponent(tenant);
           return fetch(url).then(function (r) {
-            if (!r.ok) throw new Error('HTTP ' + r.status);
+            if (!r.ok) throw new Error('no se pudo cargar la información');
             return r.json();
           });
         }
@@ -220,331 +221,360 @@
           if (text != null) n.textContent = text;
           return n;
         }
+        function chip(text, tone) { return el('span', 'chip ' + (tone || 'mute'), text); }
+        function plural(n, one, many) { return n + ' ' + (n === 1 ? one : many); }
 
-        function card(label, value, sub) {
-          var c = el('div', 'card');
-          c.appendChild(el('div', 'label', label));
-          c.appendChild(el('div', 'value', String(value)));
-          if (sub) c.appendChild(el('div', 'sub', sub));
-          return c;
-        }
-
-        function table(headers, rows, onRowClick) {
-          var wrapper = el('div', 'surface');
+        function table(headers, rows, onClick) {
+          var s = el('div', 'surface');
           if (!rows.length) {
-            wrapper.appendChild(el('div', 'empty', 'Todavía no hay nada aquí.'));
-            return wrapper;
+            s.appendChild(el('div', 'empty', 'Todavía no hay nada que mostrar aquí.'));
+            return s;
           }
-          var scroll = el('div', 'scroll');
+          var sc = el('div', 'scroll');
           var t = el('table');
-          var thead = el('thead');
           var tr = el('tr');
-          headers.forEach(function (h) { tr.appendChild(el('th', null, h)); });
-          thead.appendChild(tr);
-          t.appendChild(thead);
-
+          headers.forEach(function (h) {
+            var th = el('th', h && h.num ? 'num' : null, h && h.text != null ? h.text : h);
+            tr.appendChild(th);
+          });
+          var thead = el('thead'); thead.appendChild(tr); t.appendChild(thead);
           var tb = el('tbody');
           rows.forEach(function (cells, i) {
             var r = el('tr');
-            if (onRowClick) {
-              r.className = 'clickable';
-              r.addEventListener('click', function () { onRowClick(i); });
-            }
+            if (onClick) { r.className = 'click'; r.addEventListener('click', function () { onClick(i); }); }
             cells.forEach(function (c) {
               var td = el('td');
-              if (typeof c === 'string' || typeof c === 'number') td.textContent = String(c);
+              if (c && c.num !== undefined) { td.className = 'num'; td.textContent = String(c.num); }
+              else if (typeof c === 'string' || typeof c === 'number') td.textContent = String(c);
               else if (c) td.appendChild(c);
               r.appendChild(td);
             });
             tb.appendChild(r);
           });
-          t.appendChild(tb);
-          scroll.appendChild(t);
-          wrapper.appendChild(scroll);
-          return wrapper;
+          t.appendChild(tb); sc.appendChild(t); s.appendChild(sc);
+          return s;
         }
 
-        function pill(text, kind) {
-          return el('span', 'pill ' + (kind || 'mute'), text);
-        }
-
-        function section(title, node) {
-          var s = el('section', 'block');
+        function section(title, lead, node) {
+          var s = el('section');
           s.appendChild(el('h2', null, title));
+          if (lead) s.appendChild(el('p', 'lead', lead));
           s.appendChild(node);
           return s;
         }
 
-        function fecha(v) {
-          if (!v) return '—';
-          return String(v).replace('T', ' ').slice(0, 16);
+        function openDialog(title) {
+          document.getElementById('dt').textContent = title;
+          var b = document.getElementById('dbody');
+          b.textContent = '';
+          document.getElementById('dlg').showModal();
+          return b;
         }
 
-        // ── vistas ─────────────────────────────────────────────────────────
+        function defList(pairs) {
+          var dl = el('dl', 'dl');
+          pairs.forEach(function (p) {
+            if (p[1] == null || p[1] === '') return;
+            var row = el('div');
+            row.appendChild(el('dt', null, p[0]));
+            var dd = el('dd');
+            if (typeof p[1] === 'string' || typeof p[1] === 'number') dd.textContent = String(p[1]);
+            else dd.appendChild(p[1]);
+            row.appendChild(dd);
+            dl.appendChild(row);
+          });
+          return dl;
+        }
 
-        function renderResumen(d) {
+        // ── Inicio ─────────────────────────────────────────────────────────
+        function renderInicio(d) {
           view.textContent = '';
 
-          var g = el('div', 'grid');
-          g.appendChild(card('Conversaciones', d.totals.conversations, d.totals.contacts + ' personas'));
-          g.appendChild(card('Solicitudes', d.totals.cases, d.totals.casesRouted + ' canalizadas'));
-          g.appendChild(card('Mensajes', d.totals.messagesIn + d.totals.messagesOut,
-            d.totals.messagesIn + ' recibidos · ' + d.totals.messagesOut + ' enviados'));
-          g.appendChild(card('Preguntas sin respuesta', d.totals.gaps, 'para completar en onboarding'));
-          view.appendChild(g);
+          var a = d.attention;
+          if (a.pendingCases > 0) {
+            var w = el('div', 'alert warn');
+            w.innerHTML = '';
+            w.appendChild(el('b', null, plural(a.pendingCases, 'solicitud', 'solicitudes')));
+            w.appendChild(document.createTextNode(
+              ' ' + (a.pendingCases === 1 ? 'está' : 'están') + ' esperando que alguien les dé seguimiento.'));
+            view.appendChild(w);
+          }
+          if (a.unhappyConversations > 0) {
+            var dg = el('div', 'alert danger');
+            dg.appendChild(el('b', null, plural(a.unhappyConversations, 'persona', 'personas')));
+            dg.appendChild(document.createTextNode(
+              ' se ' + (a.unhappyConversations === 1 ? 'mostró' : 'mostraron') + ' molesta al escribir. Vale la pena revisar esas conversaciones.'));
+            view.appendChild(dg);
+          }
+          if (a.pendingCases === 0 && a.unhappyConversations === 0) {
+            var ok = el('div', 'alert ok');
+            ok.appendChild(el('b', null, 'Todo al día. '));
+            ok.appendChild(document.createTextNode('No hay solicitudes pendientes ni clientes molestos.'));
+            view.appendChild(ok);
+          }
 
-          var g2 = el('div', 'grid');
-          g2.appendChild(card('Documentos consultables', d.knowledge.websitePages + d.knowledge.publicDocs + d.knowledge.customerSafeDocs,
-            d.knowledge.websitePages + ' del sitio · ' + d.knowledge.customerSafeDocs + ' autorizados'));
-          g2.appendChild(card('Consultas a la IA', d.usage.openaiCalls, d.usage.avgLatencyMs + ' ms en promedio'));
-          g2.appendChild(card('Consumo', d.usage.totalTokens.toLocaleString('es-MX') + ' tk',
-            d.usage.tokensPerConversation.toLocaleString('es-MX') + ' por conversación'));
-          view.appendChild(section('Operación', g2));
+          var cards = el('div', 'cards');
+          d.headline.forEach(function (h) {
+            var c = el('div', 'card');
+            c.appendChild(el('div', 'k', h.label));
+            c.appendChild(el('div', 'v', h.value));
+            c.appendChild(el('div', 's', h.sub));
+            cards.appendChild(c);
+          });
+          view.appendChild(cards);
+
+          if (d.byType.length) {
+            var max = Math.max.apply(null, d.byType.map(function (x) { return x.total; }));
+            var rows = d.byType.map(function (x) {
+              var bar = el('div', 'bar');
+              var i = el('i'); i.style.width = Math.round((x.total / max) * 100) + '%';
+              bar.appendChild(i);
+              return [x.name, { num: x.total }, { num: x.ready }, { num: x.pending }, bar];
+            });
+            view.appendChild(section('¿Qué le piden a la empresa?',
+              'Cada renglón es un motivo por el que la gente escribe.',
+              table(['Motivo', { text: 'Total', num: true }, { text: 'Listas', num: true },
+                     { text: 'Pendientes', num: true }, ''], rows)));
+          }
 
           if (d.byDepartment.length) {
-            var max = Math.max.apply(null, d.byDepartment.map(function (x) { return x.cases; }));
-            var rows = d.byDepartment.map(function (x) {
-              var box = el('div');
-              var bar = el('div', 'bar');
-              var i = el('i');
-              i.style.width = Math.round((x.cases / max) * 100) + '%';
-              bar.appendChild(i);
-              box.appendChild(bar);
-              return [x.name, x.cases, x.routed, box];
+            var rows2 = d.byDepartment.map(function (x) {
+              return [x.name, { num: x.total }, { num: x.ready }, { num: x.pending }];
             });
-            view.appendChild(section('Solicitudes por área',
-              table(['Área', 'Total', 'Canalizadas', ''], rows)));
+            view.appendChild(section('¿A qué área le corresponde?', null,
+              table(['Área', { text: 'Total', num: true }, { text: 'Listas', num: true },
+                     { text: 'Pendientes', num: true }], rows2)));
           }
 
-          if (d.byWorkflow.length) {
-            var rows2 = d.byWorkflow.map(function (x) {
-              return [x.key, x.cases, x.routed];
-            });
-            view.appendChild(section('Por tipo de solicitud',
-              table(['Tipo', 'Total', 'Canalizadas'], rows2)));
-          }
+          var kbox = el('div', 'surface');
+          var kp = el('div'); kp.style.padding = '16px 18px';
+          kp.appendChild(el('div', null,
+            'El asistente responde con base en ' + plural(d.knowledge.sources, 'documento', 'documentos') +
+            ' de la empresa (' + d.knowledge.website + ' del sitio web' +
+            (d.knowledge.documents ? ' y ' + plural(d.knowledge.documents, 'documento interno', 'documentos internos') : '') + ').'));
+          kp.appendChild(el('div', 'sub', 'Última actualización: ' + d.knowledge.lastUpdate + '. Si algo no está aquí, el asistente no lo afirma.'));
+          kbox.appendChild(kp);
+          view.appendChild(section('De dónde saca la información', null, kbox));
         }
 
-        function renderCasos(d) {
+        // ── Solicitudes ────────────────────────────────────────────────────
+        function renderSolicitudes(d) {
           view.textContent = '';
           var cs = d.cases;
 
-          var nota = el('div', 'note');
-          nota.textContent = 'Cada renglón es una solicitud que el asistente recabó y dejó lista para el área correspondiente. Haz clic para ver el detalle.';
-          view.appendChild(nota);
+          view.appendChild(section('Solicitudes capturadas',
+            'Todo lo que el asistente recabó sin que nadie tuviera que contestar. Haga clic en un renglón para ver el detalle completo.',
+            table(
+              ['Folio', 'Motivo', 'Persona', 'Área', 'Estado', 'Recibida'],
+              cs.map(function (c) {
+                var m = el('div');
+                m.appendChild(el('div', null, c.type));
+                if (c.summary) m.appendChild(el('div', 'sub', c.summary));
 
-          var rows = cs.map(function (c) {
-            var estado = c.status === 'ROUTED' ? pill('Canalizada', 'ok')
-              : c.status === 'ROUTING_FAILED' ? pill('Falló el envío', 'danger')
-              : pill('En curso', 'warn');
-            var urg = c.urgency === 'HIGH' ? pill('Alta', 'danger') : el('span', 'muted', '—');
-            var resumen = el('div');
-            resumen.appendChild(el('div', null, c.workflowKey));
-            var campos = c.fields.slice(0, 3).map(function (f) { return f.label + ': ' + f.value; }).join(' · ');
-            if (campos) resumen.appendChild(el('div', 'kv', campos));
-            return ['#' + c.id, resumen, c.department, c.contactName || el('span', 'muted', 'sin nombre'), estado, urg, fecha(c.createdAt)];
-          });
+                var p = el('div');
+                p.appendChild(el('div', null, c.person.name || 'Sin nombre'));
+                p.appendChild(el('div', 'sub', c.person.phone || c.person.channel));
 
-          view.appendChild(table(
-            ['ID', 'Solicitud', 'Área', 'Contacto', 'Estado', 'Urgencia', 'Recibida'],
-            rows,
-            function (i) { showCase(cs[i]); }
-          ));
+                var st = el('div');
+                st.appendChild(chip(c.status.label, c.status.tone));
+                if (c.urgency) { st.appendChild(document.createTextNode(' ')); st.appendChild(chip(c.urgency.label, c.urgency.tone)); }
+
+                return [el('span', 'chip mute', c.folio), m, p, c.department, st, c.received];
+              }),
+              function (i) { showCase(cs[i]); }
+            )));
         }
 
         function showCase(c) {
-          document.getElementById('dlg-title').textContent = 'Solicitud #' + c.id + ' — ' + c.workflowKey;
-          var b = document.getElementById('dlg-body');
-          b.textContent = '';
+          var b = openDialog(c.folio + ' · ' + c.type);
 
-          var meta = el('div', 'kv');
-          meta.innerHTML = '';
-          [['Área', c.department], ['Estado', c.status], ['Urgencia', c.urgency],
-           ['Canal', c.channel], ['Contacto', c.contactName || 'sin nombre'],
-           ['Teléfono', c.contactPhone || '—'], ['Recibida', fecha(c.createdAt)],
-           ['Canalizada', fecha(c.routedAt)]].forEach(function (p) {
-            var line = el('div');
-            var k = el('b', null, p[0] + ': ');
-            line.appendChild(k);
-            line.appendChild(document.createTextNode(p[1]));
-            meta.appendChild(line);
-          });
-          b.appendChild(meta);
+          var st = el('div');
+          st.appendChild(chip(c.status.label, c.status.tone));
+          if (c.urgency) { st.appendChild(document.createTextNode(' ')); st.appendChild(chip(c.urgency.label, c.urgency.tone)); }
+          b.appendChild(st);
+          b.appendChild(el('p', 'sub', c.status.hint));
 
+          if (c.note) {
+            var n = el('div', 'alert warn');
+            n.textContent = c.note;
+            b.appendChild(n);
+          }
+
+          b.appendChild(el('h4', null, 'Lo que nos dijo'));
           if (c.fields.length) {
-            b.appendChild(el('h4', null, 'Información recabada'));
-            var ul = el('div', 'kv');
-            c.fields.forEach(function (f) {
-              var line = el('div');
-              line.appendChild(el('b', null, f.label + ': '));
-              line.appendChild(document.createTextNode(f.value));
-              ul.appendChild(line);
-            });
-            b.appendChild(ul);
+            b.appendChild(defList(c.fields.map(function (f) { return [f.label, f.value]; })));
+          } else {
+            b.appendChild(el('p', 'faint', 'Todavía no ha compartido datos concretos.'));
           }
 
-          if (c.intents.length) {
-            b.appendChild(el('h4', null, 'Motivos detectados'));
-            var box = el('div');
-            c.intents.forEach(function (i) {
-              box.appendChild(pill(i.intent + ' · ' + Math.round(i.confidence * 100) + '%', 'mute'));
-              box.appendChild(document.createTextNode(' '));
-            });
-            b.appendChild(box);
-          }
+          b.appendChild(el('h4', null, 'Datos de la solicitud'));
+          b.appendChild(defList([
+            ['Área que le corresponde', c.department],
+            ['Cómo nos escribió', c.person.channel],
+            ['Teléfono', c.person.phone],
+            ['Recibida', c.received],
+            ['Folio', c.folio],
+          ]));
 
-          if (c.routing) {
-            b.appendChild(el('h4', null, 'Canalización'));
-            b.appendChild(el('div', 'kv mono',
-              c.routing.adapter + ' · ' + c.routing.outcome + (c.routing.detail ? ' · ' + c.routing.detail : '')));
-          }
-
-          var verBtn = el('button', 'x');
-          document.getElementById('dlg').showModal();
+          var ver = el('button', 'chip mute', 'Ver la conversación completa');
+          ver.style.cursor = 'pointer';
+          ver.addEventListener('click', function () {
+            loadTranscript(c.conversationId, c.person.name || c.person.phone || 'contacto');
+          });
+          b.appendChild(ver);
         }
 
+        // ── Conversaciones ─────────────────────────────────────────────────
         function renderConversaciones(d) {
           view.textContent = '';
           var cs = d.conversations;
-          var rows = cs.map(function (c) {
-            var quien = el('div');
-            quien.appendChild(el('div', null, c.contactName || 'Sin nombre'));
-            if (c.contactPhone) quien.appendChild(el('div', 'kv mono', c.contactPhone));
-            var prev = el('div', 'kv');
-            prev.textContent = (c.preview || '').slice(0, 90);
-            var animo = c.lastSentiment && c.lastSentiment !== 'NEUTRAL'
-              ? pill(c.lastSentiment, c.lastSentiment === 'ANGRY' || c.lastSentiment === 'FRUSTRATED' ? 'danger' : 'mute')
-              : el('span', 'muted', '—');
-            return [quien, c.channel, prev, c.messageCount, c.caseCount, animo, fecha(c.lastMessageAt)];
-          });
-          view.appendChild(table(
-            ['Persona', 'Canal', 'Último mensaje', 'Msjs', 'Solicitudes', 'Ánimo', 'Actividad'],
-            rows,
-            function (i) { showTranscript(cs[i]); }
-          ));
+
+          view.appendChild(section('Conversaciones',
+            'Todo lo que le escribieron al asistente. Haga clic para leer la plática completa.',
+            table(
+              ['Persona', 'Último mensaje', 'Cómo escribió', { text: 'Mensajes', num: true }, { text: 'Solicitudes', num: true }, 'Ánimo', 'Actividad'],
+              cs.map(function (c) {
+                var p = el('div');
+                p.appendChild(el('div', null, c.person.name || 'Sin nombre'));
+                if (c.person.phone) p.appendChild(el('div', 'sub', c.person.phone));
+                var prev = el('div', 'sub');
+                prev.textContent = (c.preview || '').slice(0, 80);
+                return [p, prev, c.channel, { num: c.messages }, { num: c.requests },
+                        c.mood ? chip(c.mood.label, c.mood.tone) : el('span', 'faint', '—'),
+                        c.lastActivity];
+              }),
+              function (i) { loadTranscript(cs[i].id, cs[i].person.name || cs[i].person.phone || 'contacto'); }
+            )));
         }
 
-        function showTranscript(c) {
-          document.getElementById('dlg-title').textContent =
-            'Conversación con ' + (c.contactName || c.contactPhone || 'contacto');
-          var b = document.getElementById('dlg-body');
-          b.textContent = 'Cargando…';
-          document.getElementById('dlg').showModal();
-
-          api('/conversations/' + c.id + '/transcript').then(function (d) {
+        function loadTranscript(id, who) {
+          var b = openDialog('Conversación con ' + who);
+          b.appendChild(el('div', 'empty', 'Cargando…'));
+          api('/conversations/' + id + '/transcript').then(function (d) {
             b.textContent = '';
             if (!d.messages.length) { b.appendChild(el('div', 'empty', 'Sin mensajes.')); return; }
             d.messages.forEach(function (m) {
-              var row = el('div', 'msg' + (m.direction === 'OUTBOUND' ? ' out' : ''));
-              row.appendChild(el('span', null, m.body || '(sin texto)'));
+              var row = el('div', 'msg' + (m.from === 'asistente' ? ' out' : ''));
+              row.appendChild(el('div', 'b', m.text || '(sin texto)'));
+              row.appendChild(el('div', 't', (m.from === 'asistente' ? 'Asistente' : 'Cliente') + ' · ' + m.at));
               b.appendChild(row);
             });
-          }).catch(function () { b.textContent = 'No se pudo cargar.'; });
+          }).catch(function () { b.textContent = 'No se pudo cargar la conversación.'; });
         }
 
-        function renderGaps(d) {
-          view.textContent = '';
-          var nota = el('div', 'note');
-          nota.textContent = 'Esto es lo que le preguntaron al asistente y no pudo responder con información respaldada. Cada línea es algo que conviene aclarar o documentar.';
-          view.appendChild(nota);
-
-          var rows = d.gaps.map(function (g) {
-            return [
-              el('span', 'freq', g.frequency + 'x'),
-              g.topic,
-              g.missingInformation ? el('span', 'kv', g.missingInformation) : el('span', 'muted', '—'),
-              pill(g.gapType.replace(/_/g, ' ').toLowerCase(), 'mute'),
-              fecha(g.lastSeenAt),
-            ];
-          });
-          view.appendChild(table(['Veces', 'Tema', 'Qué falta', 'Tipo', 'Última vez'], rows));
-        }
-
-        function renderConfig(d) {
+        // ── Por definir ────────────────────────────────────────────────────
+        function renderPendientes(d) {
           view.textContent = '';
 
-          var p = el('div', 'surface');
-          var pb = el('div');
-          pb.style.padding = '15px 16px';
-          pb.appendChild(el('div', 'kv', 'Estilo: ' + d.personality.style.join(', ')));
-          pb.appendChild(el('div', 'kv', 'Trato: de ' + (d.personality.pronoun === 'usted' ? 'usted' : 'tú')));
-          pb.appendChild(el('div', 'kv', 'Máximo de temas por respuesta: ' + d.personality.maxQuestions));
-          if (d.personality.banned.length) {
-            pb.appendChild(el('div', 'kv', 'Frases prohibidas: ' + d.personality.banned.join(' · ')));
-          }
-          p.appendChild(pb);
-          view.appendChild(section('Personalidad', p));
+          var info = el('div', 'alert warn');
+          info.appendChild(el('b', null, '¿Para qué sirve esto? '));
+          info.appendChild(document.createTextNode(
+            'Aquí aparece lo que le preguntaron al asistente y no pudo responder, porque no está en la información que le dieron. ' +
+            'Mientras más veces se repita algo, más vale la pena resolverlo.'));
+          view.appendChild(info);
 
-          var rows = d.workflows.map(function (w) {
-            return [
-              w.key,
-              w.enabled ? pill('Activo', 'ok') : pill('Apagado', 'mute'),
-              w.department,
-              w.essential.join(', ') || el('span', 'muted', '—'),
-              w.verifiedFields.length ? pill('verifica ' + w.verifiedFields.join(', '), 'warn') : el('span', 'muted', '—'),
-              w.cannotDo.length ? el('span', 'kv', w.cannotDo.join(' · ')) : el('span', 'muted', '—'),
-            ];
-          });
-          view.appendChild(section('Qué sabe atender',
-            table(['Tipo', 'Estado', 'Área', 'Datos indispensables', 'Contra catálogo', 'No puede'], rows)));
-
-          var rrows = d.routing.map(function (r) {
-            return [r.name, r.type,
-              r.semantics === 'DELIVERED_TO_TEAM' ? pill('confirma entrega', 'ok') : pill('sólo registro', 'mute')];
-          });
-          view.appendChild(section('A dónde va cada solicitud',
-            table(['Área', 'Medio', 'Qué puede confirmar'], rrows)));
+          view.appendChild(table(
+            [{ text: 'Veces', num: true }, 'Qué le preguntaron', 'Qué conviene hacer', 'Motivo', 'Última vez'],
+            d.gaps.map(function (g) {
+              var cat = el('div');
+              cat.appendChild(el('div', null, g.category));
+              cat.appendChild(el('div', 'sub', g.categoryHint));
+              return [
+                el('span', 'times', g.times + '×'),
+                g.topic,
+                g.action ? el('span', 'sub', g.action) : el('span', 'faint', '—'),
+                cat,
+                g.lastSeen,
+              ];
+            })
+          ));
         }
 
-        // ── ruteo de pestañas ──────────────────────────────────────────────
+        // ── Qué sabe hacer ─────────────────────────────────────────────────
+        function renderAsistente(d) {
+          view.textContent = '';
 
-        var LOADERS = {
-          resumen: { path: '/summary', render: renderResumen },
-          casos: { path: '/cases', render: renderCasos },
+          var intro = el('div', 'surface');
+          var ib = el('div'); ib.style.padding = '16px 18px';
+          ib.appendChild(el('div', null, d.assistantName + ' atiende con un trato ' + d.treatment + '.'));
+          ib.appendChild(el('div', 'sub', 'Estilo: ' + d.tone + '.'));
+          intro.appendChild(ib);
+          view.appendChild(intro);
+
+          var g = el('div', 'grid2');
+          d.handles.forEach(function (h) {
+            var box = el('div', 'box');
+            box.appendChild(el('h4', null, h.name));
+            box.appendChild(el('div', 'who', 'Se turna a ' + h.department));
+            if (h.asksFor.length) {
+              box.appendChild(el('div', 'sub', 'Siempre pregunta:'));
+              var ul = el('ul', 'plain');
+              h.asksFor.forEach(function (a) { ul.appendChild(el('li', null, a)); });
+              box.appendChild(ul);
+            }
+            if (h.verifies.length) {
+              box.appendChild(el('div', 'sub', 'Verifica contra el catálogo: ' + h.verifies.join(', ')));
+            }
+            g.appendChild(box);
+          });
+          view.appendChild(section('Motivos que sabe atender',
+            'Si alguien escribe por algo que no está en esta lista, el asistente lo registra igual para que ustedes lo revisen.', g));
+
+          var nb = el('div', 'surface');
+          var nbb = el('div'); nbb.style.padding = '16px 18px';
+          var ul2 = el('ul', 'plain');
+          d.neverDoes.forEach(function (n) { ul2.appendChild(el('li', null, n)); });
+          nbb.appendChild(ul2);
+          nb.appendChild(nbb);
+          view.appendChild(section('Lo que nunca hace',
+            'Estas reglas las aplica el sistema, no dependen de la buena voluntad del asistente.', nb));
+
+          var rb = d.routing.map(function (r) { return [r.department, r.behaviour]; });
+          view.appendChild(section('Qué pasa con cada solicitud', null,
+            table(['Área', 'Qué ocurre cuando está completa'], rb)));
+        }
+
+        // ── Navegación ─────────────────────────────────────────────────────
+        var TABS = {
+          inicio: { path: '/summary', render: renderInicio },
+          solicitudes: { path: '/cases', render: renderSolicitudes },
           conversaciones: { path: '/conversations', render: renderConversaciones },
-          gaps: { path: '/gaps', render: renderGaps },
-          config: { path: '/config', render: renderConfig },
+          pendientes: { path: '/gaps', render: renderPendientes },
+          asistente: { path: '/capabilities', render: renderAsistente },
         };
 
         function show(tab) {
-          current = tab;
-          Array.prototype.forEach.call(document.querySelectorAll('nav.tabs button'), function (b) {
+          Array.prototype.forEach.call(document.querySelectorAll('nav button'), function (b) {
             b.setAttribute('aria-selected', String(b.dataset.tab === tab));
           });
           view.textContent = '';
           view.appendChild(el('div', 'empty', 'Cargando…'));
-
-          var L = LOADERS[tab];
-          api(L.path).then(function (d) {
-            cache[tab] = d;
-            L.render(d);
-          }).catch(function (e) {
+          var T = TABS[tab];
+          api(T.path).then(T.render).catch(function (e) {
             view.textContent = '';
-            view.appendChild(el('div', 'empty', 'No se pudo cargar: ' + e.message));
+            view.appendChild(el('div', 'empty', e.message));
           });
         }
 
-        Array.prototype.forEach.call(document.querySelectorAll('nav.tabs button'), function (b) {
+        Array.prototype.forEach.call(document.querySelectorAll('nav button'), function (b) {
           b.addEventListener('click', function () { show(b.dataset.tab); });
         });
-
-        document.getElementById('dlg-close').addEventListener('click', function () {
+        document.getElementById('dx').addEventListener('click', function () {
           document.getElementById('dlg').close();
         });
 
         api('/summary').then(function (d) {
           document.getElementById('company').textContent = d.tenant.name;
-          document.getElementById('assistant').textContent =
-            d.tenant.assistantName + ' · panel de administración';
-          var m = document.getElementById('mode');
-          m.textContent = d.tenant.mode === 'demo' ? 'Demostración' : 'Producción';
-          if (d.tenant.mode === 'demo') m.className = 'badge demo';
+          document.getElementById('assistant').textContent = d.tenant.assistantName;
           document.title = 'Panel — ' + d.tenant.name;
-          cache.resumen = d;
-          renderResumen(d);
+          var words = String(d.tenant.name).split(/\s+/).filter(Boolean);
+          document.getElementById('mark').textContent =
+            (words[0] ? words[0][0] : '') + (words[1] ? words[1][0] : '');
+          if (d.tenant.isDemo) document.getElementById('tag').hidden = false;
+          renderInicio(d);
         }).catch(function (e) {
           document.getElementById('company').textContent = 'No se pudo cargar el panel';
-          view.appendChild(el('div', 'empty', String(e.message)));
+          view.appendChild(el('div', 'empty', e.message));
         });
       })();
     </script>

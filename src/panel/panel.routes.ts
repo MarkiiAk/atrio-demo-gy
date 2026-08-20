@@ -2,8 +2,8 @@ import { Router, type Request, type Response } from 'express';
 import { log } from '../lib/logger';
 import { listTenants, tenantExists } from '../tenants/tenant-loader';
 import {
+  panelCapabilities,
   panelCases,
-  panelConfig,
   panelConversations,
   panelGaps,
   panelSummary,
@@ -76,4 +76,4 @@ panelRouter.get(
   handle((t, req) => ({ gaps: panelGaps(t, intParam(req.query.limit, 60, 200)) })),
 );
 
-panelRouter.get('/config', handle((t) => panelConfig(t)));
+panelRouter.get('/capabilities', handle((t) => panelCapabilities(t)));
