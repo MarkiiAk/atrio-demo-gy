@@ -24,6 +24,12 @@ export interface CaseBrief {
   fields: Array<{ key: string; label: string; value: string }>;
   /** Lo que el asistente no pudo resolver y el área sí debe atender. */
   openQuestions: string[];
+  /**
+   * Avisos que el área debe leer ANTES de actuar: datos que no se pudieron
+   * confirmar contra el catálogo. Sin esta marca, una consulta por un producto
+   * inexistente parece un pedido en firme.
+   */
+  warnings: string[];
   transcriptExcerpt: string;
 }
 

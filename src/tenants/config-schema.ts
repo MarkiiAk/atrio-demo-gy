@@ -29,6 +29,11 @@ export const CompanySchema = z.object({
     id: Slug,
     name: z.string().min(1),
     website: z.string().optional().default(''),
+    /**
+     * URL del catálogo público. Cuando alguien pide algo que no manejamos, lo
+     * útil no es sólo decir que no: es apuntarle a dónde ver lo que sí hay.
+     */
+    catalog_url: z.string().optional().default(''),
     description: z.string().optional().default(''),
   }),
   assistant: z.object({

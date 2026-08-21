@@ -308,6 +308,9 @@ company:
   id: ${a.tenantId}
   name: ${q(a.companyName)}
   website: ${q(a.website)}
+  # URL del catálogo público. Si alguien pide algo que no se maneja, el asistente
+  # lo dice claro y remite aquí. Si se deja vacío, usa el sitio web.
+  catalog_url: ""
   # Una o dos frases sobre qué hace la empresa. El asistente las usa para presentarse.
   description: ${q(TODO_SENTINEL + ': describir a qué se dedica la empresa')}
 

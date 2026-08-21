@@ -335,11 +335,17 @@ export function buildCorrectionInstruction(result: GuardResult): string {
 export function safeFallbackFor(result: GuardResult, ctx: GuardContext): string {
   const unverified = result.violations.find((v) => v.kind === 'UNVERIFIED_CLAIM');
   if (unverified) {
+    // Deliberadamente NO se cita el término capturado.
+    //
+    // Ese término sale de reconocer una frase en español con expresiones
+    // regulares, y cuando falla el cliente acaba leyendo algo absurdo —pasó en
+    // producción: «Sobre "confirmado" prefiero no confirmarle nada»—. Para
+    // decidir si bloquear, un término aproximado sirve; para ponérselo delante a
+    // una persona, no. El detalle exacto queda en el log y en los gaps.
     return (
-      `Sobre "${unverified.match}" prefiero no confirmarle nada sin verificarlo, ` +
-      'para no darle información equivocada. Dejo su consulta anotada para que se lo ' +
-      'confirmen con precisión. Si gusta, dígame qué necesita y le ayudo con lo que sí ' +
-      'tenemos disponible.'
+      'Prefiero no confirmarle ese punto sin verificarlo, para no darle información ' +
+      'equivocada. Dejo su consulta anotada para que se la confirmen con precisión. ' +
+      'Si gusta, dígame qué necesita y reviso con qué le podemos ayudar.'
     );
   }
 

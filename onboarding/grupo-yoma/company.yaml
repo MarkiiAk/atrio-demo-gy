@@ -3,6 +3,9 @@ company:
   id: grupo-yoma
   name: "Grupo Yoma"
   website: "https://grupoyoma.com.mx"
+  # URL del catálogo público. Cuando alguien pide algo que no manejamos, el
+  # asistente lo dice claro y lo remite aquí.
+  catalog_url: "https://grupoyoma.com.mx/products.html"
   # Una o dos frases sobre qué hace la empresa. El asistente las usa para presentarse.
   description: "Distribuidor industrial de productos químicos. Atiende a empresas con suministro de insumos químicos en distintas presentaciones."
 

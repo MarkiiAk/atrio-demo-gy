@@ -184,10 +184,12 @@ describe('guardián: afirmar que se ofrece algo no documentado', () => {
   });
 
   it('el texto de respaldo encaja con lo que se bloqueó', () => {
-    // El fallo real: ante un producto sin confirmar caía un genérico ("ya tengo
-    // la información necesaria") que suena a que todo va bien justo cuando no.
+    // Ante un producto sin confirmar, el respaldo habla de verificar, no del
+    // genérico "ya tengo la información necesaria" que suena a que todo va bien.
+    // Y NO cita el término: viene de una heurística y puede salir absurdo.
     const porProducto = safeFallbackFor(inspectReply('Sí manejamos óxido nitroso.', ctx), ctx);
-    expect(porProducto).toContain('óxido nitroso');
+    expect(porProducto).toContain('verificarlo');
+    expect(porProducto).not.toContain('óxido nitroso');
     expect(porProducto).not.toContain('Ya tengo la información necesaria');
 
     // Una promesa de entrega indebida sí usa el texto del tenant.
@@ -271,18 +273,20 @@ describe('elegibilidad de canalización (determinista)', () => {
     expect(d.reason).toContain('informativa');
   });
 
-  it('BLOQUEA la canalización si un dato no está confirmado en la documentación', () => {
-    // El caso real: alguien pidió cotizar óxido nitroso, que Grupo Yoma no
-    // vende, y el sistema canalizó la solicitud a Ventas igualmente.
+  it('un dato sin confirmar se canaliza MARCADO, no como pedido en firme', () => {
+    // Perder la consulta en silencio también es malo: que alguien pida algo que
+    // no tenemos catalogado es información comercial. Se avisa al área, pero
+    // marcado, y el asistente sólo puede decir que quedó registrada.
     const c = makeCase('SALES_QUOTE', 'SALES', 'elig-unverified');
     const d = evaluateEligibility(config, c, {
       essentialComplete: true,
       escalationSignal: false,
       unverifiedFields: ['product'],
     });
-    expect(d.eligible).toBe(false);
-    expect(d.reason).toContain('sin confirmar');
-    expect(d.target).toBeNull();
+    expect(d.eligible).toBe(true);
+    expect(d.unverifiedFields).toEqual(['product']);
+    // Nunca "ya está con el área": no es un pedido confirmado.
+    expect(d.target?.confirmation_semantics).toBe('REGISTERED_ONLY');
   });
 
   it('canaliza normalmente cuando todo está confirmado', () => {
@@ -624,6 +628,57 @@ tones: {}
     });
     expect(incompleto).toContain('NO AUTORIZADO');
     expect(incompleto).toContain('no des folio');
+  });
+
+  it('ante un producto no catalogado, nombra el producto y remite al catálogo', () => {
+    const status = evaluateFields(wf, { product: 'thinner americano' }, { channel: 'whatsapp', phone: '+1' });
+    const text = prompt({
+      activeCases: [
+        {
+          caseId: 1,
+          folio: 'COT-0001',
+          workflowKey: 'SALES_QUOTE',
+          departmentKey: 'SALES',
+          status,
+          routed: false,
+          justRouted: false,
+          registered: true,
+          confirmationSemantics: null,
+          unverified: [
+            {
+              field: 'product',
+              value: 'thinner americano',
+              reason: 'no aparece en la documentación de la empresa',
+            },
+          ],
+        },
+      ],
+    });
+
+    // Debe decirlo claro, con el nombre, y apuntar a dónde ver lo que sí hay.
+    expect(text).toContain('no manejamos "thinner americano"');
+    expect(text).toContain('https://ejemplo.test');
+    // Y no seguir recabando datos de algo que no se vende.
+    expect(text).toContain('NO pidas más datos de esta solicitud');
+  });
+
+  it('el texto de respaldo nunca cita el término capturado por el guardián', () => {
+    // Pasó en producción: «Sobre "confirmado" prefiero no confirmarle nada».
+    // El término sale de una heurística sobre lenguaje natural; sirve para
+    // decidir si bloquear, no para ponérselo delante a una persona.
+    const ctx = {
+      config,
+      deliveryAuthorized: false,
+      confirmationSemantics: null,
+      verify: () => 'NOT_FOUND' as const,
+    };
+    const r = inspectReply('Sí manejamos hidróxido de sodio.', ctx);
+    expect(r.violations.some((v) => v.kind === 'UNVERIFIED_CLAIM')).toBe(true);
+
+    const texto = safeFallbackFor(r, ctx);
+    expect(texto).not.toContain('"');
+    expect(texto).not.toContain('hidróxido');
+    expect(texto).toContain('verificarlo');
   });
 
   it('prohíbe explícitamente las frases que exponen las tripas', () => {

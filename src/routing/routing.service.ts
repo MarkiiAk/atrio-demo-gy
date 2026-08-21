@@ -24,6 +24,12 @@ export interface RoutingDecision {
   eligible: boolean;
   reason: string;
   target: RoutingTarget | null;
+  /**
+   * Campos que se canalizan SIN confirmar contra la documentación. El área debe
+   * verlos marcados: es una consulta por algo que quizá no está en catálogo, no
+   * un pedido en firme.
+   */
+  unverifiedFields?: string[];
 }
 
 export interface EligibilityInput {
@@ -90,19 +96,6 @@ export function evaluateEligibility(
     return { eligible: false, reason: 'faltan campos esenciales', target: null };
   }
 
-  // Un dato que no se pudo confirmar contra la documentación BLOQUEA la
-  // canalización. Avisarle al modelo no basta: puede ignorarlo y seguir
-  // recabando, y entonces el área interna recibe una solicitud de algo que la
-  // empresa no ofrece. Primero se aclara con la persona; después se canaliza.
-  const unverified = input.unverifiedFields ?? [];
-  if (unverified.length > 0) {
-    return {
-      eligible: false,
-      reason: `sin confirmar contra la documentación: ${unverified.join(', ')}`,
-      target: null,
-    };
-  }
-
   const deptKey = wf.config.department;
   if (!config.departments.departments[deptKey]) {
     return { eligible: false, reason: `departamento ${deptKey} inexistente`, target: null };
@@ -111,6 +104,24 @@ export function evaluateEligibility(
   const target = config.routing.routing[deptKey] ?? config.routing.fallback ?? null;
   if (!target) {
     return { eligible: false, reason: `sin destino de canalización para ${deptKey}`, target: null };
+  }
+
+  // Un dato sin confirmar NO se canaliza como una solicitud normal: el área
+  // recibiría una cotización de algo que la empresa quizá no ofrece.
+  //
+  // Pero tampoco se descarta. Que alguien pida un producto que no tenemos
+  // catalogado es información comercial valiosa —una oportunidad o un hueco en
+  // el catálogo— y perderla en silencio es peor que avisarla. Se canaliza
+  // MARCADA como no confirmada, y el asistente sólo puede decir que quedó
+  // registrada, nunca que ya se la están cotizando.
+  const unverified = input.unverifiedFields ?? [];
+  if (unverified.length > 0) {
+    return {
+      eligible: true,
+      reason: `sin confirmar contra la documentación: ${unverified.join(', ')}`,
+      target: { ...target, confirmation_semantics: 'REGISTERED_ONLY' },
+      unverifiedFields: unverified,
+    };
   }
 
   return { eligible: true, reason: 'ok', target };
@@ -139,7 +150,7 @@ export async function routeCase(
 
   const target = decision.target;
   const adapter = ADAPTERS[target.type];
-  const brief = buildBrief(config, caseData, extras);
+  const brief = buildBrief(config, caseData, extras, decision.unverifiedFields ?? []);
 
   let result: AdapterResult;
   if (!adapter) {
@@ -202,6 +213,7 @@ function buildBrief(
   config: TenantConfig,
   caseData: CaseWithData,
   extras: { contactName: string | null; contactPhone: string | null; channel: string; openQuestions: string[] },
+  unverifiedFields: string[] = [],
 ): CaseBrief {
   const wf = config.workflows.workflows[caseData.row.workflow_key];
   const excerpt = recentMessages(caseData.row.conversation_id, 12)
@@ -231,6 +243,11 @@ function buildBrief(
       value,
     })),
     openQuestions: extras.openQuestions,
+    warnings: unverifiedFields.map((f) => {
+      const label = wf ? fieldLabel(wf, f) : f;
+      const value = caseData.fields[f] ?? '';
+      return `SIN CONFIRMAR en catálogo — ${label}: "${value}". Verificar antes de cotizar.`;
+    }),
     transcriptExcerpt: excerpt,
   };
 }

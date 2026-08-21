@@ -344,6 +344,12 @@ function sentimentGuidance(s: Sentiment): string {
 
 function buildStateLines(ctx: PromptContext): string[] {
   const lines: string[] = [];
+  const company = ctx.config.company.company;
+  // Enlace al catálogo público, si el tenant lo declaró. Decir "no lo tenemos"
+  // y además apuntar a dónde ver lo que sí hay es lo que haría una recepción útil.
+  const catalogLink = !isTodo(company.catalog_url) && company.catalog_url
+    ? company.catalog_url
+    : (!isTodo(company.website) && company.website ? company.website : '');
 
   lines.push(ctx.contactName ? `Persona: ${ctx.contactName}.` : 'Persona: nombre aún desconocido.');
   if (ctx.channelKnownFacts.length > 0) {
@@ -400,14 +406,17 @@ function buildStateLines(ctx: PromptContext): string[] {
       lines.push(
         `⚠ NO CONFIRMADO: "${u.value}" (${fieldLabel(wf, u.field)}) ${u.reason}.`,
         '  ESTO ES LO PRIMERO que debes atender en tu respuesta, antes que cualquier otra cosa.',
-        '  NO pidas más datos sobre esta solicitud. NO preguntes cantidad, ciudad, presentación ni contacto:',
-        '  recabar información de algo que quizá no ofrecemos hace perder el tiempo a la persona.',
-        '  La solicitud está BLOQUEADA y no se canalizará mientras esto no se aclare.',
         '',
-        '  Di con naturalidad que no lo tienes confirmado dentro de lo que manejamos, menciona lo que SÍ',
-        '  manejamos que se le parezca si aplica, y ofrece dejar la consulta para que se lo confirmen.',
-        '  Si la persona dijo haberlo visto en nuestro sitio, no la corrijas con dureza: pudo confundirse',
-        '  con un producto de nombre parecido.',
+        `  Dilo claro y sin rodeos, nombrando el producto: que no manejamos "${u.value}" en nuestro catálogo.`,
+        catalogLink
+          ? `  Invítale a revisar el catálogo completo: ${catalogLink}`
+          : '  Menciona lo que SÍ manejamos que se le parezca, si aplica.',
+        '  Deja la consulta anotada para que se la confirmen, por si el producto existe con otro nombre.',
+        '',
+        '  NO pidas más datos de esta solicitud (cantidad, ciudad, presentación): recabar información de',
+        '  algo que no ofrecemos hace perder el tiempo a la persona.',
+        '  Si dijo haberlo visto en nuestro sitio, no la corrijas con dureza: pudo confundirse con un',
+        '  producto de nombre parecido.',
       );
     }
 
