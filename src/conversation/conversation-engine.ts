@@ -262,7 +262,11 @@ export async function processTurn(input: EngineInput): Promise<EngineResult> {
   // La respuesta se generó cuando el caso AÚN no estaba canalizado, así que no
   // podía confirmar nada. Ahora que sí ocurrió, se regenera con el estado real:
   // así el asistente confirma después del hecho, nunca antes.
-  if (routedSomething || blockedByVerification) {
+  // También cuando hay un dato sin confirmar, aunque el caso SÍ se canalice
+  // marcado: la advertencia llega al estado después de que el modelo ya habló,
+  // así que sin rehacer la respuesta el asistente pide RFC y razón social de un
+  // producto que no está en catálogo, como si fuera un pedido normal.
+  if (routedSomething || blockedByVerification || debug.unverified.length > 0) {
     snapshot = snapshotConversation(config, conversation.id, channel, justRoutedCaseIds, userMessages);
     systemPrompt = buildPrompt(snapshot.views);
     debug.systemPrompt = systemPrompt;
@@ -355,7 +359,21 @@ export async function processTurn(input: EngineInput): Promise<EngineResult> {
   // ── 8. Gaps de onboarding ──────────────────────────────────────────────────
   persistGaps(config, conversation.id, ai, Boolean(vectorStoreId));
 
-  const reply = ai.reply.trim() || config.company.assistant.fallback_message;
+  let reply = ai.reply.trim() || config.company.assistant.fallback_message;
+
+  // Enlace al catálogo cuando se pidió algo que no manejamos. El prompt ya lo
+  // pide, pero el modelo lo incluye de forma intermitente y es justo el dato
+  // que convierte un "no" en algo útil. Se añade sólo si no lo puso él.
+  if (debug.unverified.length > 0) {
+    const catalog = (
+      config.company.company.catalog_url ||
+      config.company.company.website ||
+      ''
+    ).trim();
+    if (catalog && !reply.includes(catalog)) {
+      reply = `${reply}\n\nPuede ver nuestro catálogo completo aquí: ${catalog}`;
+    }
+  }
 
   log.block('AI', [
     ['Tenant', tenantId],
