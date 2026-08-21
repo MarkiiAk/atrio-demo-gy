@@ -3,7 +3,7 @@ import { knowledgeStatus } from '../knowledge/knowledge.service';
 import { buildGapReport } from '../onboarding/gap.service';
 import { getTenantConfig } from '../tenants/tenant-loader';
 import { departmentName, fieldLabel } from '../workflows/workflow-engine';
-import { verifyCaseFields } from '../knowledge/knowledge-verifier';
+import { inspectCatalogFields, verifyCaseFields } from '../knowledge/knowledge-verifier';
 import {
   caseStatusView,
   channelLabel,
@@ -204,6 +204,23 @@ export function panelCases(tenantId: string, limit = 50): PanelCase[] {
       note = `Ojo: ${unconfirmed
         .map((u) => `"${u.value}" (${fieldLabel(wf, u.field)})`)
         .join(', ')} no aparece en el catálogo. Verificar antes de cotizar.`;
+    }
+
+    // Producto que sí se vende pero todavía no está preciso. Sin esto, un caso
+    // detenido porque pidieron "thinner" —y hay tres— se veía en el panel igual
+    // que uno al que sólo le falta un dato, sin decir por qué está parado.
+    const porPrecisar = inspectCatalogFields(
+      config,
+      r.workflow_key,
+      Object.fromEntries(fields.map((f) => [f.field_key, f.field_value])),
+    );
+    for (const f of porPrecisar) {
+      if (f.kind === 'AMBIGUOUS') {
+        note = `Pidió "${f.value}" y manejamos ${f.candidates.length}: ${f.candidates.join(', ')}. Se le está preguntando cuál.`;
+      } else if (!note) {
+        // Sólo si no hay nada más urgente que decir: es un aviso, no un problema.
+        note = `Sí manejamos "${f.canonicalName ?? f.value}", pero no tenemos publicadas sus presentaciones. Confirmar el envase con la persona.`;
+      }
     }
 
     if (routing?.outcome === 'FAILED' || routing?.outcome === 'SKIPPED') {

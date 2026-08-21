@@ -1,7 +1,7 @@
 {
   "tenantId": "grupo-yoma",
   "vectorStoreId": "vs_6a85fc597c688191ad45dc5063f71fb4",
-  "updatedAt": "2026-08-19T18:57:22.425Z",
+  "updatedAt": "2026-08-21T07:39:21.469Z",
   "entries": {
     "PUBLIC::website/about.html--5bd38c94.md": {
       "sourceName": "website/about.html--5bd38c94.md",
@@ -497,6 +497,182 @@
       "cachedPath": null,
       "openaiFileId": "file-GZYXu3WYZCnmY1NKyzVguU",
       "syncedAt": "2026-08-19T18:57:22.424Z"
+    },
+    "PUBLIC::website/nuestra-historia.html--e132568f.md": {
+      "sourceName": "website/nuestra-historia.html--e132568f.md",
+      "visibility": "PUBLIC",
+      "sourceType": "WEBSITE",
+      "uri": "https://grupoyoma.com.mx/nuestra-historia.html",
+      "hash": "07742150cba0aaa619fe325a28df5a3fee7888b1e3b63561247fab179f35eb24",
+      "bytes": 5973,
+      "cachedPath": null,
+      "openaiFileId": "file-K2rLUXSRg9ytpNqhUUB1qR",
+      "syncedAt": "2026-08-21T07:39:02.261Z"
+    },
+    "PUBLIC::website/product-single-Product40.html--c8bfb7cf.md": {
+      "sourceName": "website/product-single-Product40.html--c8bfb7cf.md",
+      "visibility": "PUBLIC",
+      "sourceType": "WEBSITE",
+      "uri": "https://grupoyoma.com.mx/product-single-Product40.html",
+      "hash": "ce590faeb0eb1824008f03dfecf675075c58e71cfdb5640903e11ef0a6acb275",
+      "bytes": 709,
+      "cachedPath": null,
+      "openaiFileId": "file-Wjj6N1pUHVjjoWSodBcTvf",
+      "syncedAt": "2026-08-21T07:39:04.213Z"
+    },
+    "PUBLIC::website/product-single-Product41.html--8e594fff.md": {
+      "sourceName": "website/product-single-Product41.html--8e594fff.md",
+      "visibility": "PUBLIC",
+      "sourceType": "WEBSITE",
+      "uri": "https://grupoyoma.com.mx/product-single-Product41.html",
+      "hash": "0784ab4ebdec908cc03689a739da7456a88bcfc47339310289528062c9f78347",
+      "bytes": 726,
+      "cachedPath": null,
+      "openaiFileId": "file-QuFNfDxBQGrUgBgTRDZhaD",
+      "syncedAt": "2026-08-21T07:39:05.327Z"
+    },
+    "PUBLIC::website/product-single-Product42.html--88884fbc.md": {
+      "sourceName": "website/product-single-Product42.html--88884fbc.md",
+      "visibility": "PUBLIC",
+      "sourceType": "WEBSITE",
+      "uri": "https://grupoyoma.com.mx/product-single-Product42.html",
+      "hash": "568f5c4e0b01d4ed0b2ddba210c08c7a238632c3130fa9a89f1d7edbdadc190e",
+      "bytes": 701,
+      "cachedPath": null,
+      "openaiFileId": "file-ACyeqFnbVof9M8M1Tu5eTe",
+      "syncedAt": "2026-08-21T07:39:06.542Z"
+    },
+    "PUBLIC::website/products.html-categoria-Alcoholes--2f702359.md": {
+      "sourceName": "website/products.html-categoria-Alcoholes--2f702359.md",
+      "visibility": "PUBLIC",
+      "sourceType": "WEBSITE",
+      "uri": "https://grupoyoma.com.mx/products.html?categoria=Alcoholes",
+      "hash": "0faf5dccd1d067eb548ded3b404317553bc504cb67af6a6087caea6d6b92a0e6",
+      "bytes": 1210,
+      "cachedPath": null,
+      "openaiFileId": "file-P8ffY6o9AV72vqS9jJBya3",
+      "syncedAt": "2026-08-21T07:39:07.706Z"
+    },
+    "PUBLIC::website/products.html-categoria-Alif-C3-A1ticos--802ff8d4.md": {
+      "sourceName": "website/products.html-categoria-Alif-C3-A1ticos--802ff8d4.md",
+      "visibility": "PUBLIC",
+      "sourceType": "WEBSITE",
+      "uri": "https://grupoyoma.com.mx/products.html?categoria=Alif%C3%A1ticos",
+      "hash": "701fc14373911c5c924d732993696194826d9b5c6bd90e4e7ce1622d5191a72c",
+      "bytes": 1216,
+      "cachedPath": null,
+      "openaiFileId": "file-1FjxYZMNsnDg9niXGE1haR",
+      "syncedAt": "2026-08-21T07:39:09.976Z"
+    },
+    "PUBLIC::website/products.html-categoria-Aminas--cfe2b1da.md": {
+      "sourceName": "website/products.html-categoria-Aminas--cfe2b1da.md",
+      "visibility": "PUBLIC",
+      "sourceType": "WEBSITE",
+      "uri": "https://grupoyoma.com.mx/products.html?categoria=Aminas",
+      "hash": "d8a514be686187dc080b7c2da1788ffebe74faf96791cdf15fced82b0587ffcc",
+      "bytes": 1207,
+      "cachedPath": null,
+      "openaiFileId": "file-6Td4Ry4f6xy5Tu9Cy1L2gZ",
+      "syncedAt": "2026-08-21T07:39:11.106Z"
+    },
+    "PUBLIC::website/products.html-categoria-Arom-C3-A1ticos--03c48dc0.md": {
+      "sourceName": "website/products.html-categoria-Arom-C3-A1ticos--03c48dc0.md",
+      "visibility": "PUBLIC",
+      "sourceType": "WEBSITE",
+      "uri": "https://grupoyoma.com.mx/products.html?categoria=Arom%C3%A1ticos",
+      "hash": "badd9ff81aa5d5d4ee396fe1fc21bad89385974397d3721626dc8bda8a7f704e",
+      "bytes": 1216,
+      "cachedPath": null,
+      "openaiFileId": "file-Udv2n99bWxxDgHBCQnKJjY",
+      "syncedAt": "2026-08-21T07:39:12.608Z"
+    },
+    "PUBLIC::website/products.html-categoria-Cetonas--f4d61026.md": {
+      "sourceName": "website/products.html-categoria-Cetonas--f4d61026.md",
+      "visibility": "PUBLIC",
+      "sourceType": "WEBSITE",
+      "uri": "https://grupoyoma.com.mx/products.html?categoria=Cetonas",
+      "hash": "b32393127e0409e4db8fecf9466d49f079fac4342c71e3a8dd0ce9f0b16adf53",
+      "bytes": 1208,
+      "cachedPath": null,
+      "openaiFileId": "file-NLCpmw3fsWTQUNrABQVb8L",
+      "syncedAt": "2026-08-21T07:39:13.699Z"
+    },
+    "PUBLIC::website/products.html-categoria-Clorados--fa7778e6.md": {
+      "sourceName": "website/products.html-categoria-Clorados--fa7778e6.md",
+      "visibility": "PUBLIC",
+      "sourceType": "WEBSITE",
+      "uri": "https://grupoyoma.com.mx/products.html?categoria=Clorados",
+      "hash": "1796af57fe7ee9db73b631a5617fb0b8c7f1ceb875753dc77298a8e5396d13cc",
+      "bytes": 1209,
+      "cachedPath": null,
+      "openaiFileId": "file-BJhuy3Uq8t8aYYYpFwkEbp",
+      "syncedAt": "2026-08-21T07:39:14.909Z"
+    },
+    "PUBLIC::website/products.html-categoria-Esteres--6fc36f42.md": {
+      "sourceName": "website/products.html-categoria-Esteres--6fc36f42.md",
+      "visibility": "PUBLIC",
+      "sourceType": "WEBSITE",
+      "uri": "https://grupoyoma.com.mx/products.html?categoria=Esteres",
+      "hash": "63ec70f89e22687a3e76058c3302cb02d61b345b063b4d5ea0ca60eef3c1d83b",
+      "bytes": 1208,
+      "cachedPath": null,
+      "openaiFileId": "file-44nYCNUGwGQbksyYW14uPm",
+      "syncedAt": "2026-08-21T07:39:16.007Z"
+    },
+    "PUBLIC::website/products.html-categoria-Glico-C3-A9teres--01809a9e.md": {
+      "sourceName": "website/products.html-categoria-Glico-C3-A9teres--01809a9e.md",
+      "visibility": "PUBLIC",
+      "sourceType": "WEBSITE",
+      "uri": "https://grupoyoma.com.mx/products.html?categoria=Glico%C3%A9teres",
+      "hash": "2b05bf8e0e786d6909dcecb6a89340714987894fa14cc0a20225c89464171b5a",
+      "bytes": 1217,
+      "cachedPath": null,
+      "openaiFileId": "file-KA3YUyqKrxCXje3UvRwin4",
+      "syncedAt": "2026-08-21T07:39:17.223Z"
+    },
+    "PUBLIC::website/products.html-categoria-Glicoeteres--0daa31bf.md": {
+      "sourceName": "website/products.html-categoria-Glicoeteres--0daa31bf.md",
+      "visibility": "PUBLIC",
+      "sourceType": "WEBSITE",
+      "uri": "https://grupoyoma.com.mx/products.html?categoria=Glicoeteres",
+      "hash": "382af5a60ade7b20e7831ddcc062ccd90452f58d243504b0ac24784035e07d8b",
+      "bytes": 1212,
+      "cachedPath": null,
+      "openaiFileId": "file-5TwfLSXH8SttJjmz1vYEXJ",
+      "syncedAt": "2026-08-21T07:39:18.210Z"
+    },
+    "PUBLIC::website/products.html-categoria-Glicoles--56291336.md": {
+      "sourceName": "website/products.html-categoria-Glicoles--56291336.md",
+      "visibility": "PUBLIC",
+      "sourceType": "WEBSITE",
+      "uri": "https://grupoyoma.com.mx/products.html?categoria=Glicoles",
+      "hash": "a5b542c520260f39eae558f1841fb3ab6c37f0e2cab8fbb3d92adc78d028904e",
+      "bytes": 1209,
+      "cachedPath": null,
+      "openaiFileId": "file-9bbjUYXqjQiVnaKARkoK6p",
+      "syncedAt": "2026-08-21T07:39:19.269Z"
+    },
+    "PUBLIC::website/products.html-categoria-Mon-C3-B3meros--5b393c8c.md": {
+      "sourceName": "website/products.html-categoria-Mon-C3-B3meros--5b393c8c.md",
+      "visibility": "PUBLIC",
+      "sourceType": "WEBSITE",
+      "uri": "https://grupoyoma.com.mx/products.html?categoria=Mon%C3%B3meros",
+      "hash": "7b7bdffef9010e6857fd0ad8a5c5b50d083e42eb5f79acb2cc970a57ad1324c7",
+      "bytes": 1215,
+      "cachedPath": null,
+      "openaiFileId": "file-LkgH896fwgdJbjM7cF9mAb",
+      "syncedAt": "2026-08-21T07:39:20.328Z"
+    },
+    "PUBLIC::website/products.html-categoria-Plastificantes--8f8888cc.md": {
+      "sourceName": "website/products.html-categoria-Plastificantes--8f8888cc.md",
+      "visibility": "PUBLIC",
+      "sourceType": "WEBSITE",
+      "uri": "https://grupoyoma.com.mx/products.html?categoria=Plastificantes",
+      "hash": "2fc262d0c9aceff9da9b13b41d7f4d5ee702a168128addc77b4f928eff6356dc",
+      "bytes": 1215,
+      "cachedPath": null,
+      "openaiFileId": "file-3eULH2tha2SBZ9AqbbHf9w",
+      "syncedAt": "2026-08-21T07:39:21.467Z"
     }
   }
 }
