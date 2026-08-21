@@ -5,6 +5,15 @@ import { log } from '../lib/logger';
 import { sha256, urlToFilename, websiteCacheDir } from './knowledge-manifest';
 
 export interface CrawlOptions {
+  /**
+   * Tope de seguridad, NO el criterio de fin.
+   *
+   * El crawl termina cuando se agota la frontera de URLs válidas del dominio.
+   * Este número sólo evita un bucle infinito ante un sitio que genera URLs sin
+   * fin (calendarios, filtros, parámetros infinitos). Antes valía 40 y el
+   * catálogo de Grupo Yoma se cortaba exactamente en el límite, sin que nada lo
+   * avisara: el sistema daba por inexistentes productos que sí se venden.
+   */
   maxPages: number;
   /** Pausa entre peticiones, para no golpear el sitio del cliente. */
   delayMs: number;
@@ -14,7 +23,7 @@ export interface CrawlOptions {
 }
 
 export const DEFAULT_CRAWL: CrawlOptions = {
-  maxPages: 40,
+  maxPages: 500,
   delayMs: 600,
   timeoutMs: 20_000,
   userAgent: 'AtrioKnowledgeBot/0.1 (+onboarding de asistente autorizado por el propietario del sitio)',
@@ -34,6 +43,23 @@ export interface CrawlResult {
   pages: CrawledPage[];
   visited: number;
   skipped: Array<{ url: string; reason: string }>;
+  /**
+   * `exhausted` = se agotó la frontera, el sitio se recorrió completo.
+   * `limit`     = se tocó el tope de seguridad: el resultado está INCOMPLETO.
+   *
+   * Se distingue porque un catálogo truncado es indistinguible de uno completo
+   * si sólo se mira el número de páginas, y decidir "no vendemos eso" sobre un
+   * catálogo a medias es el peor fallo que puede tener este sistema.
+   */
+  stoppedBecause: 'exhausted' | 'limit';
+  /** URLs que quedaron sin visitar si se tocó el tope. */
+  pending: number;
+  /** Respuestas HTTP no exitosas, por código. */
+  httpErrors: Record<string, number>;
+  /** Páginas que respondieron pero no dieron contenido aprovechable. */
+  unparsed: string[];
+  /** URLs distintas que resolvieron al mismo contenido. */
+  duplicates: number;
 }
 
 const SKIP_EXT =
@@ -200,9 +226,15 @@ export async function crawlWebsite(
   const seen = new Set<string>([start.toString()]);
   const pages: CrawledPage[] = [];
   const skipped: CrawlResult['skipped'] = [];
+  const httpErrors: Record<string, number> = {};
+  const unparsed: string[] = [];
+  // Hash del contenido → primera URL que lo produjo. Dos URLs con el mismo
+  // contenido son la misma página; indexarla dos veces sesga el corpus.
+  const byHash = new Map<string, string>();
   let visited = 0;
+  let duplicates = 0;
 
-  while (queue.length > 0 && pages.length < opts.maxPages) {
+  while (queue.length > 0 && visited < opts.maxPages) {
     const current = queue.shift() as string;
     const url = new URL(current);
 
@@ -229,6 +261,7 @@ export async function crawlWebsite(
 
       if (!res.ok) {
         skipped.push({ url: current, reason: `HTTP ${res.status}` });
+        httpErrors[String(res.status)] = (httpErrors[String(res.status)] ?? 0) + 1;
         continue;
       }
       const contentType = res.headers.get('content-type') ?? '';
@@ -242,17 +275,27 @@ export async function crawlWebsite(
 
       if (markdown.replace(/\s+/g, '').length < 200) {
         skipped.push({ url: current, reason: 'contenido insuficiente' });
+        unparsed.push(current);
       } else {
-        const filename = urlToFilename(current);
-        fs.writeFileSync(path.join(outDir, filename), markdown, 'utf8');
-        pages.push({
-          url: current,
-          title,
-          markdown,
-          hash: sha256(markdown),
-          bytes: Buffer.byteLength(markdown, 'utf8'),
-          filename,
-        });
+        const hash = sha256(markdown);
+        const original = byHash.get(hash);
+        if (original) {
+          // Misma página con otra URL (index.html vs /, parámetros de tracking).
+          skipped.push({ url: current, reason: `duplicado de ${original}` });
+          duplicates += 1;
+        } else {
+          byHash.set(hash, current);
+          const filename = urlToFilename(current);
+          fs.writeFileSync(path.join(outDir, filename), markdown, 'utf8');
+          pages.push({
+            url: current,
+            title,
+            markdown,
+            hash,
+            bytes: Buffer.byteLength(markdown, 'utf8'),
+            filename,
+          });
+        }
       }
 
       for (const link of extractLinks(html, url)) {
@@ -267,15 +310,42 @@ export async function crawlWebsite(
       skipped.push({ url: current, reason: (e as Error).message });
     }
 
-    if (queue.length > 0 && pages.length < opts.maxPages) await sleep(delay);
+    if (queue.length > 0 && visited < opts.maxPages) await sleep(delay);
   }
+
+  // Se distingue el fin natural del corte por tope. Con la frontera agotada el
+  // recorrido está completo; con URLs pendientes, el catálogo quedó a medias y
+  // hay que decirlo en voz alta.
+  const stoppedBecause: CrawlResult['stoppedBecause'] =
+    queue.length === 0 ? 'exhausted' : 'limit';
+
+  const result: CrawlResult = {
+    pages,
+    visited,
+    skipped,
+    stoppedBecause,
+    pending: queue.length,
+    httpErrors,
+    unparsed,
+    duplicates,
+  };
 
   log.info('Crawl terminado', {
     tenant: tenantId,
     visited,
     indexed: pages.length,
     skipped: skipped.length,
+    stoppedBecause,
+    pending: queue.length,
+    duplicates,
   });
 
-  return { pages, visited, skipped };
+  if (stoppedBecause === 'limit') {
+    log.warn(
+      'El crawl se detuvo por el tope de seguridad: el catálogo puede estar INCOMPLETO',
+      { tenant: tenantId, maxPages: opts.maxPages, pending: queue.length },
+    );
+  }
+
+  return result;
 }

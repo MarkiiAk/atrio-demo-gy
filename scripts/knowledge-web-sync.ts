@@ -1,4 +1,4 @@
-import { c, die, heading, ok, option, out, positionals, warn } from '../src/lib/cli';
+import { c, die, heading, ok, option, out, positionals, warn, fail } from '../src/lib/cli';
 import { crawlWebsite } from '../src/knowledge/website-crawler';
 import { websiteCacheDir } from '../src/knowledge/knowledge-manifest';
 import { loadTenantConfig, tenantExists } from '../src/tenants/tenant-loader';
@@ -23,15 +23,16 @@ async function main(): Promise<void> {
     die(`URL inválida: ${url}`);
   }
 
-  const maxPages = Number.parseInt(option('max', '40') as string, 10);
+  // Tope de seguridad, no criterio de fin: el crawl termina al agotar el sitio.
+  const maxPages = Number.parseInt(option('max', '500') as string, 10);
   const delayMs = Number.parseInt(option('delay', '600') as string, 10);
   const respectRobots = !process.argv.includes('--no-robots');
 
   heading(`Sincronización de sitio — ${tenantId}`);
-  out(`  Origen:      ${parsed.origin}`);
-  out(`  Máx páginas: ${maxPages}`);
-  out(`  Pausa:       ${delayMs} ms`);
-  out(`  robots.txt:  ${respectRobots ? 'se respeta' : c.yellow('IGNORADO')}`);
+  out(`  Origen:        ${parsed.origin}`);
+  out(`  Tope seguridad:${String(maxPages).padStart(5)} páginas (el fin normal es agotar el sitio)`);
+  out(`  Pausa:         ${delayMs} ms`);
+  out(`  robots.txt:    ${respectRobots ? 'se respeta' : c.yellow('IGNORADO')}`);
   out();
 
   const result = await crawlWebsite(tenantId, parsed.toString(), {
@@ -43,6 +44,25 @@ async function main(): Promise<void> {
   out();
   ok(`${result.pages.length} página(s) indexadas de ${result.visited} visitadas.`);
   out(c.gray(`  Copia local: ${websiteCacheDir(tenantId)}`));
+
+  // Diagnóstico del recorrido. Un catálogo truncado se ve igual que uno
+  // completo si sólo se cuenta páginas, así que se dice explícitamente.
+  out();
+  out(c.bold('Diagnóstico del recorrido'));
+  if (result.stoppedBecause === 'exhausted') {
+    out(`  ${c.green('✓')} Terminó al agotar el sitio: no quedaron URLs por visitar.`);
+  } else {
+    fail(`Se detuvo por el tope de seguridad. Quedan ${result.pending} URL(s) sin visitar.`);
+    out(c.yellow(`    El catálogo está INCOMPLETO. Repite con --max ${maxPages * 2}.`));
+  }
+  out(`  URLs duplicadas descartadas: ${result.duplicates}`);
+  out(`  Páginas sin contenido útil:  ${result.unparsed.length}`);
+  const httpCodes = Object.entries(result.httpErrors);
+  if (httpCodes.length === 0) {
+    out(`  Errores HTTP:               0`);
+  } else {
+    out(`  Errores HTTP:               ${httpCodes.map(([k, v]) => `${v}× ${k}`).join(', ')}`);
+  }
 
   if (result.pages.length > 0) {
     out();
