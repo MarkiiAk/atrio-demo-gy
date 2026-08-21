@@ -3,7 +3,12 @@ import { log, pii, snip } from '../lib/logger';
 import { runAssistantTurn, OpenAiUnavailableError, type TurnResult } from '../ai/openai.service';
 import type { AiTurnOutput } from '../ai/ai-schema';
 import { getVectorStoreId } from '../knowledge/vector-store.service';
-import { findSubstitutedFields, verifyCaseFields, verifyTerm } from '../knowledge/knowledge-verifier';
+import {
+  findSubstitutedFields,
+  resolveKnownProduct,
+  verifyCaseFields,
+  verifyTerm,
+} from '../knowledge/knowledge-verifier';
 import { recordGap } from '../onboarding/gap.service';
 import { buildSystemPrompt, buildTurnHint, type ActiveCaseView } from '../prompts/build-system-prompt';
 import {
@@ -25,6 +30,7 @@ import { evaluateEligibility, routeCase } from '../routing/routing.service';
 import type { TenantConfig } from '../tenants/config-schema';
 import type { ContactRow, ConversationRow, Sentiment } from '../types/domain';
 import {
+  candidateProductTerms,
   evaluateFields,
   fillDescriptiveFields,
   mergeFields,
@@ -539,6 +545,23 @@ function materializeCases(
     if (Object.keys(described).length > 0) {
       upsertCaseFields(c.row.id, described, 'USER');
       c.fields = { ...c.fields, ...described };
+    }
+
+    // Producto que la persona nombró y que SÍ está en el catálogo, cuando el
+    // modelo no lo registró. Está dicho y confirmado: no hay nada que suponer, y
+    // dejarlo vacío hace que se le pida "el producto exacto" a alguien que abrió
+    // la conversación diciéndolo.
+    const missingVerifiable = wf.verify_against_knowledge.filter((f) => !c.fields[f]?.trim());
+    if (missingVerifiable.length > 0) {
+      const known = resolveKnownProduct(
+        config,
+        userMessages.flatMap((m) => candidateProductTerms(m)),
+      );
+      if (known) {
+        const filled = Object.fromEntries(missingVerifiable.map((f) => [f, known]));
+        upsertCaseFields(c.row.id, filled, 'USER');
+        c.fields = { ...c.fields, ...filled };
+      }
     }
 
     const status = evaluateFields(wf, c.fields, channel);

@@ -2,6 +2,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import type { TenantConfig } from '../tenants/config-schema';
 import { websiteCacheDir } from './knowledge-manifest';
+import { TERM_NOISE } from '../workflows/field-engine';
 
 /**
  * Verificación DETERMINISTA de términos contra el conocimiento del tenant.
@@ -128,9 +129,15 @@ export function verifyTerm(config: TenantConfig, term: string): VerificationResu
 
   if (needle.length < 3) return 'NO_KNOWLEDGE';
 
-  // Se buscan las palabras significativas del término; todas deben aparecer
-  // como palabra completa en algún punto del corpus.
-  const words = needle.split(' ').filter((w) => w.length >= 3 && !STOPWORDS.has(w));
+  // Se limpian unidades y presentaciones antes de decidir.
+  //
+  // El modelo suele registrar "tolueno en tambo" o "27 tambos de thiner
+  // americano" en el campo del producto. Exigir que TODAS esas palabras estén
+  // en el catálogo negaba productos que sí se venden: "tambo" no aparece porque
+  // el catálogo dice "tambos". Lo que importa es el nombre del producto.
+  const words = needle
+    .split(' ')
+    .filter((w) => w.length >= 3 && !STOPWORDS.has(w) && !TERM_NOISE.has(w));
   if (words.length === 0) return 'NO_KNOWLEDGE';
 
   const allPresent = words.every((w) => {
@@ -184,6 +191,21 @@ export function detectUnknownRequest(
 
   // Ninguno existe: se reporta el más específico (el más largo).
   return checked[0].term;
+}
+
+/**
+ * Primer candidato del mensaje que SÍ está en el catálogo.
+ *
+ * La contraparte de `detectUnknownRequest`. Si la persona nombró un producto que
+ * existe y el modelo no lo registró, la aplicación puede rellenarlo: lo dijo y
+ * está confirmado, así que no hay nada que suponer. Sin esto el asistente pedía
+ * "el producto exacto" a alguien que había abierto la conversación diciéndolo.
+ */
+export function resolveKnownProduct(config: TenantConfig, candidates: string[]): string | null {
+  for (const term of candidates) {
+    if (verifyTerm(config, term) === 'FOUND') return term;
+  }
+  return null;
 }
 
 export interface FieldVerification {

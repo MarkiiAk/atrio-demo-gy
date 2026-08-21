@@ -8,6 +8,7 @@ import {
   clearVerifierCache,
   detectUnknownRequest,
   findSubstitutedFields,
+  resolveKnownProduct,
   verifyCaseFields,
   verifyTerm,
 } from '../src/knowledge/knowledge-verifier';
@@ -88,6 +89,47 @@ describe('verificación de términos contra el conocimiento', () => {
     expect(verifyTerm(config, '1000 L de óxido nitroso')).toBe('NOT_FOUND');
   });
 
+  it('ignora la presentación al verificar el producto', () => {
+    // Regresión real: el modelo registró "tolueno en tambo" y la verificación
+    // exigía que TODAS las palabras estuvieran en el catálogo. "tambo" no
+    // aparece —el catálogo dice "tambos"— así que negó un producto que sí se
+    // vende. Peor que el bug original: rechazar una venta legítima.
+    writeTenant('presentacion');
+    clearTenantCache();
+    seedKnowledge('presentacion');
+    const config = requireTenantConfig('presentacion');
+
+    for (const t of [
+      'tolueno',
+      'tolueno en tambo',
+      'tolueno en tambos',
+      'alcohol isopropílico en porrones',
+      'xileno a granel',
+      'acetato de etilo en cubeta',
+    ]) {
+      expect(verifyTerm(config, t), `debió encontrar: "${t}"`).toBe('FOUND');
+    }
+
+    // Y la presentación NO hace pasar lo que no existe: las palabras de ruido se
+    // descartan, no cuentan como coincidencia. Si sólo quedan palabras de ruido
+    // el resultado es "no sé", nunca "sí lo vendemos".
+    for (const t of [
+      '27 tambos de thiner americano',
+      'acetona en tambos',
+      'sosa caustica a granel',
+      'pito en tambo',
+      'cerveza en porrones',
+      'xxxxx en cubeta',
+    ]) {
+      expect(verifyTerm(config, t), `no debió encontrar: "${t}"`).toBe('NOT_FOUND');
+    }
+
+    // Sólo presentación, sin producto: no se afirma nada.
+    for (const t of ['tambo', 'en tambos', 'a granel', 'cubeta']) {
+      expect(verifyTerm(config, t), `no debió afirmar por: "${t}"`).toBe('NO_KNOWLEDGE');
+    }
+  });
+
   it('sin conocimiento cargado no afirma nada', () => {
     writeTenant('verif-vacio');
     clearTenantCache();
@@ -151,6 +193,40 @@ channels:
 
     // Comportamiento heredado: sin declarar el catálogo, todo cuenta.
     expect(verifyTerm(requireTenantConfig('sin-fuente'), 'acetona')).toBe('FOUND');
+  });
+});
+
+describe('rellenar el producto que la persona sí nombró', () => {
+  it('resuelve el producto del mensaje cuando está en el catálogo', () => {
+    // El fallo real: el cliente abrió con "necesito cotizar tolueno en tambos",
+    // el modelo no registró el campo, y dos turnos después el asistente le pedía
+    // "confirmar el producto exacto" a alguien que ya lo había dicho.
+    writeTenant('relleno');
+    clearTenantCache();
+    seedKnowledge('relleno');
+    const config = requireTenantConfig('relleno');
+
+    expect(
+      resolveKnownProduct(config, candidateProductTerms('necesito cotizar tolueno en tambos')),
+    ).toContain('tolueno');
+
+    expect(
+      resolveKnownProduct(
+        config,
+        candidateProductTerms('quiero 200 litros de alcohol isopropilico'),
+      ),
+    ).toContain('alcohol');
+  });
+
+  it('no rellena nada si lo que pidió no está en el catálogo', () => {
+    writeTenant('relleno-no');
+    clearTenantCache();
+    seedKnowledge('relleno-no');
+    const config = requireTenantConfig('relleno-no');
+
+    expect(
+      resolveKnownProduct(config, candidateProductTerms('cotizar 27 tambos de thiner americano')),
+    ).toBeNull();
   });
 });
 

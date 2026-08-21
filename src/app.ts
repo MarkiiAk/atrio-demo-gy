@@ -9,6 +9,29 @@ import { panelRouter } from './panel/panel.routes';
 import { jobStats } from './jobs/job.repository';
 import { listTenants } from './tenants/tenant-loader';
 
+/**
+ * Commit desplegado, tomado de lo que publica el host. Vacío en local.
+ *
+ * Los hosts gestionados exponen el SHA del commit que construyeron; leerlo
+ * convierte "¿ya subió el arreglo?" en un dato en vez de una deducción a partir
+ * del comportamiento del asistente.
+ */
+const STARTED_AT = new Date().toISOString();
+
+function deployedVersion(): { commit: string; startedAt: string } {
+  const sha =
+    process.env.RAILWAY_GIT_COMMIT_SHA ??
+    process.env.RENDER_GIT_COMMIT ??
+    process.env.SOURCE_VERSION ??
+    '';
+  return {
+    commit: sha ? sha.slice(0, 7) : 'local',
+    // Cuándo arrancó este proceso: distingue "no desplegué" de "desplegué y
+    // sigue igual", que son problemas distintos.
+    startedAt: STARTED_AT,
+  };
+}
+
 export function createApp(): Express {
   const app = express();
 
@@ -36,6 +59,10 @@ export function createApp(): Express {
       jobs: jobStats(),
       publicBaseUrl: env.PUBLIC_BASE_URL || null,
       signatureValidation: env.TWILIO_VALIDATE_SIGNATURE,
+      // Qué versión está corriendo de verdad. Sin esto, cuando un arreglo no se
+      // ve en producción hay que deducir por comportamiento si el despliegue
+      // llegó o no, y eso cuesta ciclos enteros de prueba.
+      version: deployedVersion(),
     });
   });
 

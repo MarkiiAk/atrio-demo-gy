@@ -202,8 +202,14 @@ export function candidateProductTerms(text: string): string[] {
   return [...new Set(out)].sort((a, b) => b.length - a.length).slice(0, 8);
 }
 
-/** Palabras que aparecen en cualquier pedido y no nombran un producto. */
-const TERM_NOISE = new Set([
+/**
+ * Palabras que aparecen en cualquier pedido y no nombran un producto:
+ * saludos, verbos, unidades, presentaciones y datos de contacto.
+ *
+ * Se usa para dos cosas: elegir candidatos en un mensaje, y limpiar un valor
+ * antes de verificarlo contra el catálogo.
+ */
+export const TERM_NOISE = new Set([
   'buenas',
   'tardes',
   'noches',
@@ -220,13 +226,29 @@ const TERM_NOISE = new Set([
   'favor',
   'gracias',
   'hola',
+  'tambo',
   'tambos',
   'tambor',
   'tambores',
-  'porrones',
   'porron',
-  'pipas',
+  'porrones',
   'pipa',
+  'pipas',
+  'cubeta',
+  'cubetas',
+  'cilindro',
+  'cilindros',
+  'granel',
+  'bidon',
+  'bidones',
+  'garrafa',
+  'garrafas',
+  'caja',
+  'cajas',
+  'saco',
+  'sacos',
+  'bolsa',
+  'bolsas',
   'litros',
   'litro',
   'kilos',
