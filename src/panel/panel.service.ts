@@ -3,6 +3,7 @@ import { knowledgeStatus } from '../knowledge/knowledge.service';
 import { buildGapReport } from '../onboarding/gap.service';
 import { getTenantConfig } from '../tenants/tenant-loader';
 import { departmentName, fieldLabel } from '../workflows/workflow-engine';
+import { verifyCaseFields } from '../knowledge/knowledge-verifier';
 import {
   caseStatusView,
   channelLabel,
@@ -190,6 +191,21 @@ export function panelCases(tenantId: string, limit = 50): PanelCase[] {
         note = `Falta por confirmar: ${missing.map((f) => fieldLabel(wf, f)).join(', ')}.`;
       }
     }
+
+    // Producto que no está en el catálogo. Se avisa aunque el caso ya se haya
+    // canalizado: quien lo atienda tiene que saberlo ANTES de cotizar, y en el
+    // panel no se veía —sólo llegaba en el mensaje al área.
+    const unconfirmed = verifyCaseFields(
+      config,
+      r.workflow_key,
+      Object.fromEntries(fields.map((f) => [f.field_key, f.field_value])),
+    );
+    if (unconfirmed.length > 0 && wf) {
+      note = `Ojo: ${unconfirmed
+        .map((u) => `"${u.value}" (${fieldLabel(wf, u.field)})`)
+        .join(', ')} no aparece en el catálogo. Verificar antes de cotizar.`;
+    }
+
     if (routing?.outcome === 'FAILED' || routing?.outcome === 'SKIPPED') {
       note = 'La información está completa, pero no se pudo avisar al área. Requiere revisión.';
     }
@@ -291,6 +307,17 @@ export interface PanelGap {
   lastSeen: string;
 }
 
+/**
+ * El tema de un gap lo escribe el modelo, y a veces manda una clave técnica
+ * ("Product_catalog_match") en lugar de una frase. Quien lee el panel es alguien
+ * de administración: una clave con guiones bajos no le dice nada.
+ */
+function humanizeTopic(topic: string): string {
+  const looksTechnical = /^[a-z]+([_.][a-z]+)+$/i.test(topic.trim());
+  const text = looksTechnical ? topic.trim().replace(/[_.]+/g, ' ') : topic.trim();
+  return text.charAt(0).toUpperCase() + text.slice(1);
+}
+
 export function panelGaps(tenantId: string, limit = 60): PanelGap[] {
   return Object.values(buildGapReport(tenantId).byType)
     .flat()
@@ -301,7 +328,7 @@ export function panelGaps(tenantId: string, limit = 60): PanelGap[] {
       return {
         category: l.label,
         categoryHint: l.hint,
-        topic: g.topic.charAt(0).toUpperCase() + g.topic.slice(1),
+        topic: humanizeTopic(g.topic),
         action: g.missing_information,
         times: g.frequency,
         lastSeen: humanDate(g.last_seen_at),
