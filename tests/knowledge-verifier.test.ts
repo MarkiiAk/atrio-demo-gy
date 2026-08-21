@@ -99,6 +99,61 @@ describe('verificación de términos contra el conocimiento', () => {
   });
 });
 
+describe('el catálogo es la fuente de verdad, no todo el sitio', () => {
+  it('un químico mencionado en el blog NO cuenta como catalogado', () => {
+    // Frágil de otro modo: en cuanto el cliente publique un artículo que
+    // mencione un producto que no vende, el asistente lo ofrecería.
+    writeTenant('fuente-verdad', {
+      company: `company:
+  id: fuente-verdad
+  name: "Fuente de Verdad"
+  website: "https://ejemplo.test"
+  catalog_url: "https://ejemplo.test/products.html"
+  catalog_sources:
+    - "products.html"
+assistant:
+  display_name: "Asistente"
+  locale: es-MX
+channels:
+  whatsapp:
+    enabled: false
+`,
+    });
+    clearTenantCache();
+
+    const dir = websiteCacheDir('fuente-verdad');
+    fs.mkdirSync(dir, { recursive: true });
+    fs.writeFileSync(path.join(dir, 'products.html--aaa.md'), CATALOGO, 'utf8');
+    fs.writeFileSync(
+      path.join(dir, 'blog.html--bbb.md'),
+      '# Blog\nHablemos del uso industrial de la acetona y del hidróxido de sodio.',
+      'utf8',
+    );
+    clearVerifierCache();
+
+    const config = requireTenantConfig('fuente-verdad');
+
+    // Está en el catálogo → sí.
+    expect(verifyTerm(config, 'tolueno')).toBe('FOUND');
+    // Sólo aparece en el blog → NO se vende.
+    expect(verifyTerm(config, 'acetona')).toBe('NOT_FOUND');
+    expect(verifyTerm(config, 'hidróxido de sodio')).toBe('NOT_FOUND');
+  });
+
+  it('sin catalog_sources se usa todo el sitio', () => {
+    writeTenant('sin-fuente');
+    clearTenantCache();
+
+    const dir = websiteCacheDir('sin-fuente');
+    fs.mkdirSync(dir, { recursive: true });
+    fs.writeFileSync(path.join(dir, 'blog.html--ccc.md'), 'Vendemos acetona industrial.', 'utf8');
+    clearVerifierCache();
+
+    // Comportamiento heredado: sin declarar el catálogo, todo cuenta.
+    expect(verifyTerm(requireTenantConfig('sin-fuente'), 'acetona')).toBe('FOUND');
+  });
+});
+
 describe('recuperación del vector store tras un despliegue', () => {
   it('lo lee del manifest cuando la base está en blanco', () => {
     // El fallo real: al desplegar, la base nace vacía y el id del vector store

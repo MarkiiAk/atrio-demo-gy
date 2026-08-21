@@ -6,6 +6,12 @@ company:
   # URL del catálogo público. Cuando alguien pide algo que no manejamos, el
   # asistente lo dice claro y lo remite aquí.
   catalog_url: "https://grupoyoma.com.mx/products.html"
+  # Páginas que SON el catálogo: la fuente de verdad sobre lo que se vende.
+  # La verificación de productos sólo mira aquí, para que un químico mencionado
+  # en el blog o en una nota no pase por catalogado.
+  catalog_sources:
+    - "products.html"
+    - "product-single"
   # Una o dos frases sobre qué hace la empresa. El asistente las usa para presentarse.
   description: "Distribuidor industrial de productos químicos. Atiende a empresas con suministro de insumos químicos en distintas presentaciones."
 

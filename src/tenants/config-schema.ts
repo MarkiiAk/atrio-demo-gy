@@ -34,6 +34,15 @@ export const CompanySchema = z.object({
      * útil no es sólo decir que no: es apuntarle a dónde ver lo que sí hay.
      */
     catalog_url: z.string().optional().default(''),
+    /**
+     * Qué páginas del sitio son el CATÁLOGO, la fuente de verdad sobre lo que la
+     * empresa vende. Se comparan contra el nombre del archivo cacheado o su URL.
+     *
+     * Sin esto la verificación busca en todo el sitio, y un producto mencionado
+     * de pasada en un artículo del blog pasaría por catalogado. Vacío = todo el
+     * sitio (aceptable si no hay blog ni contenido editorial).
+     */
+    catalog_sources: z.array(z.string().min(1)).default([]),
     description: z.string().optional().default(''),
   }),
   assistant: z.object({

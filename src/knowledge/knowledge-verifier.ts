@@ -52,16 +52,26 @@ function readDir(dir: string, exts: string[]): string[] {
 }
 
 /**
- * Corpus consultable: el caché del sitio más los documentos de texto del
- * onboarding. Los PDF y binarios no se leen aquí — para ellos la verificación
- * devuelve lo que encuentre en el resto, y ante la duda no se afirma nada.
+ * Corpus contra el que se verifica QUÉ VENDE la empresa.
+ *
+ * Cuando el tenant declara `catalog_sources`, sólo esas páginas cuentan: son la
+ * fuente de verdad del catálogo. El resto del sitio —blog, "quiénes somos",
+ * notas— puede mencionar un químico sin que la empresa lo venda, y tomarlo como
+ * catálogo haría que el asistente ofreciera algo inexistente.
+ *
+ * Los documentos autorizados del onboarding siempre cuentan: los sube el propio
+ * cliente para que se usen.
  */
 function loadCorpus(config: TenantConfig): Corpus {
   const cached = cache.get(config.tenantId);
   if (cached && Date.now() - cached.loadedAt < TTL_MS) return cached;
 
+  const patterns = config.company.company.catalog_sources
+    .map((p) => normalize(p))
+    .filter(Boolean);
+
   const parts: string[] = [
-    ...readDir(websiteCacheDir(config.tenantId), ['.md']),
+    ...readWebsite(config.tenantId, patterns),
     ...readDir(path.join(config.dir, 'knowledge', 'public'), ['.md', '.txt', '.json', '.csv']),
     ...readDir(path.join(config.dir, 'knowledge', 'customer-safe'), ['.md', '.txt', '.json', '.csv']),
   ];
@@ -73,6 +83,25 @@ function loadCorpus(config: TenantConfig): Corpus {
   };
   cache.set(config.tenantId, corpus);
   return corpus;
+}
+
+/** Páginas del sitio que cuentan como catálogo. Sin patrones, todas. */
+function readWebsite(tenantId: string, patterns: string[]): string[] {
+  const dir = websiteCacheDir(tenantId);
+  if (!fs.existsSync(dir)) return [];
+
+  return fs
+    .readdirSync(dir)
+    .filter((f) => f.endsWith('.md'))
+    .filter((f) => patterns.length === 0 || patterns.some((p) => normalize(f).includes(p)))
+    .map((f) => {
+      try {
+        return fs.readFileSync(path.join(dir, f), 'utf8');
+      } catch {
+        return '';
+      }
+    })
+    .filter(Boolean);
 }
 
 export function clearVerifierCache(): void {

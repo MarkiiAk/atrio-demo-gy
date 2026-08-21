@@ -311,6 +311,11 @@ company:
   # URL del catálogo público. Si alguien pide algo que no se maneja, el asistente
   # lo dice claro y remite aquí. Si se deja vacío, usa el sitio web.
   catalog_url: ""
+  # Páginas del sitio que SON el catálogo (la fuente de verdad sobre lo que se
+  # vende). Se comparan contra el nombre del archivo o la URL. Si se deja vacío
+  # se usa todo el sitio, y entonces algo mencionado en el blog puede pasar por
+  # catalogado.
+  catalog_sources: []
   # Una o dos frases sobre qué hace la empresa. El asistente las usa para presentarse.
   description: ${q(TODO_SENTINEL + ': describir a qué se dedica la empresa')}
 
