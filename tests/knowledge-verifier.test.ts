@@ -2,7 +2,7 @@ import { afterEach, describe, expect, it } from 'vitest';
 
 import * as fs from 'fs';
 import * as path from 'path';
-import { writeTenant } from './helpers/fixtures';
+import { fixtureCatalog, writeCatalog, writeTenant } from './helpers/fixtures';
 import { clearTenantCache, requireTenantConfig } from '../src/tenants/tenant-loader';
 import {
   clearVerifierCache,
@@ -18,26 +18,29 @@ import { ensureTenantRow, getTenantConfig } from '../src/db';
 import { tenantCacheDir, websiteCacheDir } from '../src/knowledge/knowledge-manifest';
 
 /**
- * Estos tests codifican dos fallos reales observados en producción:
- *  - se aceptó una cotización de "acetona" cuando el catálogo sólo tiene
- *    "acetatos" (nombres parecidos, productos distintos);
+ * Estos tests codifican fallos reales observados en producción:
+ *  - se aceptó una cotización de "acetona" cuando el catálogo de ESTA empresa
+ *    ficticia sólo tiene "acetatos" (nombres parecidos, productos distintos);
  *  - se canalizó a Ventas una solicitud de "óxido nitroso", que no se vende.
+ *
+ * La existencia se comprueba contra el CATÁLOGO DECLARADO del tenant, no contra
+ * el markdown crawleado del sitio. Antes se hacía contra el corpus documental y
+ * eso producía falsos negativos silenciosos: el sitio de Grupo Yoma sólo publica
+ * ficha de 38 de sus 63 productos, así que el asistente negaba 26 productos
+ * reales. El markdown alimenta el RAG que redacta; no decide qué existe.
  */
 
-const CATALOGO = `# Catálogo
+/** Markdown del sitio: alimenta el RAG, NO decide existencia. */
+const CATALOGO_MD = `# Catálogo
 ### Alcohol Isopropílico
 ### Acetato de Etilo
-### Acetato de Butilo
 ### Tolueno
-### Xileno
-### Monómero de Estireno
 Presentaciones: pipa, tambos de 200 l, porrones de 20 l y 50 l.
 `;
 
-function seedKnowledge(tenantId: string, content = CATALOGO): void {
-  const dir = websiteCacheDir(tenantId);
-  fs.mkdirSync(dir, { recursive: true });
-  fs.writeFileSync(path.join(dir, 'catalogo.md'), content, 'utf8');
+function seedKnowledge(tenantId: string): void {
+  writeCatalog(tenantId, fixtureCatalog());
+  clearTenantCache();
   clearVerifierCache();
 }
 
@@ -141,31 +144,18 @@ describe('verificación de términos contra el conocimiento', () => {
   });
 });
 
-describe('el catálogo es la fuente de verdad, no todo el sitio', () => {
-  it('un químico mencionado en el blog NO cuenta como catalogado', () => {
-    // Frágil de otro modo: en cuanto el cliente publique un artículo que
-    // mencione un producto que no vende, el asistente lo ofrecería.
-    writeTenant('fuente-verdad', {
-      company: `company:
-  id: fuente-verdad
-  name: "Fuente de Verdad"
-  website: "https://ejemplo.test"
-  catalog_url: "https://ejemplo.test/products.html"
-  catalog_sources:
-    - "products.html"
-assistant:
-  display_name: "Asistente"
-  locale: es-MX
-channels:
-  whatsapp:
-    enabled: false
-`,
-    });
-    clearTenantCache();
+describe('el catálogo declarado decide, el markdown del sitio no', () => {
+  it('un producto mencionado en el sitio NO existe si no está declarado', () => {
+    // Antes bastaba con que la palabra apareciera en alguna página crawleada. En
+    // cuanto el cliente publicara un artículo mencionando un producto que no
+    // vende, el asistente lo ofrecería. Y al revés, y peor: lo que la empresa sí
+    // vende pero no publica en ficha, se negaba.
+    writeTenant('fuente-verdad');
+    seedKnowledge('fuente-verdad');
 
     const dir = websiteCacheDir('fuente-verdad');
     fs.mkdirSync(dir, { recursive: true });
-    fs.writeFileSync(path.join(dir, 'products.html--aaa.md'), CATALOGO, 'utf8');
+    fs.writeFileSync(path.join(dir, 'products.html--aaa.md'), CATALOGO_MD, 'utf8');
     fs.writeFileSync(
       path.join(dir, 'blog.html--bbb.md'),
       '# Blog\nHablemos del uso industrial de la acetona y del hidróxido de sodio.',
@@ -175,24 +165,50 @@ channels:
 
     const config = requireTenantConfig('fuente-verdad');
 
-    // Está en el catálogo → sí.
     expect(verifyTerm(config, 'tolueno')).toBe('FOUND');
-    // Sólo aparece en el blog → NO se vende.
+    // Aparece en el sitio, pero no está declarado: el texto no crea existencia.
     expect(verifyTerm(config, 'acetona')).toBe('NOT_FOUND');
     expect(verifyTerm(config, 'hidróxido de sodio')).toBe('NOT_FOUND');
   });
 
-  it('sin catalog_sources se usa todo el sitio', () => {
-    writeTenant('sin-fuente');
+  it('un producto declarado existe aunque el sitio no lo publique', () => {
+    // Este es el fallo que costó cuatro ventas: Acetona, MEK, Thinner Americano y
+    // Sosa Cáustica están en el catálogo oficial de Grupo Yoma y NO tienen ficha
+    // en el sitio, así que el verificador documental los negaba.
+    writeTenant('solo-declarado');
+    writeCatalog('solo-declarado', {
+      schemaVersion: '1.0.0',
+      products: [
+        {
+          id: 'producto-sin-ficha',
+          canonicalName: 'Producto Sin Ficha',
+          sourcePresence: { pdf2025: true, webCatalog: false, detailPage: false },
+        },
+      ],
+    });
     clearTenantCache();
-
-    const dir = websiteCacheDir('sin-fuente');
-    fs.mkdirSync(dir, { recursive: true });
-    fs.writeFileSync(path.join(dir, 'blog.html--ccc.md'), 'Vendemos acetona industrial.', 'utf8');
     clearVerifierCache();
 
-    // Comportamiento heredado: sin declarar el catálogo, todo cuenta.
-    expect(verifyTerm(requireTenantConfig('sin-fuente'), 'acetona')).toBe('FOUND');
+    // No hay NADA en el sitio crawleado, ni una página.
+    expect(fs.existsSync(websiteCacheDir('solo-declarado'))).toBe(false);
+
+    const config = requireTenantConfig('solo-declarado');
+    expect(verifyTerm(config, 'Producto Sin Ficha')).toBe('FOUND');
+    // Y existir no implica conocer presentaciones: eso se pregunta, no se inventa.
+    expect(verifyTerm(config, 'otro producto cualquiera')).toBe('NOT_FOUND');
+  });
+
+  it('sin catálogo declarado no se afirma ni se niega nada', () => {
+    // NO_KNOWLEDGE no autoriza negar. Antes, un tenant sin conocimiento cargado
+    // se comportaba como si nada existiera.
+    writeTenant('sin-catalogo-decl');
+    clearTenantCache();
+    clearVerifierCache();
+
+    const config = requireTenantConfig('sin-catalogo-decl');
+    expect(verifyTerm(config, 'tolueno')).toBe('NO_KNOWLEDGE');
+    expect(verifyTerm(config, 'óxido nitroso')).toBe('NO_KNOWLEDGE');
+    expect(verifyCaseFields(config, 'SALES_QUOTE', { product: 'óxido nitroso' })).toEqual([]);
   });
 });
 
@@ -206,16 +222,24 @@ describe('rellenar el producto que la persona sí nombró', () => {
     seedKnowledge('relleno');
     const config = requireTenantConfig('relleno');
 
+    // Devuelve el nombre CANÓNICO, no lo que la persona escribió: así el caso
+    // que le llega al área dice "Tolueno" y dos personas que piden lo mismo con
+    // palabras distintas producen el mismo dato.
     expect(
       resolveKnownProduct(config, candidateProductTerms('necesito cotizar tolueno en tambos')),
-    ).toContain('tolueno');
+    ).toBe('Tolueno');
 
     expect(
       resolveKnownProduct(
         config,
         candidateProductTerms('quiero 200 litros de alcohol isopropilico'),
       ),
-    ).toContain('alcohol');
+    ).toBe('Alcohol Isopropílico');
+
+    // Y por alias químico: quien dice "isopropanol" pide el mismo producto.
+    expect(resolveKnownProduct(config, candidateProductTerms('cotizar isopropanol'))).toBe(
+      'Alcohol Isopropílico',
+    );
   });
 
   it('no rellena nada si lo que pidió no está en el catálogo', () => {

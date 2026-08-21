@@ -188,7 +188,9 @@ export interface GuardContext {
    * Comprueba un término contra la documentación del tenant. Se inyecta para
    * que el guardián siga siendo puro y testeable sin tocar disco.
    */
-  verify?: (term: string) => 'FOUND' | 'NOT_FOUND' | 'NO_KNOWLEDGE';
+  // AMBIGUOUS no bloquea: "manejamos thinner" es cierto (hay tres), sólo falta
+  // saber cuál. Bloquearlo haría negar productos declarados.
+  verify?: (term: string) => 'FOUND' | 'AMBIGUOUS' | 'NOT_FOUND' | 'NO_KNOWLEDGE';
   /** true si en este turno la aplicación YA canalizó con éxito algún caso. */
   deliveryAuthorized: boolean;
   /** Alcance máximo autorizado si `deliveryAuthorized`. */
@@ -278,7 +280,7 @@ function findUnverifiedOffering(text: string, ctx: GuardContext): string | null 
       if (words.length === 0) continue;
       // Se prueban las variantes más largas primero: "óxido nitroso" antes que
       // "óxido", para no señalar una palabra suelta que sí exista por su cuenta.
-      for (let len = Math.min(3, words.length); len >= 1; len -= 1) {
+      for (let len = Math.min(4, words.length); len >= 1; len -= 1) {
         const term = words.slice(0, len).join(' ');
         const normalized = term
           .toLowerCase()
@@ -287,7 +289,15 @@ function findUnverifiedOffering(text: string, ctx: GuardContext): string | null 
         if (normalized.split(/\s+/).every((w) => GENERIC_TERMS.has(w))) continue;
         if (normalized.replace(/[^a-z0-9]/g, '').length < 4) continue;
 
-        if (ctx.verify(term) === 'NOT_FOUND') return term;
+        const result = ctx.verify(term);
+
+        // Si la variante LARGA sí existe, las cortas son prefijos suyos y no hay
+        // nada que reportar. Sin este corte el guard bloqueaba respuestas
+        // correctas: "Metil Isobutil Cetona" existe, pero al seguir probando,
+        // "Metil Isobutil" daba NOT_FOUND y se descartaba una respuesta buena.
+        if (result === 'FOUND' || result === 'AMBIGUOUS') break;
+
+        if (result === 'NOT_FOUND') return term;
       }
     }
   }

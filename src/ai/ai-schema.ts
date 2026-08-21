@@ -17,6 +17,8 @@ export const AI_OUTPUT_JSON_SCHEMA = {
   required: [
     'reply',
     'detected_intents',
+    'product_query',
+    'product_attributes',
     'field_updates',
     'customer_sentiment',
     'urgency_signal',
@@ -43,6 +45,36 @@ export const AI_OUTPUT_JSON_SCHEMA = {
         properties: {
           intent: { type: 'string', enum: [...INTENTS] },
           confidence: { type: 'number', description: 'Entre 0 y 1.' },
+        },
+      },
+    },
+    product_query: {
+      type: 'string',
+      description:
+        'SÓLO el nombre del producto que la persona pide, sin cantidades, sin presentación y sin envase. De "27 tambos de thiner americano" el valor es "thiner americano". De "etanol de 20 litros" es "etanol". De "3 tambores de alcohol etílico" es "alcohol etílico". Cadena vacía si no está pidiendo un producto concreto. Este valor se usa para buscar el producto en el catálogo, así que cualquier palabra que no sea parte del nombre impide encontrarlo.',
+    },
+    product_attributes: {
+      type: 'object',
+      additionalProperties: false,
+      required: ['presentation_quantity', 'presentation_unit', 'container', 'requested_quantity'],
+      description:
+        'Lo que la persona pidió ALREDEDOR del producto: tamaño de la presentación, envase y cuántas piezas. Va aparte del nombre porque que no exista una presentación no significa que no exista el producto.',
+      properties: {
+        presentation_quantity: {
+          type: 'string',
+          description: 'Tamaño de cada envase, sólo el número. De "tambos de 200 L" es "200". Vacío si no lo dijo.',
+        },
+        presentation_unit: {
+          type: 'string',
+          description: 'Unidad de la presentación: L, ml, kg, ton. Vacío si no la dijo.',
+        },
+        container: {
+          type: 'string',
+          description: 'Envase: tambor, tambo, porrón, pipa, cubeta, granel. Vacío si no lo dijo.',
+        },
+        requested_quantity: {
+          type: 'string',
+          description: 'Cuántas piezas o cuánto volumen total quiere. De "27 tambos" es "27". Vacío si no lo dijo.',
         },
       },
     },
@@ -122,9 +154,19 @@ export interface AiGap {
   missing_information: string;
 }
 
+export interface AiProductAttributes {
+  presentation_quantity: string;
+  presentation_unit: string;
+  container: string;
+  requested_quantity: string;
+}
+
 export interface AiTurnOutput {
   reply: string;
   detected_intents: AiDetectedIntent[];
+  /** Sólo el nombre del producto, sin cantidades ni presentación. */
+  product_query: string;
+  product_attributes: AiProductAttributes;
   field_updates: AiFieldUpdate[];
   customer_sentiment: Sentiment;
   urgency_signal: Urgency;
@@ -154,9 +196,19 @@ export function normalizeAiOutput(raw: unknown): AiTurnOutput {
       confidence: Math.min(1, Math.max(0, Number(d.confidence) || 0)),
     }));
 
+  const attrs = (o.product_attributes ?? {}) as Partial<AiProductAttributes>;
+  const str = (v: unknown): string => (typeof v === 'string' ? v.trim() : '');
+
   return {
     reply: typeof o.reply === 'string' ? o.reply.trim() : '',
     detected_intents: dedupeIntents(intents),
+    product_query: str(o.product_query),
+    product_attributes: {
+      presentation_quantity: str(attrs.presentation_quantity),
+      presentation_unit: str(attrs.presentation_unit),
+      container: str(attrs.container),
+      requested_quantity: str(attrs.requested_quantity),
+    },
     field_updates: (Array.isArray(o.field_updates) ? o.field_updates : [])
       .filter((f) => f && typeof f.key === 'string' && typeof f.value === 'string')
       .map((f) => ({ workflow: String(f.workflow ?? ''), key: f.key, value: f.value })),

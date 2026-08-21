@@ -445,6 +445,7 @@ describe('constructor del system prompt', () => {
       ambiguityCount: 0,
       hasKnowledge: true,
       globalCannotDo: ['dar precios'],
+      mentionedProducts: [],
       ...overrides,
     });
   }
@@ -491,6 +492,7 @@ tones: {}
       ambiguityCount: 0,
       hasKnowledge: false,
       globalCannotDo: [],
+      mentionedProducts: [],
     });
     expect(text).toContain('Marca Distinta');
     expect(text).toContain('de tú');
@@ -510,6 +512,7 @@ tones: {}
           routed: false,
           confirmationSemantics: null,
           unverified: [],
+          catalog: [],
         },
       ],
     });
@@ -541,6 +544,7 @@ tones: {}
           registered: false,
           confirmationSemantics: null,
           unverified: [],
+          catalog: [],
         },
       ],
     });
@@ -559,6 +563,7 @@ tones: {}
           registered: true,
           confirmationSemantics: 'REGISTERED_ONLY',
           unverified: [],
+          catalog: [],
         },
       ],
     });
@@ -581,6 +586,7 @@ tones: {}
           registered: true,
           confirmationSemantics: 'REGISTERED_ONLY',
           unverified: [],
+          catalog: [],
         },
       ],
     });
@@ -602,6 +608,7 @@ tones: {}
           registered: true,
           confirmationSemantics: null,
           unverified: [],
+          catalog: [],
         },
       ],
     });
@@ -623,6 +630,7 @@ tones: {}
           registered: false,
           confirmationSemantics: null,
           unverified: [],
+          catalog: [],
         },
       ],
     });
@@ -631,7 +639,11 @@ tones: {}
   });
 
   it('ante un producto no catalogado, nombra el producto y remite al catálogo', () => {
-    const status = evaluateFields(wf, { product: 'thinner americano' }, { channel: 'whatsapp', phone: '+1' });
+    // Nota: se usa "óxido nitroso" y NO "thinner americano" como en la primera
+    // versión de este test. Grupo Yoma SÍ vende Thinner Americano —está en su
+    // catálogo oficial 2025— y usarlo aquí codificaba como correcto justo el
+    // falso negativo que nos costó la venta.
+    const status = evaluateFields(wf, { product: 'óxido nitroso' }, { channel: 'whatsapp', phone: '+1' });
     const text = prompt({
       activeCases: [
         {
@@ -647,19 +659,85 @@ tones: {}
           unverified: [
             {
               field: 'product',
-              value: 'thinner americano',
+              value: 'óxido nitroso',
               reason: 'no aparece en la documentación de la empresa',
+            },
+          ],
+          catalog: [],
+        },
+      ],
+    });
+
+    // Debe decirlo claro, con el nombre, y apuntar a dónde ver lo que sí hay.
+    expect(text).toContain('no manejamos "óxido nitroso"');
+    expect(text).toContain('https://ejemplo.test');
+    // Y no seguir recabando datos de algo que no se vende.
+    expect(text).toContain('NO pidas más datos de esta solicitud');
+  });
+
+  it('ante una familia de productos, confirma que sí y pregunta cuál', () => {
+    // "thinner" son tres productos distintos. Negarlo sería falso y elegir uno
+    // vendería algo que no pidieron: hay que preguntar.
+    const status = evaluateFields(wf, { product: 'thinner' }, { channel: 'whatsapp', phone: '+1' });
+    const text = prompt({
+      activeCases: [
+        {
+          caseId: 1,
+          folio: 'COT-0001',
+          workflowKey: 'SALES_QUOTE',
+          departmentKey: 'SALES',
+          status,
+          routed: false,
+          justRouted: false,
+          registered: false,
+          confirmationSemantics: null,
+          unverified: [],
+          catalog: [
+            {
+              field: 'product',
+              value: 'thinner',
+              kind: 'AMBIGUOUS',
+              familyLabel: 'thinner',
+              candidates: ['Thinner Acrilico', 'Thinner Americano', 'Thinner Standard'],
             },
           ],
         },
       ],
     });
 
-    // Debe decirlo claro, con el nombre, y apuntar a dónde ver lo que sí hay.
-    expect(text).toContain('no manejamos "thinner americano"');
-    expect(text).toContain('https://ejemplo.test');
-    // Y no seguir recabando datos de algo que no se vende.
-    expect(text).toContain('NO pidas más datos de esta solicitud');
+    expect(text).toContain('SÍ los manejamos: Thinner Acrilico, Thinner Americano, Thinner Standard');
+    expect(text).toContain('tipos de thinner');
+    expect(text).toContain('NO elijas tú una');
+    // Y jamás debe negarlo.
+    expect(text).toContain('NO digas que no manejamos "thinner"');
+  });
+
+  it('ante un producto sin presentaciones publicadas, confirma y pregunta el envase', () => {
+    // 26 de los 64 productos sólo vienen en el catálogo oficial, sin ficha: se
+    // sabe que existen, no en qué envases vienen. Inventarlo sería peor.
+    const status = evaluateFields(wf, { product: 'Acetona' }, { channel: 'whatsapp', phone: '+1' });
+    const text = prompt({
+      activeCases: [
+        {
+          caseId: 1,
+          folio: 'COT-0001',
+          workflowKey: 'SALES_QUOTE',
+          departmentKey: 'SALES',
+          status,
+          routed: false,
+          justRouted: false,
+          registered: false,
+          confirmationSemantics: null,
+          unverified: [],
+          catalog: [
+            { field: 'product', value: 'Acetona', kind: 'NO_PRESENTATIONS', candidates: [], canonicalName: 'Acetona' },
+          ],
+        },
+      ],
+    });
+
+    expect(text).toContain('SÍ MANEJAMOS "Acetona"');
+    expect(text).toContain('NO inventes envases');
   });
 
   it('el texto de respaldo nunca cita el término capturado por el guardián', () => {

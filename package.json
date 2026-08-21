@@ -25,7 +25,9 @@
     "chat": "tsx scripts/cli-chat.ts",
     "eval:demo": "tsx scripts/eval-demo.ts",
     "usage:report": "tsx scripts/usage-report.ts",
-    "data:purge": "tsx scripts/data-purge.ts"
+    "data:purge": "tsx scripts/data-purge.ts",
+    "catalog:check": "tsx scripts/catalog-check.ts",
+    "demo:smoke": "tsx scripts/demo-smoke.ts"
   },
   "dependencies": {
     "better-sqlite3": "^13.0.3",

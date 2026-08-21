@@ -1,6 +1,7 @@
 import type { AppMode } from '../config/env';
 import type { TenantConfig } from '../tenants/config-schema';
 import { isTodo } from '../tenants/config-schema';
+import type { CatalogFinding } from '../knowledge/knowledge-verifier';
 import type { Sentiment } from '../types/domain';
 import { allFields, type FieldStatus } from '../workflows/field-engine';
 import { departmentName, enabledWorkflows, fieldLabel, toneFor } from '../workflows/workflow-engine';
@@ -41,6 +42,12 @@ export interface ActiveCaseView {
    * Lo determina la aplicación buscando en el conocimiento real, no el modelo.
    */
   unverified: Array<{ field: string; value: string; reason: string }>;
+  /**
+   * El producto SÍ existe, pero falta algo antes de dar la solicitud por buena:
+   * o se pidió una familia y hay que preguntar cuál, o no conocemos sus envases.
+   * Lo resuelve la aplicación contra el catálogo declarado, no el modelo.
+   */
+  catalog: CatalogFinding[];
 }
 
 export interface PromptContext {
@@ -56,6 +63,31 @@ export interface PromptContext {
   hasKnowledge: boolean;
   /** Cosas que ningún workflow habilitado puede resolver. */
   globalCannotDo: string[];
+  /**
+   * Productos que la persona acaba de mencionar, ya resueltos contra el catálogo
+   * declarado ANTES de generar la respuesta.
+   *
+   * Sin esto el modelo no sabía nada del producto en el primer turno: los
+   * hallazgos del catálogo se calculan del estado previo, y en el turno en que
+   * alguien pide algo por primera vez todavía no hay caso. El resultado medido
+   * fue que ante "necesito acetona" el asistente ofreció "acetato y otras
+   * opciones similares" —la sustitución que este sistema debe impedir— en lugar
+   * de confirmar un producto que sí se vende.
+   */
+  mentionedProducts: MentionedProduct[];
+}
+
+export interface MentionedProduct {
+  /** Lo que la persona escribió. */
+  term: string;
+  status: 'MATCH' | 'AMBIGUOUS' | 'NO_MATCH';
+  /** MATCH: nombre del catálogo, que es el que se debe usar al responder. */
+  canonicalName?: string;
+  /** MATCH: presentaciones publicadas. Vacío = no se conocen, hay que preguntar. */
+  presentations?: string;
+  /** AMBIGUOUS: entre estos hay que preguntar. */
+  candidates?: string[];
+  familyLabel?: string;
 }
 
 const NL = '\n';
@@ -247,6 +279,26 @@ export function buildSystemPrompt(ctx: PromptContext): string {
     ]),
   );
 
+  // ── Catálogo: lo que se acaba de mencionar ─────────────────────────────────
+  //
+  // Va ANTES del estado y del protocolo porque es lo que decide si la respuesta
+  // afirma, niega o pregunta. Lo resolvió la aplicación contra el catálogo
+  // declarado, así que es un hecho, no una sugerencia.
+  if (ctx.mentionedProducts.length > 0) {
+    parts.push(
+      section('Productos que mencionó y qué sabemos de ellos', [
+        'Esto lo resolvió la aplicación contra el catálogo. Es la verdad: no lo contradigas,',
+        'no lo relativices y no digas que necesitas verificarlo.',
+        '',
+        ...ctx.mentionedProducts.flatMap((m) => mentionedProductLines(m)),
+        '',
+        'NUNCA ofrezcas un producto distinto porque el nombre se parezca. Si alguien pide',
+        'acetona no le ofrezcas acetato: son químicos distintos y entregarle el equivocado',
+        'es peor que decirle que no lo manejamos.',
+      ]),
+    );
+  }
+
   // ── Estado actual ──────────────────────────────────────────────────────────
   parts.push(section('Estado actual de la conversación', buildStateLines(ctx)));
 
@@ -332,6 +384,47 @@ export function buildSystemPrompt(ctx: PromptContext): string {
   }
 
   return parts.filter((p) => p !== '').join(NL);
+}
+
+/**
+ * Cómo debe tratar el modelo cada producto mencionado.
+ *
+ * Los cuatro casos son distintos y confundirlos cuesta ventas: negar lo que se
+ * vende, elegir por la persona entre productos distintos, inventar envases que
+ * la empresa no publica, o afirmar algo que no está en el catálogo.
+ */
+function mentionedProductLines(m: MentionedProduct): string[] {
+  if (m.status === 'MATCH') {
+    const nombre = m.canonicalName ?? m.term;
+    const lines = [`- "${m.term}" → SÍ LO MANEJAMOS. Se llama ${nombre}; usa ese nombre.`];
+    if (m.presentations) {
+      lines.push(`    Presentaciones publicadas: ${m.presentations}`);
+      lines.push('    Puedes mencionarlas. No inventes ninguna que no esté aquí.');
+    } else {
+      lines.push('    NO tenemos publicadas sus presentaciones.');
+      lines.push(
+        '    Confirma que sí lo manejamos y pregunta en qué presentación o volumen lo necesita.',
+      );
+      lines.push('    No inventes envases, litrajes ni pesos: si no aparecen aquí, no los sabes.');
+    }
+    return lines;
+  }
+
+  if (m.status === 'AMBIGUOUS') {
+    const grupo = m.familyLabel ? `tipos de ${m.familyLabel}` : 'variantes';
+    return [
+      `- "${m.term}" → SÍ MANEJAMOS ${grupo}, y son ${(m.candidates ?? []).length} productos distintos:`,
+      `    ${(m.candidates ?? []).join(', ')}.`,
+      '    Confírmalo y pregunta cuál necesita, nombrando las opciones.',
+      '    NO elijas tú una y NO digas que no lo manejamos: manejamos varias.',
+    ];
+  }
+
+  return [
+    `- "${m.term}" → NO ESTÁ en nuestro catálogo.`,
+    '    Dilo claro y sin rodeos, nombrando el producto, e invítale a revisar el catálogo.',
+    '    No pidas cantidad ni presentación de algo que no ofrecemos.',
+  ];
 }
 
 function sentimentGuidance(s: Sentiment): string {
@@ -425,6 +518,31 @@ function buildStateLines(ctx: PromptContext): string[] {
         '  Si dijo haberlo visto en nuestro sitio, no la corrijas con dureza: pudo confundirse con un',
         '  producto de nombre parecido.',
       );
+    }
+
+    // Hallazgos del catálogo: el producto existe, pero falta precisarlo. Van
+    // después de lo NO CONFIRMADO porque negar algo es más urgente que precisarlo.
+    for (const f of c.catalog) {
+      if (f.kind === 'AMBIGUOUS') {
+        const grupo = f.familyLabel ? `tipos de ${f.familyLabel}` : 'variantes';
+        lines.push(
+          `◆ PRECISAR: pidió "${f.value}" y manejamos ${f.candidates.length} productos distintos que corresponden.`,
+          `  SÍ los manejamos: ${f.candidates.join(', ')}.`,
+          '',
+          `  Confirma que sí manejamos ${grupo} y pregunta cuál necesita, nombrando las opciones.`,
+          '  NO elijas tú una: son productos distintos y entregar el que no pidió es un error costoso.',
+          `  NO digas que no manejamos "${f.value}": es falso, manejamos varios.`,
+          '  Hasta que lo aclare, no pidas los demás datos ni des la solicitud por lista.',
+          '',
+        );
+      } else {
+        lines.push(
+          `◆ SÍ MANEJAMOS "${f.canonicalName ?? f.value}", pero no tenemos publicadas sus presentaciones.`,
+          '  Confírmale que sí lo manejamos y pregúntale en qué presentación o volumen lo necesita.',
+          '  NO inventes envases, litrajes ni pesos: si no aparecen aquí, no los sabes.',
+          '',
+        );
+      }
     }
 
     if (c.routed && c.justRouted && c.confirmationSemantics === 'DELIVERED_TO_TEAM') {

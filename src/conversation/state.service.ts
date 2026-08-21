@@ -6,6 +6,7 @@ import { candidateProductTerms, evaluateFields } from '../workflows/field-engine
 import {
   detectUnknownRequest,
   findSubstitutedFields,
+  inspectCatalogFields,
   verifyCaseFields,
 } from '../knowledge/knowledge-verifier';
 import { folioFor } from '../panel/labels';
@@ -78,6 +79,9 @@ export function snapshotConversation(
         // que no aparece en el catálogo. Sin esto nadie puede avisarlo.
         ...unknownRequestFor(config, c.row.workflow_key, status.known, userMessages),
       ],
+      // El producto existe, pero hay que precisarlo antes de darlo por bueno:
+      // una familia ("thinner") o un producto sin presentaciones publicadas.
+      catalog: inspectCatalogFields(config, c.row.workflow_key, status.known),
     });
   }
 

@@ -129,3 +129,84 @@ fallback:
 
   return dir;
 }
+
+/** Escribe el catálogo declarado del tenant, que es la fuente de existencia. */
+export function writeCatalog(tenantId: string, catalog: unknown): void {
+  const dir = path.join(onboardingDir(), tenantId);
+  fs.mkdirSync(dir, { recursive: true });
+  fs.writeFileSync(
+    path.join(dir, 'catalog.json'),
+    `${JSON.stringify(catalog, null, 2)}\n`,
+    'utf8',
+  );
+}
+
+/**
+ * Catálogo pequeño de una empresa ficticia.
+ *
+ * Deliberadamente NO incluye acetona, thinner ni sosa cáustica: así los tests
+ * que comprueban que no se inventan productos siguen siendo verdaderos. (El
+ * catálogo real de Grupo Yoma sí los vende, y afirmar lo contrario en un test
+ * fue justo el error que nos costó cuatro ventas.)
+ */
+export function fixtureCatalog(): unknown {
+  const p = (
+    id: string,
+    canonicalName: string,
+    extra: Record<string, unknown> = {},
+  ): Record<string, unknown> => ({
+    id,
+    canonicalName,
+    aliasesOfficial: [],
+    aliasesCommon: [],
+    variants: [],
+    families: [],
+    cas: null,
+    description: null,
+    presentations: [],
+    applications: [],
+    sourceNames: { pdf2025: [], web: [canonicalName] },
+    sourcePresence: { pdf2025: false, webCatalog: true, detailPage: true },
+    sourceUrls: [],
+    dataQualityFlags: [],
+    ...extra,
+  });
+
+  return {
+    schemaVersion: '1.0.0',
+    catalogName: 'Catálogo de prueba',
+    generatedAt: '2026-01-01',
+    families: { acetato: { label: 'acetato', terms: ['acetato', 'acetatos'] } },
+    resolverConfig: {
+      matchOrder: ['canonicalName', 'aliasesOfficial', 'aliasesCommon', 'cas'],
+      noSemanticExistenceProof: true,
+      ambiguousIfMultipleExactAliasTargets: true,
+    },
+    products: [
+      p('alcohol-isopropilico', 'Alcohol Isopropílico', {
+        aliasesCommon: ['isopropanol', 'IPA'],
+        cas: '67-63-0',
+        presentations: [
+          { container: 'tambor', quantities: [200], unit: 'l', raw: 'Tambos: 200 l' },
+        ],
+      }),
+      p('acetato-de-etilo', 'Acetato de Etilo', { families: ['acetato'], cas: '141-78-6' }),
+      p('acetato-de-butilo', 'Acetato de Butilo', { families: ['acetato'], cas: '123-86-4' }),
+      p('tolueno', 'Tolueno', { aliasesCommon: ['toluol'], cas: '108-88-3' }),
+      p('xileno', 'Xileno', { aliasesCommon: ['xilol'], cas: '1330-20-7' }),
+      p('monomero-de-estireno', 'Monómero de Estireno', { aliasesCommon: ['estireno'] }),
+    ],
+  };
+}
+
+/**
+ * Catálogo REAL de Grupo Yoma tal como se despliega.
+ *
+ * Los tests que dependen de él comprueban el dato publicado, no un fixture
+ * inventado: el fallo que nos costó cuatro ventas fue exactamente que el dato
+ * real no contenía lo que el código suponía.
+ */
+export function realYomaCatalog(): unknown {
+  const file = path.join(__dirname, '..', '..', 'onboarding', 'grupo-yoma', 'catalog.json');
+  return JSON.parse(fs.readFileSync(file, 'utf8'));
+}

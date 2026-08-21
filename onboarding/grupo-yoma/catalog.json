@@ -1,0 +1,3598 @@
+{
+  "schemaVersion": "1.0.0",
+  "catalogName": "Grupo Yoma - Catálogo consolidado",
+  "generatedAt": "2026-08-21",
+  "sourceAuthority": {
+    "existenceRule": "A product is considered cataloged if it appears in either the current official products web catalog/detail pages or the currently linked official PDF 'Catálogo Completo 2025'. Semantic similarity alone must never create a product.",
+    "detailRule": "CAS, description, presentations and applications are populated only from current official web detail pages when available. PDF-only products intentionally keep those fields null/empty rather than inventing data.",
+    "productIdentityRule": "Canonical product identity is separate from requested presentation, quantity, container, grade and other modifiers."
+  },
+  "sources": {
+    "webCatalog": "https://grupoyoma.com.mx/products.html",
+    "pdfCatalog2025": "https://grupoyoma.com.mx/assets/docs/CATALOGO%20DE%20PRODUCTOS%202025.pdf"
+  },
+  "audit": {
+    "pdfCatalogRows": 63,
+    "webCatalogUniqueProducts": 38,
+    "mergedUniqueProductEntities": 64,
+    "productsPresentInBothSources": 36,
+    "pdfOnlyProductEntities": 26,
+    "webOnlyProductEntities": 2,
+    "duplicateCurrentDetailPagesObserved": [
+      {
+        "canonicalName": "Alcohol Etílico",
+        "urls": [
+          "https://grupoyoma.com.mx/product-single-Product7.html",
+          "https://grupoyoma.com.mx/product-single-Product45.html"
+        ]
+      },
+      {
+        "canonicalName": "Glicerina",
+        "urls": [
+          "https://grupoyoma.com.mx/product-single-Product25.html",
+          "https://grupoyoma.com.mx/product-single-Product44.html"
+        ]
+      }
+    ],
+    "excludedNonAuthoritativeOrLegacyPages": [
+      {
+        "url": "https://grupoyoma.com.mx/product-single-Product2.html",
+        "reason": "Orphan/template-like page not linked from the current products catalog; contains placeholder CAS 'XXX#000-00-0' and generic placeholder synonyms/applications."
+      },
+      {
+        "url": "https://www.grupoyoma.com.mx/product-single-Product4.html",
+        "reason": "Legacy duplicate page for Monómero de Estireno; current catalog links Product37 instead. Kept out of authoritative detail data to avoid conflicting presentations."
+      }
+    ],
+    "pdfOnlyCanonicalNames": [
+      "Acetato de Butil Cellosolve",
+      "Acetato de Cellosolve",
+      "Acetato de Metilo",
+      "Acetona",
+      "Acrilato de Butilo",
+      "Alcohol Di-Acetona",
+      "Alico 9",
+      "Aromina 100",
+      "Aromina 150",
+      "Cellosolve o Etoxietanol",
+      "Ciclohexanona",
+      "Dibutil Ftalato",
+      "Dimetil Formamida",
+      "Disobutil Cetona",
+      "Exxsol D-40",
+      "Exxsol D-60",
+      "Gasolina Blanca",
+      "Gasolvente",
+      "Isoforona",
+      "Metil Amil Cetona",
+      "Metil Etil Cetona",
+      "Monómero Acetato de Vinilo",
+      "Sosa Caústica en Escamas",
+      "Thinner Acrilico",
+      "Thinner Americano",
+      "Thinner Standard"
+    ],
+    "webOnlyCanonicalNames": [
+      "Alcohol Isobutílico",
+      "PM Acetato"
+    ]
+  },
+  "resolverConfig": {
+    "normalization": {
+      "caseInsensitive": true,
+      "accentInsensitive": true,
+      "trimWhitespace": true,
+      "collapseWhitespace": true,
+      "normalizeHyphens": true
+    },
+    "matchOrder": [
+      "canonicalName",
+      "aliasesOfficial",
+      "aliasesCommon",
+      "cas"
+    ],
+    "noSemanticExistenceProof": true,
+    "ambiguousIfMultipleExactAliasTargets": true
+  },
+  "products": [
+    {
+      "id": "acetato-de-butil-cellosolve",
+      "canonicalName": "Acetato de Butil Cellosolve",
+      "aliasesOfficial": [],
+      "variants": [],
+      "cas": null,
+      "description": null,
+      "presentations": [],
+      "applications": [],
+      "sourcePresence": {
+        "pdf2025": true,
+        "webCatalog": false,
+        "detailPage": false
+      },
+      "sourceNames": {
+        "pdf2025": [
+          "Acetato de Butil Cellosolve"
+        ],
+        "web": []
+      },
+      "sourceUrls": [
+        "https://grupoyoma.com.mx/assets/docs/CATALOGO%20DE%20PRODUCTOS%202025.pdf"
+      ],
+      "dataQualityFlags": [
+        "pdf_only_no_current_web_detail"
+      ],
+      "aliasesCommon": [],
+      "aliasPolicy": {
+        "aliasesOfficial": "directly derived from Grupo Yoma sources",
+        "aliasesCommon": "conservative common chemical names for resolver convenience; do not use semantic similarity as proof of existence"
+      },
+      "families": [
+        "acetato"
+      ]
+    },
+    {
+      "id": "acetato-de-butilo",
+      "canonicalName": "Acetato de Butilo",
+      "aliasesOfficial": [],
+      "variants": [],
+      "cas": "123-86-4",
+      "description": "Líquido claro e incoloro de olor dulce y afrutado.",
+      "presentations": [
+        {
+          "container": "pipa",
+          "minQuantity": 5000,
+          "maxQuantity": 35000,
+          "unit": "kg",
+          "raw": "Pipa: 5000 kg hasta 35,000 kg."
+        },
+        {
+          "container": "tambor",
+          "quantities": [
+            200
+          ],
+          "unit": "L",
+          "raw": "Tambos: 200 l."
+        },
+        {
+          "container": "porrón",
+          "quantities": [
+            20,
+            50
+          ],
+          "unit": "L",
+          "raw": "Porrones: 20 l y 50 l."
+        }
+      ],
+      "applications": [
+        "Fabricación de perfumes, cosméticos, en pinturas, lacas, adhesivos y quita esmaltes."
+      ],
+      "sourcePresence": {
+        "pdf2025": true,
+        "webCatalog": true,
+        "detailPage": true
+      },
+      "sourceNames": {
+        "pdf2025": [
+          "Acetato de Butilo"
+        ],
+        "web": [
+          "Acetato de Butilo"
+        ]
+      },
+      "sourceUrls": [
+        "https://grupoyoma.com.mx/products.html",
+        "https://grupoyoma.com.mx/product-single-Product1.html",
+        "https://grupoyoma.com.mx/assets/docs/CATALOGO%20DE%20PRODUCTOS%202025.pdf"
+      ],
+      "dataQualityFlags": [],
+      "aliasesCommon": [
+        "butyl acetate",
+        "n-butyl acetate"
+      ],
+      "aliasPolicy": {
+        "aliasesOfficial": "directly derived from Grupo Yoma sources",
+        "aliasesCommon": "conservative common chemical names for resolver convenience; do not use semantic similarity as proof of existence"
+      },
+      "families": [
+        "acetato"
+      ]
+    },
+    {
+      "id": "acetato-de-cellosolve",
+      "canonicalName": "Acetato de Cellosolve",
+      "aliasesOfficial": [],
+      "variants": [],
+      "cas": null,
+      "description": null,
+      "presentations": [],
+      "applications": [],
+      "sourcePresence": {
+        "pdf2025": true,
+        "webCatalog": false,
+        "detailPage": false
+      },
+      "sourceNames": {
+        "pdf2025": [
+          "Acetato de Cellosolve"
+        ],
+        "web": []
+      },
+      "sourceUrls": [
+        "https://grupoyoma.com.mx/assets/docs/CATALOGO%20DE%20PRODUCTOS%202025.pdf"
+      ],
+      "dataQualityFlags": [
+        "pdf_only_no_current_web_detail"
+      ],
+      "aliasesCommon": [],
+      "aliasPolicy": {
+        "aliasesOfficial": "directly derived from Grupo Yoma sources",
+        "aliasesCommon": "conservative common chemical names for resolver convenience; do not use semantic similarity as proof of existence"
+      },
+      "families": [
+        "acetato"
+      ]
+    },
+    {
+      "id": "acetato-de-etilo",
+      "canonicalName": "Acetato de Etilo",
+      "aliasesOfficial": [],
+      "variants": [],
+      "cas": "141-78-6",
+      "description": "Líquido claro e incoloro de olor afrutado.",
+      "presentations": [
+        {
+          "container": "pipa",
+          "minQuantity": 5000,
+          "maxQuantity": 35000,
+          "unit": "kg",
+          "raw": "Pipa: 5000 kg hasta 35,000 kg."
+        },
+        {
+          "container": "tambor",
+          "quantities": [
+            200
+          ],
+          "unit": "L",
+          "raw": "Tambos: 200 l."
+        },
+        {
+          "container": "porrón",
+          "quantities": [
+            20,
+            50
+          ],
+          "unit": "L",
+          "raw": "Porrones: 20 l y 50 l."
+        }
+      ],
+      "applications": [
+        "Quitaesmaltes, pegamentos en tinas para impresión."
+      ],
+      "sourcePresence": {
+        "pdf2025": true,
+        "webCatalog": true,
+        "detailPage": true
+      },
+      "sourceNames": {
+        "pdf2025": [
+          "Acetato de Etilo"
+        ],
+        "web": [
+          "Acetato de Etilo"
+        ]
+      },
+      "sourceUrls": [
+        "https://grupoyoma.com.mx/products.html",
+        "https://grupoyoma.com.mx/product-single-Product6.html",
+        "https://grupoyoma.com.mx/assets/docs/CATALOGO%20DE%20PRODUCTOS%202025.pdf"
+      ],
+      "dataQualityFlags": [
+        "cas_duplicated_on_website:141-78-6"
+      ],
+      "aliasesCommon": [
+        "ethyl acetate"
+      ],
+      "aliasPolicy": {
+        "aliasesOfficial": "directly derived from Grupo Yoma sources",
+        "aliasesCommon": "conservative common chemical names for resolver convenience; do not use semantic similarity as proof of existence"
+      },
+      "families": [
+        "acetato"
+      ]
+    },
+    {
+      "id": "acetato-de-isopropilo",
+      "canonicalName": "Acetato de Isopropilo",
+      "aliasesOfficial": [],
+      "variants": [],
+      "cas": "128-21-4",
+      "description": "Líquido claro e incoloro de olor afrutado.",
+      "presentations": [
+        {
+          "container": "pipa",
+          "minQuantity": 5000,
+          "maxQuantity": 35000,
+          "unit": "kg",
+          "raw": "Pipa: 5000 kg hasta 35,000 kg."
+        },
+        {
+          "container": "tambor",
+          "quantities": [
+            200
+          ],
+          "unit": "L",
+          "raw": "Tambos: 200 l."
+        },
+        {
+          "container": "porrón",
+          "quantities": [
+            20,
+            50
+          ],
+          "unit": "L",
+          "raw": "Porrones: 20 l y 50 l."
+        }
+      ],
+      "applications": [
+        "Fabricación de tintas de impresión, fragancias, cosméticos y barnices."
+      ],
+      "sourcePresence": {
+        "pdf2025": true,
+        "webCatalog": true,
+        "detailPage": true
+      },
+      "sourceNames": {
+        "pdf2025": [
+          "Acetato de Isopropilo"
+        ],
+        "web": [
+          "Acetato de Isopropilo"
+        ]
+      },
+      "sourceUrls": [
+        "https://grupoyoma.com.mx/products.html",
+        "https://grupoyoma.com.mx/product-single-Product14.html",
+        "https://grupoyoma.com.mx/assets/docs/CATALOGO%20DE%20PRODUCTOS%202025.pdf"
+      ],
+      "dataQualityFlags": [],
+      "aliasesCommon": [
+        "isopropyl acetate"
+      ],
+      "aliasPolicy": {
+        "aliasesOfficial": "directly derived from Grupo Yoma sources",
+        "aliasesCommon": "conservative common chemical names for resolver convenience; do not use semantic similarity as proof of existence"
+      },
+      "families": [
+        "acetato"
+      ]
+    },
+    {
+      "id": "acetato-de-metilo",
+      "canonicalName": "Acetato de Metilo",
+      "aliasesOfficial": [],
+      "variants": [],
+      "cas": null,
+      "description": null,
+      "presentations": [],
+      "applications": [],
+      "sourcePresence": {
+        "pdf2025": true,
+        "webCatalog": false,
+        "detailPage": false
+      },
+      "sourceNames": {
+        "pdf2025": [
+          "Acetato de Metilo"
+        ],
+        "web": []
+      },
+      "sourceUrls": [
+        "https://grupoyoma.com.mx/assets/docs/CATALOGO%20DE%20PRODUCTOS%202025.pdf"
+      ],
+      "dataQualityFlags": [
+        "pdf_only_no_current_web_detail"
+      ],
+      "aliasesCommon": [],
+      "aliasPolicy": {
+        "aliasesOfficial": "directly derived from Grupo Yoma sources",
+        "aliasesCommon": "conservative common chemical names for resolver convenience; do not use semantic similarity as proof of existence"
+      },
+      "families": [
+        "acetato"
+      ]
+    },
+    {
+      "id": "acetato-de-n-propilo",
+      "canonicalName": "Acetato de N-Propilo",
+      "aliasesOfficial": [],
+      "variants": [],
+      "cas": "109-60-4",
+      "description": "Líquido claro e incoloro de olor suave afrutado.",
+      "presentations": [
+        {
+          "container": "pipa",
+          "minQuantity": 5000,
+          "maxQuantity": 35000,
+          "unit": "kg",
+          "raw": "Pipa: 5000 kg hasta 35,000 kg."
+        },
+        {
+          "container": "tambor",
+          "quantities": [
+            200
+          ],
+          "unit": "L",
+          "raw": "Tambos: 200 l."
+        },
+        {
+          "container": "porrón",
+          "quantities": [
+            20,
+            50
+          ],
+          "unit": "L",
+          "raw": "Porrones: 20 l y 50 l."
+        }
+      ],
+      "applications": [
+        "Fabricación de tintas de impresión, barnices, dilución de resinas y fragancias."
+      ],
+      "sourcePresence": {
+        "pdf2025": true,
+        "webCatalog": true,
+        "detailPage": true
+      },
+      "sourceNames": {
+        "pdf2025": [
+          "Acetato de N-Propilo"
+        ],
+        "web": [
+          "Acetato de N-Propilo"
+        ]
+      },
+      "sourceUrls": [
+        "https://grupoyoma.com.mx/products.html",
+        "https://grupoyoma.com.mx/product-single-Product15.html",
+        "https://grupoyoma.com.mx/assets/docs/CATALOGO%20DE%20PRODUCTOS%202025.pdf"
+      ],
+      "dataQualityFlags": [],
+      "aliasesCommon": [
+        "n-propyl acetate",
+        "propyl acetate"
+      ],
+      "aliasPolicy": {
+        "aliasesOfficial": "directly derived from Grupo Yoma sources",
+        "aliasesCommon": "conservative common chemical names for resolver convenience; do not use semantic similarity as proof of existence"
+      },
+      "families": [
+        "acetato"
+      ]
+    },
+    {
+      "id": "acetona",
+      "canonicalName": "Acetona",
+      "aliasesOfficial": [],
+      "variants": [],
+      "cas": null,
+      "description": null,
+      "presentations": [],
+      "applications": [],
+      "sourcePresence": {
+        "pdf2025": true,
+        "webCatalog": false,
+        "detailPage": false
+      },
+      "sourceNames": {
+        "pdf2025": [
+          "Acetona"
+        ],
+        "web": []
+      },
+      "sourceUrls": [
+        "https://grupoyoma.com.mx/assets/docs/CATALOGO%20DE%20PRODUCTOS%202025.pdf"
+      ],
+      "dataQualityFlags": [
+        "pdf_only_no_current_web_detail"
+      ],
+      "aliasesCommon": [
+        "acetone",
+        "propanona",
+        "dimetil cetona"
+      ],
+      "aliasPolicy": {
+        "aliasesOfficial": "directly derived from Grupo Yoma sources",
+        "aliasesCommon": "conservative common chemical names for resolver convenience; do not use semantic similarity as proof of existence"
+      },
+      "families": []
+    },
+    {
+      "id": "acrilato-de-butilo",
+      "canonicalName": "Acrilato de Butilo",
+      "aliasesOfficial": [],
+      "variants": [],
+      "cas": null,
+      "description": null,
+      "presentations": [],
+      "applications": [],
+      "sourcePresence": {
+        "pdf2025": true,
+        "webCatalog": false,
+        "detailPage": false
+      },
+      "sourceNames": {
+        "pdf2025": [
+          "Acrilato de Butilo"
+        ],
+        "web": []
+      },
+      "sourceUrls": [
+        "https://grupoyoma.com.mx/assets/docs/CATALOGO%20DE%20PRODUCTOS%202025.pdf"
+      ],
+      "dataQualityFlags": [
+        "pdf_only_no_current_web_detail"
+      ],
+      "aliasesCommon": [],
+      "aliasPolicy": {
+        "aliasesOfficial": "directly derived from Grupo Yoma sources",
+        "aliasesCommon": "conservative common chemical names for resolver convenience; do not use semantic similarity as proof of existence"
+      },
+      "families": []
+    },
+    {
+      "id": "alcohol-bencilico",
+      "canonicalName": "Alcohol Bencílico",
+      "aliasesOfficial": [],
+      "variants": [],
+      "cas": "100-51-6",
+      "description": "Líquido claro de olor suave, dulce y aromático similar a las almendras.",
+      "presentations": [
+        {
+          "container": "tambor",
+          "quantities": [
+            210
+          ],
+          "unit": "kg",
+          "raw": "Tambos: 210 kg."
+        },
+        {
+          "container": "porrón",
+          "quantities": [
+            20,
+            50
+          ],
+          "unit": "L",
+          "raw": "Porrones: 20 l y 50 l."
+        }
+      ],
+      "applications": [
+        "Se utiliza en lociones, cremas y perfumes, en la fabricación de algunos plásticos, también en productos de limpieza."
+      ],
+      "sourcePresence": {
+        "pdf2025": true,
+        "webCatalog": true,
+        "detailPage": true
+      },
+      "sourceNames": {
+        "pdf2025": [
+          "Alcohol Bencílico"
+        ],
+        "web": [
+          "Alcohol Bencílico"
+        ]
+      },
+      "sourceUrls": [
+        "https://grupoyoma.com.mx/products.html",
+        "https://grupoyoma.com.mx/product-single-Product11.html",
+        "https://grupoyoma.com.mx/assets/docs/CATALOGO%20DE%20PRODUCTOS%202025.pdf"
+      ],
+      "dataQualityFlags": [],
+      "aliasesCommon": [
+        "benzyl alcohol"
+      ],
+      "aliasPolicy": {
+        "aliasesOfficial": "directly derived from Grupo Yoma sources",
+        "aliasesCommon": "conservative common chemical names for resolver convenience; do not use semantic similarity as proof of existence"
+      },
+      "families": [
+        "alcohol"
+      ]
+    },
+    {
+      "id": "alcohol-butilico",
+      "canonicalName": "Alcohol Butílico",
+      "aliasesOfficial": [],
+      "variants": [],
+      "cas": "71-36-3",
+      "description": "Líquido claro de un olor fuerte muy distintivo ligeramente alcohólico.",
+      "presentations": [
+        {
+          "container": "pipa",
+          "minQuantity": 5000,
+          "maxQuantity": 35000,
+          "unit": "kg",
+          "raw": "Pipa: 5000 kg hasta 35,000 kg."
+        },
+        {
+          "container": "tambor",
+          "quantities": [
+            200
+          ],
+          "unit": "L",
+          "raw": "Tambos: 200 l."
+        },
+        {
+          "container": "porrón",
+          "quantities": [
+            20,
+            50
+          ],
+          "unit": "L",
+          "raw": "Porrones: 20 l y 50 l."
+        }
+      ],
+      "applications": [
+        "Se utiliza en la industria de pinturas, recubrimientos y adhesivos, en la fabricación de tintas de impresión, como retardante o estabilizador en impresiones de flebografía y roto grabado."
+      ],
+      "sourcePresence": {
+        "pdf2025": true,
+        "webCatalog": true,
+        "detailPage": true
+      },
+      "sourceNames": {
+        "pdf2025": [
+          "Alcohol Butilico"
+        ],
+        "web": [
+          "Alcohol Butílico"
+        ]
+      },
+      "sourceUrls": [
+        "https://grupoyoma.com.mx/products.html",
+        "https://grupoyoma.com.mx/product-single-Product9.html",
+        "https://grupoyoma.com.mx/assets/docs/CATALOGO%20DE%20PRODUCTOS%202025.pdf"
+      ],
+      "dataQualityFlags": [],
+      "aliasesCommon": [
+        "n-butanol",
+        "1-butanol",
+        "butanol"
+      ],
+      "aliasPolicy": {
+        "aliasesOfficial": "directly derived from Grupo Yoma sources",
+        "aliasesCommon": "conservative common chemical names for resolver convenience; do not use semantic similarity as proof of existence"
+      },
+      "families": [
+        "alcohol"
+      ]
+    },
+    {
+      "id": "alcohol-di-acetona",
+      "canonicalName": "Alcohol Di-Acetona",
+      "aliasesOfficial": [],
+      "variants": [],
+      "cas": null,
+      "description": null,
+      "presentations": [],
+      "applications": [],
+      "sourcePresence": {
+        "pdf2025": true,
+        "webCatalog": false,
+        "detailPage": false
+      },
+      "sourceNames": {
+        "pdf2025": [
+          "Alcohol Di-Acetona"
+        ],
+        "web": []
+      },
+      "sourceUrls": [
+        "https://grupoyoma.com.mx/assets/docs/CATALOGO%20DE%20PRODUCTOS%202025.pdf"
+      ],
+      "dataQualityFlags": [
+        "pdf_only_no_current_web_detail"
+      ],
+      "aliasesCommon": [
+        "diacetona alcohol",
+        "DAA"
+      ],
+      "aliasPolicy": {
+        "aliasesOfficial": "directly derived from Grupo Yoma sources",
+        "aliasesCommon": "conservative common chemical names for resolver convenience; do not use semantic similarity as proof of existence"
+      },
+      "families": [
+        "alcohol"
+      ]
+    },
+    {
+      "id": "alcohol-etilico",
+      "canonicalName": "Alcohol Etílico",
+      "aliasesOfficial": [
+        "Alcohol Etilico de Caña"
+      ],
+      "variants": [],
+      "cas": "64-17-5",
+      "description": "Líquido claro, de olor suave, característico y agradable.",
+      "presentations": [
+        {
+          "container": "pipa",
+          "minQuantity": 5000,
+          "maxQuantity": 35000,
+          "unit": "kg",
+          "raw": "Pipa: 5000 kg hasta 35,000 kg."
+        },
+        {
+          "container": "tambor",
+          "quantities": [
+            200
+          ],
+          "unit": "L",
+          "raw": "Tambos: 200 l."
+        },
+        {
+          "container": "porrón",
+          "quantities": [
+            20,
+            50
+          ],
+          "unit": "L",
+          "raw": "Porrones: 20 l y 50 l."
+        }
+      ],
+      "applications": [
+        "Desinfectantes, lociones y perfumes, como alcohol de quemar."
+      ],
+      "sourcePresence": {
+        "pdf2025": true,
+        "webCatalog": true,
+        "detailPage": true
+      },
+      "sourceNames": {
+        "pdf2025": [
+          "Alcohol Etilico de Caña"
+        ],
+        "web": [
+          "Alcohol Etílico"
+        ]
+      },
+      "sourceUrls": [
+        "https://grupoyoma.com.mx/products.html",
+        "https://grupoyoma.com.mx/product-single-Product7.html",
+        "https://grupoyoma.com.mx/product-single-Product45.html",
+        "https://grupoyoma.com.mx/assets/docs/CATALOGO%20DE%20PRODUCTOS%202025.pdf"
+      ],
+      "dataQualityFlags": [
+        "duplicate_current_detail_page"
+      ],
+      "aliasesCommon": [
+        "etanol",
+        "ethanol",
+        "ethyl alcohol"
+      ],
+      "aliasPolicy": {
+        "aliasesOfficial": "directly derived from Grupo Yoma sources",
+        "aliasesCommon": "conservative common chemical names for resolver convenience; do not use semantic similarity as proof of existence"
+      },
+      "families": [
+        "alcohol"
+      ]
+    },
+    {
+      "id": "alcohol-isobutilico",
+      "canonicalName": "Alcohol Isobutílico",
+      "aliasesOfficial": [],
+      "variants": [],
+      "cas": "78-83-1",
+      "description": "Líquido claro, de olor dulce y mohoso pero desagradable.",
+      "presentations": [
+        {
+          "container": "pipa",
+          "minQuantity": 5000,
+          "maxQuantity": 35000,
+          "unit": "kg",
+          "raw": "Pipa: 5000 kg hasta 35,000 kg."
+        },
+        {
+          "container": "tambor",
+          "quantities": [
+            200
+          ],
+          "unit": "L",
+          "raw": "Tambos: 200 l."
+        },
+        {
+          "container": "porrón",
+          "quantities": [
+            20,
+            50
+          ],
+          "unit": "L",
+          "raw": "Porrones: 20 l y 50 l."
+        }
+      ],
+      "applications": [
+        "Utilizado en la fabricación de pinturas y recubrimientos, se utiliza como aditivo y en la fabricación de plastificantes."
+      ],
+      "sourcePresence": {
+        "pdf2025": false,
+        "webCatalog": true,
+        "detailPage": true
+      },
+      "sourceNames": {
+        "pdf2025": [],
+        "web": [
+          "Alcohol Isobutílico"
+        ]
+      },
+      "sourceUrls": [
+        "https://grupoyoma.com.mx/products.html",
+        "https://grupoyoma.com.mx/product-single-Product10.html"
+      ],
+      "dataQualityFlags": [
+        "web_only_not_in_pdf_2025"
+      ],
+      "aliasesCommon": [
+        "isobutanol",
+        "isobutyl alcohol"
+      ],
+      "aliasPolicy": {
+        "aliasesOfficial": "directly derived from Grupo Yoma sources",
+        "aliasesCommon": "conservative common chemical names for resolver convenience; do not use semantic similarity as proof of existence"
+      },
+      "families": [
+        "alcohol"
+      ]
+    },
+    {
+      "id": "alcohol-isopropilico",
+      "canonicalName": "Alcohol Isopropílico",
+      "aliasesOfficial": [],
+      "variants": [],
+      "cas": "67-63-01",
+      "description": "Líquido Claro, de olor característico, intenso y penetrante.",
+      "presentations": [
+        {
+          "container": "pipa",
+          "minQuantity": 5000,
+          "maxQuantity": 35000,
+          "unit": "kg",
+          "raw": "Pipa: 5000 kg hasta 35,000 kg."
+        },
+        {
+          "container": "tambor",
+          "quantities": [
+            200
+          ],
+          "unit": "L",
+          "raw": "Tambos: 200 l."
+        },
+        {
+          "container": "porrón",
+          "quantities": [
+            20,
+            50
+          ],
+          "unit": "L",
+          "raw": "Porrones: 20 l y 50 l."
+        }
+      ],
+      "applications": [
+        "Se utiliza como antiséptico, limpieza de componentes electrónicos, se emplea en la fabricación de lociones y tónicos. Es utilizado en las artes gráficas."
+      ],
+      "sourcePresence": {
+        "pdf2025": true,
+        "webCatalog": true,
+        "detailPage": true
+      },
+      "sourceNames": {
+        "pdf2025": [
+          "Alcohol Isopropilico"
+        ],
+        "web": [
+          "Alcohol Isopropílico"
+        ]
+      },
+      "sourceUrls": [
+        "https://grupoyoma.com.mx/products.html",
+        "https://grupoyoma.com.mx/product-single-Product8.html",
+        "https://grupoyoma.com.mx/assets/docs/CATALOGO%20DE%20PRODUCTOS%202025.pdf"
+      ],
+      "dataQualityFlags": [
+        "cas_format_suspicious_as_published"
+      ],
+      "aliasesCommon": [
+        "isopropanol",
+        "2-propanol",
+        "IPA",
+        "isopropyl alcohol"
+      ],
+      "aliasPolicy": {
+        "aliasesOfficial": "directly derived from Grupo Yoma sources",
+        "aliasesCommon": "conservative common chemical names for resolver convenience; do not use semantic similarity as proof of existence"
+      },
+      "families": [
+        "alcohol"
+      ]
+    },
+    {
+      "id": "alcohol-metilico",
+      "canonicalName": "Alcohol Metílico",
+      "aliasesOfficial": [],
+      "variants": [],
+      "cas": "141-78-6",
+      "description": "Líquido claro e incoloro, de olor acre suave, ligeramente picante.",
+      "presentations": [
+        {
+          "container": "pipa",
+          "minQuantity": 5000,
+          "maxQuantity": 35000,
+          "unit": "kg",
+          "raw": "Pipa: 5000 kg hasta 35,000 kg."
+        },
+        {
+          "container": "tambor",
+          "quantities": [
+            200
+          ],
+          "unit": "L",
+          "raw": "Tambos: 200 l."
+        },
+        {
+          "container": "porrón",
+          "quantities": [
+            20,
+            50
+          ],
+          "unit": "L",
+          "raw": "Porrones: 20 l y 50 l."
+        }
+      ],
+      "applications": [
+        "Fabricación de algunos combustibles y anticongelantes, en la producción de pinturas, resinas y plásticos, así como alcohol para quemar. En la fabricación de diluyentes y adelgazadores de pinturas y barnices."
+      ],
+      "sourcePresence": {
+        "pdf2025": true,
+        "webCatalog": true,
+        "detailPage": true
+      },
+      "sourceNames": {
+        "pdf2025": [
+          "Alcohol Metilico"
+        ],
+        "web": [
+          "Alcohol Metílico"
+        ]
+      },
+      "sourceUrls": [
+        "https://grupoyoma.com.mx/products.html",
+        "https://grupoyoma.com.mx/product-single-Product13.html",
+        "https://grupoyoma.com.mx/assets/docs/CATALOGO%20DE%20PRODUCTOS%202025.pdf"
+      ],
+      "dataQualityFlags": [
+        "cas_duplicated_on_website:141-78-6"
+      ],
+      "aliasesCommon": [
+        "metanol",
+        "methanol",
+        "methyl alcohol"
+      ],
+      "aliasPolicy": {
+        "aliasesOfficial": "directly derived from Grupo Yoma sources",
+        "aliasesCommon": "conservative common chemical names for resolver convenience; do not use semantic similarity as proof of existence"
+      },
+      "families": [
+        "alcohol"
+      ]
+    },
+    {
+      "id": "alcohol-n-propanol",
+      "canonicalName": "Alcohol N-Propanol",
+      "aliasesOfficial": [],
+      "variants": [],
+      "cas": "71-23-8",
+      "description": "Líquido claro e incoloro, de olor picante y desagradable.",
+      "presentations": [
+        {
+          "container": "pipa",
+          "minQuantity": 5000,
+          "maxQuantity": 35000,
+          "unit": "kg",
+          "raw": "Pipa: 5000 kg hasta 35,000 kg."
+        },
+        {
+          "container": "tambor",
+          "quantities": [
+            200
+          ],
+          "unit": "L",
+          "raw": "Tambos: 200 l."
+        },
+        {
+          "container": "porrón",
+          "quantities": [
+            20,
+            50
+          ],
+          "unit": "L",
+          "raw": "Porrones: 20 l y 50 l."
+        }
+      ],
+      "applications": [
+        "Se utiliza en la fabricación de lacas, tintas y barnices, antiséptico, en productos de limpieza y desinfección, en productos de limpieza de componentes."
+      ],
+      "sourcePresence": {
+        "pdf2025": true,
+        "webCatalog": true,
+        "detailPage": true
+      },
+      "sourceNames": {
+        "pdf2025": [
+          "Alcohol N - Propanol"
+        ],
+        "web": [
+          "Alcohol N-Propanol"
+        ]
+      },
+      "sourceUrls": [
+        "https://grupoyoma.com.mx/products.html",
+        "https://grupoyoma.com.mx/product-single-Product12.html",
+        "https://grupoyoma.com.mx/assets/docs/CATALOGO%20DE%20PRODUCTOS%202025.pdf"
+      ],
+      "dataQualityFlags": [],
+      "aliasesCommon": [
+        "n-propanol",
+        "1-propanol",
+        "propyl alcohol"
+      ],
+      "aliasPolicy": {
+        "aliasesOfficial": "directly derived from Grupo Yoma sources",
+        "aliasesCommon": "conservative common chemical names for resolver convenience; do not use semantic similarity as proof of existence"
+      },
+      "families": [
+        "alcohol"
+      ]
+    },
+    {
+      "id": "alico-9",
+      "canonicalName": "Alico 9",
+      "aliasesOfficial": [],
+      "variants": [],
+      "cas": null,
+      "description": null,
+      "presentations": [],
+      "applications": [],
+      "sourcePresence": {
+        "pdf2025": true,
+        "webCatalog": false,
+        "detailPage": false
+      },
+      "sourceNames": {
+        "pdf2025": [
+          "Alico 9"
+        ],
+        "web": []
+      },
+      "sourceUrls": [
+        "https://grupoyoma.com.mx/assets/docs/CATALOGO%20DE%20PRODUCTOS%202025.pdf"
+      ],
+      "dataQualityFlags": [
+        "pdf_only_no_current_web_detail"
+      ],
+      "aliasesCommon": [],
+      "aliasPolicy": {
+        "aliasesOfficial": "directly derived from Grupo Yoma sources",
+        "aliasesCommon": "conservative common chemical names for resolver convenience; do not use semantic similarity as proof of existence"
+      },
+      "families": []
+    },
+    {
+      "id": "aromina-100",
+      "canonicalName": "Aromina 100",
+      "aliasesOfficial": [],
+      "variants": [],
+      "cas": null,
+      "description": null,
+      "presentations": [],
+      "applications": [],
+      "sourcePresence": {
+        "pdf2025": true,
+        "webCatalog": false,
+        "detailPage": false
+      },
+      "sourceNames": {
+        "pdf2025": [
+          "Aromina 100"
+        ],
+        "web": []
+      },
+      "sourceUrls": [
+        "https://grupoyoma.com.mx/assets/docs/CATALOGO%20DE%20PRODUCTOS%202025.pdf"
+      ],
+      "dataQualityFlags": [
+        "pdf_only_no_current_web_detail"
+      ],
+      "aliasesCommon": [],
+      "aliasPolicy": {
+        "aliasesOfficial": "directly derived from Grupo Yoma sources",
+        "aliasesCommon": "conservative common chemical names for resolver convenience; do not use semantic similarity as proof of existence"
+      },
+      "families": [
+        "aromina"
+      ]
+    },
+    {
+      "id": "aromina-150",
+      "canonicalName": "Aromina 150",
+      "aliasesOfficial": [],
+      "variants": [],
+      "cas": null,
+      "description": null,
+      "presentations": [],
+      "applications": [],
+      "sourcePresence": {
+        "pdf2025": true,
+        "webCatalog": false,
+        "detailPage": false
+      },
+      "sourceNames": {
+        "pdf2025": [
+          "Aromina 150"
+        ],
+        "web": []
+      },
+      "sourceUrls": [
+        "https://grupoyoma.com.mx/assets/docs/CATALOGO%20DE%20PRODUCTOS%202025.pdf"
+      ],
+      "dataQualityFlags": [
+        "pdf_only_no_current_web_detail"
+      ],
+      "aliasesCommon": [],
+      "aliasPolicy": {
+        "aliasesOfficial": "directly derived from Grupo Yoma sources",
+        "aliasesCommon": "conservative common chemical names for resolver convenience; do not use semantic similarity as proof of existence"
+      },
+      "families": [
+        "aromina"
+      ]
+    },
+    {
+      "id": "butil-carbitol",
+      "canonicalName": "Butil Carbitol",
+      "aliasesOfficial": [],
+      "variants": [],
+      "cas": "111-34-5",
+      "description": "Líquido claro e incoloro de olor suave y dulce.",
+      "presentations": [
+        {
+          "container": "pipa",
+          "minQuantity": 5000,
+          "maxQuantity": 35000,
+          "unit": "kg",
+          "raw": "Pipa: 5000 kg hasta 35,000 kg."
+        },
+        {
+          "container": "tambor",
+          "quantities": [
+            200
+          ],
+          "unit": "L",
+          "raw": "Tambos: 200 l."
+        },
+        {
+          "container": "porrón",
+          "quantities": [
+            20,
+            50
+          ],
+          "unit": "L",
+          "raw": "Porrones: 20 l y 50 l."
+        }
+      ],
+      "applications": [
+        "Tintas y pinturas."
+      ],
+      "sourcePresence": {
+        "pdf2025": true,
+        "webCatalog": true,
+        "detailPage": true
+      },
+      "sourceNames": {
+        "pdf2025": [
+          "Butil Carbitol"
+        ],
+        "web": [
+          "Butil Carbitol"
+        ]
+      },
+      "sourceUrls": [
+        "https://grupoyoma.com.mx/products.html",
+        "https://grupoyoma.com.mx/product-single-Product19.html",
+        "https://grupoyoma.com.mx/assets/docs/CATALOGO%20DE%20PRODUCTOS%202025.pdf"
+      ],
+      "dataQualityFlags": [],
+      "aliasesCommon": [
+        "diethylene glycol monobutyl ether",
+        "butyl diglycol"
+      ],
+      "aliasPolicy": {
+        "aliasesOfficial": "directly derived from Grupo Yoma sources",
+        "aliasesCommon": "conservative common chemical names for resolver convenience; do not use semantic similarity as proof of existence"
+      },
+      "families": []
+    },
+    {
+      "id": "butil-cellosolve",
+      "canonicalName": "Butil Cellosolve",
+      "aliasesOfficial": [],
+      "variants": [],
+      "cas": "111-76-2",
+      "description": "Líquido claro e incoloro de olor suave ligeramente afrutado.",
+      "presentations": [
+        {
+          "container": "pipa",
+          "minQuantity": 5000,
+          "maxQuantity": 35000,
+          "unit": "kg",
+          "raw": "Pipa: 5000 kg hasta 35,000 kg."
+        },
+        {
+          "container": "tambor",
+          "quantities": [
+            200
+          ],
+          "unit": "L",
+          "raw": "Tambos: 200 l."
+        },
+        {
+          "container": "porrón",
+          "quantities": [
+            20,
+            50
+          ],
+          "unit": "L",
+          "raw": "Porrones: 20 l y 50 l."
+        }
+      ],
+      "applications": [
+        "Fabricación de tintas, lacas, pinturas y limpiadores."
+      ],
+      "sourcePresence": {
+        "pdf2025": true,
+        "webCatalog": true,
+        "detailPage": true
+      },
+      "sourceNames": {
+        "pdf2025": [
+          "Butil Cellosolve"
+        ],
+        "web": [
+          "Butil Cellosolve"
+        ]
+      },
+      "sourceUrls": [
+        "https://grupoyoma.com.mx/products.html",
+        "https://grupoyoma.com.mx/product-single-Product18.html",
+        "https://grupoyoma.com.mx/assets/docs/CATALOGO%20DE%20PRODUCTOS%202025.pdf"
+      ],
+      "dataQualityFlags": [],
+      "aliasesCommon": [
+        "2-butoxyethanol",
+        "butyl glycol"
+      ],
+      "aliasPolicy": {
+        "aliasesOfficial": "directly derived from Grupo Yoma sources",
+        "aliasesCommon": "conservative common chemical names for resolver convenience; do not use semantic similarity as proof of existence"
+      },
+      "families": []
+    },
+    {
+      "id": "cellosolve-o-etoxietanol",
+      "canonicalName": "Cellosolve o Etoxietanol",
+      "aliasesOfficial": [
+        "Cellosolve",
+        "Etoxietanol"
+      ],
+      "variants": [],
+      "cas": null,
+      "description": null,
+      "presentations": [],
+      "applications": [],
+      "sourcePresence": {
+        "pdf2025": true,
+        "webCatalog": false,
+        "detailPage": false
+      },
+      "sourceNames": {
+        "pdf2025": [
+          "Cellosolve o Etoxietanol"
+        ],
+        "web": []
+      },
+      "sourceUrls": [
+        "https://grupoyoma.com.mx/assets/docs/CATALOGO%20DE%20PRODUCTOS%202025.pdf"
+      ],
+      "dataQualityFlags": [
+        "pdf_only_no_current_web_detail"
+      ],
+      "aliasesCommon": [],
+      "aliasPolicy": {
+        "aliasesOfficial": "directly derived from Grupo Yoma sources",
+        "aliasesCommon": "conservative common chemical names for resolver convenience; do not use semantic similarity as proof of existence"
+      },
+      "families": []
+    },
+    {
+      "id": "ciclohexanona",
+      "canonicalName": "Ciclohexanona",
+      "aliasesOfficial": [],
+      "variants": [],
+      "cas": null,
+      "description": null,
+      "presentations": [],
+      "applications": [],
+      "sourcePresence": {
+        "pdf2025": true,
+        "webCatalog": false,
+        "detailPage": false
+      },
+      "sourceNames": {
+        "pdf2025": [
+          "Ciclohexanona"
+        ],
+        "web": []
+      },
+      "sourceUrls": [
+        "https://grupoyoma.com.mx/assets/docs/CATALOGO%20DE%20PRODUCTOS%202025.pdf"
+      ],
+      "dataQualityFlags": [
+        "pdf_only_no_current_web_detail"
+      ],
+      "aliasesCommon": [
+        "cyclohexanone"
+      ],
+      "aliasPolicy": {
+        "aliasesOfficial": "directly derived from Grupo Yoma sources",
+        "aliasesCommon": "conservative common chemical names for resolver convenience; do not use semantic similarity as proof of existence"
+      },
+      "families": []
+    },
+    {
+      "id": "cloruro-de-metileno",
+      "canonicalName": "Cloruro de Metileno",
+      "aliasesOfficial": [],
+      "variants": [],
+      "cas": "75-09-2",
+      "description": "Líquido claro e incoloro de olor fuerte y penetrante.",
+      "presentations": [
+        {
+          "container": "tambor",
+          "quantities": [
+            270
+          ],
+          "unit": "kg",
+          "raw": "Tambos: 270 kg."
+        },
+        {
+          "container": "porrón",
+          "quantities": [
+            20,
+            50
+          ],
+          "unit": "kg",
+          "raw": "Porrones: 20 kg y 50 kg."
+        }
+      ],
+      "applications": [
+        "Agente de expansión, removedor de pinturas, resinas, barnices y como agente desengrasante."
+      ],
+      "sourcePresence": {
+        "pdf2025": true,
+        "webCatalog": true,
+        "detailPage": true
+      },
+      "sourceNames": {
+        "pdf2025": [
+          "Cloruro de Metileno"
+        ],
+        "web": [
+          "Cloruro de Metileno"
+        ]
+      },
+      "sourceUrls": [
+        "https://grupoyoma.com.mx/products.html",
+        "https://grupoyoma.com.mx/product-single-Product20.html",
+        "https://grupoyoma.com.mx/assets/docs/CATALOGO%20DE%20PRODUCTOS%202025.pdf"
+      ],
+      "dataQualityFlags": [],
+      "aliasesCommon": [
+        "dichloromethane",
+        "methylene chloride",
+        "DCM"
+      ],
+      "aliasPolicy": {
+        "aliasesOfficial": "directly derived from Grupo Yoma sources",
+        "aliasesCommon": "conservative common chemical names for resolver convenience; do not use semantic similarity as proof of existence"
+      },
+      "families": []
+    },
+    {
+      "id": "dibutil-ftalato",
+      "canonicalName": "Dibutil Ftalato",
+      "aliasesOfficial": [
+        "DBP"
+      ],
+      "variants": [],
+      "cas": null,
+      "description": null,
+      "presentations": [],
+      "applications": [],
+      "sourcePresence": {
+        "pdf2025": true,
+        "webCatalog": false,
+        "detailPage": false
+      },
+      "sourceNames": {
+        "pdf2025": [
+          "Dibutil Ftalato (DBP)"
+        ],
+        "web": []
+      },
+      "sourceUrls": [
+        "https://grupoyoma.com.mx/assets/docs/CATALOGO%20DE%20PRODUCTOS%202025.pdf"
+      ],
+      "dataQualityFlags": [
+        "pdf_only_no_current_web_detail"
+      ],
+      "aliasesCommon": [
+        "dibutyl phthalate"
+      ],
+      "aliasPolicy": {
+        "aliasesOfficial": "directly derived from Grupo Yoma sources",
+        "aliasesCommon": "conservative common chemical names for resolver convenience; do not use semantic similarity as proof of existence"
+      },
+      "families": [
+        "ftalato"
+      ]
+    },
+    {
+      "id": "dietilen-glicol",
+      "canonicalName": "Dietilen Glicol",
+      "aliasesOfficial": [
+        "DEG"
+      ],
+      "variants": [],
+      "cas": "111-46-6",
+      "description": "Líquido claro e incoloro, con un ligero olor.",
+      "presentations": [
+        {
+          "container": "pipa",
+          "minQuantity": 5000,
+          "maxQuantity": 35000,
+          "unit": "kg",
+          "raw": "Pipas: a partir de 5,000 kg hasta 35,000 kg"
+        },
+        {
+          "container": "tambor",
+          "quantities": [
+            230
+          ],
+          "unit": "kg",
+          "raw": "Tambos: 230 kg"
+        },
+        {
+          "container": "porrón",
+          "quantities": [
+            20,
+            50
+          ],
+          "unit": "kg",
+          "raw": "Porrones: 20 kg y 50 kg"
+        }
+      ],
+      "applications": [
+        "Anticongelante, lubricante y disolvente de tintas."
+      ],
+      "sourcePresence": {
+        "pdf2025": true,
+        "webCatalog": true,
+        "detailPage": true
+      },
+      "sourceNames": {
+        "pdf2025": [
+          "Dietilen Glicol (DEG)"
+        ],
+        "web": [
+          "Dietilen Glicol"
+        ]
+      },
+      "sourceUrls": [
+        "https://grupoyoma.com.mx/products.html",
+        "https://grupoyoma.com.mx/product-single-Product36.html",
+        "https://grupoyoma.com.mx/assets/docs/CATALOGO%20DE%20PRODUCTOS%202025.pdf"
+      ],
+      "dataQualityFlags": [],
+      "aliasesCommon": [
+        "diethylene glycol"
+      ],
+      "aliasPolicy": {
+        "aliasesOfficial": "directly derived from Grupo Yoma sources",
+        "aliasesCommon": "conservative common chemical names for resolver convenience; do not use semantic similarity as proof of existence"
+      },
+      "families": [
+        "glicol"
+      ]
+    },
+    {
+      "id": "dimetil-formamida",
+      "canonicalName": "Dimetil Formamida",
+      "aliasesOfficial": [
+        "DMF"
+      ],
+      "variants": [],
+      "cas": null,
+      "description": null,
+      "presentations": [],
+      "applications": [],
+      "sourcePresence": {
+        "pdf2025": true,
+        "webCatalog": false,
+        "detailPage": false
+      },
+      "sourceNames": {
+        "pdf2025": [
+          "Dimetil Formamida (DMF)"
+        ],
+        "web": []
+      },
+      "sourceUrls": [
+        "https://grupoyoma.com.mx/assets/docs/CATALOGO%20DE%20PRODUCTOS%202025.pdf"
+      ],
+      "dataQualityFlags": [
+        "pdf_only_no_current_web_detail"
+      ],
+      "aliasesCommon": [
+        "dimethylformamide"
+      ],
+      "aliasPolicy": {
+        "aliasesOfficial": "directly derived from Grupo Yoma sources",
+        "aliasesCommon": "conservative common chemical names for resolver convenience; do not use semantic similarity as proof of existence"
+      },
+      "families": []
+    },
+    {
+      "id": "dioctil-adipato",
+      "canonicalName": "Dioctil Adipato",
+      "aliasesOfficial": [
+        "DOA"
+      ],
+      "variants": [],
+      "cas": "123-79-5",
+      "description": "Líquido claro e incoloro, de olor casi imperceptible, apariencia aceitosa.",
+      "presentations": [
+        {
+          "container": "tambor",
+          "quantities": [
+            185
+          ],
+          "unit": "kg",
+          "raw": "Tambos: 185 kg"
+        },
+        {
+          "container": "porrón",
+          "quantities": [
+            20,
+            50
+          ],
+          "unit": "kg",
+          "raw": "Porrones: 20 kg y 50 kg"
+        }
+      ],
+      "applications": [
+        "Da flexibilidad a los plásticos a bajas temperaturas."
+      ],
+      "sourcePresence": {
+        "pdf2025": true,
+        "webCatalog": true,
+        "detailPage": true
+      },
+      "sourceNames": {
+        "pdf2025": [
+          "Dioctil Adipato (DOA)"
+        ],
+        "web": [
+          "Dioctil Adipato"
+        ]
+      },
+      "sourceUrls": [
+        "https://grupoyoma.com.mx/products.html",
+        "https://grupoyoma.com.mx/product-single-Product40.html",
+        "https://grupoyoma.com.mx/assets/docs/CATALOGO%20DE%20PRODUCTOS%202025.pdf"
+      ],
+      "dataQualityFlags": [],
+      "aliasesCommon": [
+        "dioctyl adipate"
+      ],
+      "aliasPolicy": {
+        "aliasesOfficial": "directly derived from Grupo Yoma sources",
+        "aliasesCommon": "conservative common chemical names for resolver convenience; do not use semantic similarity as proof of existence"
+      },
+      "families": [
+        "dioctil"
+      ]
+    },
+    {
+      "id": "dioctil-ftalato",
+      "canonicalName": "Dioctil Ftalato",
+      "aliasesOfficial": [
+        "DOP"
+      ],
+      "variants": [],
+      "cas": "117-81-7",
+      "description": "Líquido claro, ligeramente amarillo, de olor característico, apariencia aceitosa.",
+      "presentations": [
+        {
+          "container": "pipa",
+          "minQuantity": 5000,
+          "unit": "kg",
+          "raw": "Pipas: a partir de 5,000 kg"
+        },
+        {
+          "container": "tambor",
+          "quantities": [
+            200
+          ],
+          "unit": "L",
+          "raw": "Tambos: 200 L"
+        },
+        {
+          "container": "porrón",
+          "quantities": [
+            20,
+            50
+          ],
+          "unit": "L",
+          "raw": "Porrones: 20 L y 50 L"
+        }
+      ],
+      "applications": [
+        "Plastificante para mejorar la flexibilidad del PVC."
+      ],
+      "sourcePresence": {
+        "pdf2025": true,
+        "webCatalog": true,
+        "detailPage": true
+      },
+      "sourceNames": {
+        "pdf2025": [
+          "Dioctil Ftalato (DOP)"
+        ],
+        "web": [
+          "Dioctil Ftalato"
+        ]
+      },
+      "sourceUrls": [
+        "https://grupoyoma.com.mx/products.html",
+        "https://grupoyoma.com.mx/product-single-Product38.html",
+        "https://grupoyoma.com.mx/assets/docs/CATALOGO%20DE%20PRODUCTOS%202025.pdf"
+      ],
+      "dataQualityFlags": [],
+      "aliasesCommon": [
+        "diethylhexyl phthalate",
+        "DEHP"
+      ],
+      "aliasPolicy": {
+        "aliasesOfficial": "directly derived from Grupo Yoma sources",
+        "aliasesCommon": "conservative common chemical names for resolver convenience; do not use semantic similarity as proof of existence"
+      },
+      "families": [
+        "ftalato",
+        "dioctil"
+      ]
+    },
+    {
+      "id": "dioctil-sebacato",
+      "canonicalName": "Dioctil Sebacato",
+      "aliasesOfficial": [
+        "DOS"
+      ],
+      "variants": [],
+      "cas": "122-62-3",
+      "description": "Líquido claro e incoloro, de olor casi imperceptible, apariencia aceitosa.",
+      "presentations": [
+        {
+          "container": "tambor",
+          "quantities": [
+            190
+          ],
+          "unit": "kg",
+          "raw": "Tambos: 190 kg"
+        },
+        {
+          "container": "porrón",
+          "quantities": [
+            20,
+            50
+          ],
+          "unit": "kg",
+          "raw": "Porrones: 20 kg y 50 kg"
+        }
+      ],
+      "applications": [
+        "Plastificante para PVC con excelente resistencia a bajas temperaturas."
+      ],
+      "sourcePresence": {
+        "pdf2025": true,
+        "webCatalog": true,
+        "detailPage": true
+      },
+      "sourceNames": {
+        "pdf2025": [
+          "Dioctil Sebacato (DOS)"
+        ],
+        "web": [
+          "Dioctil Sebacato"
+        ]
+      },
+      "sourceUrls": [
+        "https://grupoyoma.com.mx/products.html",
+        "https://grupoyoma.com.mx/product-single-Product41.html",
+        "https://grupoyoma.com.mx/assets/docs/CATALOGO%20DE%20PRODUCTOS%202025.pdf"
+      ],
+      "dataQualityFlags": [],
+      "aliasesCommon": [
+        "dioctyl sebacate"
+      ],
+      "aliasPolicy": {
+        "aliasesOfficial": "directly derived from Grupo Yoma sources",
+        "aliasesCommon": "conservative common chemical names for resolver convenience; do not use semantic similarity as proof of existence"
+      },
+      "families": [
+        "dioctil"
+      ]
+    },
+    {
+      "id": "dioctil-tereftalato",
+      "canonicalName": "Dioctil Tereftalato",
+      "aliasesOfficial": [
+        "DOTP"
+      ],
+      "variants": [],
+      "cas": "6422-86-2",
+      "description": "Líquido claro, ligeramente amarillo, de olor característico, apariencia aceitosa.",
+      "presentations": [
+        {
+          "container": "pipa",
+          "minQuantity": 5000,
+          "unit": "kg",
+          "raw": "Pipas: a partir de 5,000 kg"
+        },
+        {
+          "container": "tambor",
+          "quantities": [
+            200
+          ],
+          "unit": "kg",
+          "raw": "Tambos: 200 kg"
+        },
+        {
+          "container": "porrón",
+          "quantities": [
+            20,
+            50
+          ],
+          "unit": "kg",
+          "raw": "Porrones: 20 kg y 50 kg"
+        }
+      ],
+      "applications": [
+        "Se utiliza en plásticos para hacerlos flexibles y resistentes."
+      ],
+      "sourcePresence": {
+        "pdf2025": true,
+        "webCatalog": true,
+        "detailPage": true
+      },
+      "sourceNames": {
+        "pdf2025": [
+          "Dioctil Tereftalato (DOTP)"
+        ],
+        "web": [
+          "Dioctil Tereftalato"
+        ]
+      },
+      "sourceUrls": [
+        "https://grupoyoma.com.mx/products.html",
+        "https://grupoyoma.com.mx/product-single-Product39.html",
+        "https://grupoyoma.com.mx/assets/docs/CATALOGO%20DE%20PRODUCTOS%202025.pdf"
+      ],
+      "dataQualityFlags": [],
+      "aliasesCommon": [
+        "dioctyl terephthalate"
+      ],
+      "aliasPolicy": {
+        "aliasesOfficial": "directly derived from Grupo Yoma sources",
+        "aliasesCommon": "conservative common chemical names for resolver convenience; do not use semantic similarity as proof of existence"
+      },
+      "families": [
+        "dioctil"
+      ]
+    },
+    {
+      "id": "dipropilen-glicol-metil-eter",
+      "canonicalName": "Dipropilen Glicol Metil Éter",
+      "aliasesOfficial": [
+        "Dowanol"
+      ],
+      "variants": [],
+      "cas": "34590-94-8",
+      "description": "Líquido claro e incoloro, de olor etéreo.",
+      "presentations": [
+        {
+          "container": "tambor",
+          "quantities": [
+            200
+          ],
+          "unit": "L",
+          "raw": "Tambos: 200 L"
+        },
+        {
+          "container": "porrón",
+          "quantities": [
+            20,
+            50
+          ],
+          "unit": "L",
+          "raw": "Porrones: 20 L y 50 L"
+        }
+      ],
+      "applications": [
+        "Aplicaciones en polímeros para limpieza."
+      ],
+      "sourcePresence": {
+        "pdf2025": true,
+        "webCatalog": true,
+        "detailPage": true
+      },
+      "sourceNames": {
+        "pdf2025": [
+          "Dipropilenglicol Metil Etér"
+        ],
+        "web": [
+          "Dipropilen Glicol Metil Éter (Dowanol)"
+        ]
+      },
+      "sourceUrls": [
+        "https://grupoyoma.com.mx/products.html",
+        "https://grupoyoma.com.mx/product-single-Product33.html",
+        "https://grupoyoma.com.mx/assets/docs/CATALOGO%20DE%20PRODUCTOS%202025.pdf"
+      ],
+      "dataQualityFlags": [],
+      "aliasesCommon": [
+        "dipropylene glycol methyl ether",
+        "DPM"
+      ],
+      "aliasPolicy": {
+        "aliasesOfficial": "directly derived from Grupo Yoma sources",
+        "aliasesCommon": "conservative common chemical names for resolver convenience; do not use semantic similarity as proof of existence"
+      },
+      "families": [
+        "glicol"
+      ]
+    },
+    {
+      "id": "disobutil-cetona",
+      "canonicalName": "Disobutil Cetona",
+      "aliasesOfficial": [
+        "DIBK"
+      ],
+      "variants": [],
+      "cas": null,
+      "description": null,
+      "presentations": [],
+      "applications": [],
+      "sourcePresence": {
+        "pdf2025": true,
+        "webCatalog": false,
+        "detailPage": false
+      },
+      "sourceNames": {
+        "pdf2025": [
+          "Disobutil Cetona (DIBK)"
+        ],
+        "web": []
+      },
+      "sourceUrls": [
+        "https://grupoyoma.com.mx/assets/docs/CATALOGO%20DE%20PRODUCTOS%202025.pdf"
+      ],
+      "dataQualityFlags": [
+        "pdf_only_no_current_web_detail"
+      ],
+      "aliasesCommon": [
+        "diisobutyl ketone"
+      ],
+      "aliasPolicy": {
+        "aliasesOfficial": "directly derived from Grupo Yoma sources",
+        "aliasesCommon": "conservative common chemical names for resolver convenience; do not use semantic similarity as proof of existence"
+      },
+      "families": [
+        "cetona"
+      ]
+    },
+    {
+      "id": "epoxidado-de-soya",
+      "canonicalName": "Epoxidado de Soya",
+      "aliasesOfficial": [],
+      "variants": [],
+      "cas": "8013-07-8",
+      "description": "Líquido viscoso, amarillo claro, de olor característico.",
+      "presentations": [
+        {
+          "container": "tambor",
+          "quantities": [
+            190
+          ],
+          "unit": "kg",
+          "raw": "Tambos: 190 kg"
+        },
+        {
+          "container": "porrón",
+          "quantities": [
+            20,
+            50
+          ],
+          "unit": "kg",
+          "raw": "Porrones: 20 kg y 50 kg"
+        }
+      ],
+      "applications": [
+        "Plastificante y estabilizador para PVC, alternativa natural."
+      ],
+      "sourcePresence": {
+        "pdf2025": true,
+        "webCatalog": true,
+        "detailPage": true
+      },
+      "sourceNames": {
+        "pdf2025": [
+          "Epoxidado de Soya"
+        ],
+        "web": [
+          "Epoxidado de Soya"
+        ]
+      },
+      "sourceUrls": [
+        "https://grupoyoma.com.mx/products.html",
+        "https://grupoyoma.com.mx/product-single-Product42.html",
+        "https://grupoyoma.com.mx/assets/docs/CATALOGO%20DE%20PRODUCTOS%202025.pdf"
+      ],
+      "dataQualityFlags": [],
+      "aliasesCommon": [
+        "epoxidized soybean oil",
+        "ESBO"
+      ],
+      "aliasPolicy": {
+        "aliasesOfficial": "directly derived from Grupo Yoma sources",
+        "aliasesCommon": "conservative common chemical names for resolver convenience; do not use semantic similarity as proof of existence"
+      },
+      "families": []
+    },
+    {
+      "id": "exxsol-d-40",
+      "canonicalName": "Exxsol D-40",
+      "aliasesOfficial": [],
+      "variants": [],
+      "cas": null,
+      "description": null,
+      "presentations": [],
+      "applications": [],
+      "sourcePresence": {
+        "pdf2025": true,
+        "webCatalog": false,
+        "detailPage": false
+      },
+      "sourceNames": {
+        "pdf2025": [
+          "Exxsol D-40"
+        ],
+        "web": []
+      },
+      "sourceUrls": [
+        "https://grupoyoma.com.mx/assets/docs/CATALOGO%20DE%20PRODUCTOS%202025.pdf"
+      ],
+      "dataQualityFlags": [
+        "pdf_only_no_current_web_detail"
+      ],
+      "aliasesCommon": [],
+      "aliasPolicy": {
+        "aliasesOfficial": "directly derived from Grupo Yoma sources",
+        "aliasesCommon": "conservative common chemical names for resolver convenience; do not use semantic similarity as proof of existence"
+      },
+      "families": [
+        "exxsol"
+      ]
+    },
+    {
+      "id": "exxsol-d-60",
+      "canonicalName": "Exxsol D-60",
+      "aliasesOfficial": [],
+      "variants": [],
+      "cas": null,
+      "description": null,
+      "presentations": [],
+      "applications": [],
+      "sourcePresence": {
+        "pdf2025": true,
+        "webCatalog": false,
+        "detailPage": false
+      },
+      "sourceNames": {
+        "pdf2025": [
+          "Exxsol D-60"
+        ],
+        "web": []
+      },
+      "sourceUrls": [
+        "https://grupoyoma.com.mx/assets/docs/CATALOGO%20DE%20PRODUCTOS%202025.pdf"
+      ],
+      "dataQualityFlags": [
+        "pdf_only_no_current_web_detail"
+      ],
+      "aliasesCommon": [],
+      "aliasPolicy": {
+        "aliasesOfficial": "directly derived from Grupo Yoma sources",
+        "aliasesCommon": "conservative common chemical names for resolver convenience; do not use semantic similarity as proof of existence"
+      },
+      "families": [
+        "exxsol"
+      ]
+    },
+    {
+      "id": "gas-nafta",
+      "canonicalName": "Gas Nafta",
+      "aliasesOfficial": [],
+      "variants": [],
+      "cas": "95-63-6",
+      "description": "Líquido claro, de claro a ligeramente amarillo, de olor similar a la gasolina.",
+      "presentations": [
+        {
+          "container": "pipa",
+          "minQuantity": 5000,
+          "maxQuantity": 35000,
+          "unit": "kg",
+          "raw": "Pipa: 5000 kg hasta 35,000 kg."
+        },
+        {
+          "container": "tambor",
+          "quantities": [
+            200
+          ],
+          "unit": "L",
+          "raw": "Tambos: 200 l."
+        },
+        {
+          "container": "porrón",
+          "quantities": [
+            20,
+            50
+          ],
+          "unit": "L",
+          "raw": "Porrones: 20 l y 50 l."
+        }
+      ],
+      "applications": [
+        "Desengrasante, diluyente en barnices y pinturas de impresión."
+      ],
+      "sourcePresence": {
+        "pdf2025": true,
+        "webCatalog": true,
+        "detailPage": true
+      },
+      "sourceNames": {
+        "pdf2025": [
+          "Gas Nafta"
+        ],
+        "web": [
+          "Gas Nafta"
+        ]
+      },
+      "sourceUrls": [
+        "https://grupoyoma.com.mx/products.html",
+        "https://grupoyoma.com.mx/product-single-Product26.html",
+        "https://grupoyoma.com.mx/assets/docs/CATALOGO%20DE%20PRODUCTOS%202025.pdf"
+      ],
+      "dataQualityFlags": [
+        "cas_duplicated_on_website:95-63-6"
+      ],
+      "aliasesCommon": [],
+      "aliasPolicy": {
+        "aliasesOfficial": "directly derived from Grupo Yoma sources",
+        "aliasesCommon": "conservative common chemical names for resolver convenience; do not use semantic similarity as proof of existence"
+      },
+      "families": []
+    },
+    {
+      "id": "gasolina-blanca",
+      "canonicalName": "Gasolina Blanca",
+      "aliasesOfficial": [],
+      "variants": [],
+      "cas": null,
+      "description": null,
+      "presentations": [],
+      "applications": [],
+      "sourcePresence": {
+        "pdf2025": true,
+        "webCatalog": false,
+        "detailPage": false
+      },
+      "sourceNames": {
+        "pdf2025": [
+          "Gasolina Blanca"
+        ],
+        "web": []
+      },
+      "sourceUrls": [
+        "https://grupoyoma.com.mx/assets/docs/CATALOGO%20DE%20PRODUCTOS%202025.pdf"
+      ],
+      "dataQualityFlags": [
+        "pdf_only_no_current_web_detail"
+      ],
+      "aliasesCommon": [],
+      "aliasPolicy": {
+        "aliasesOfficial": "directly derived from Grupo Yoma sources",
+        "aliasesCommon": "conservative common chemical names for resolver convenience; do not use semantic similarity as proof of existence"
+      },
+      "families": []
+    },
+    {
+      "id": "gasolvente",
+      "canonicalName": "Gasolvente",
+      "aliasesOfficial": [],
+      "variants": [],
+      "cas": null,
+      "description": null,
+      "presentations": [],
+      "applications": [],
+      "sourcePresence": {
+        "pdf2025": true,
+        "webCatalog": false,
+        "detailPage": false
+      },
+      "sourceNames": {
+        "pdf2025": [
+          "Gasolvente"
+        ],
+        "web": []
+      },
+      "sourceUrls": [
+        "https://grupoyoma.com.mx/assets/docs/CATALOGO%20DE%20PRODUCTOS%202025.pdf"
+      ],
+      "dataQualityFlags": [
+        "pdf_only_no_current_web_detail"
+      ],
+      "aliasesCommon": [],
+      "aliasPolicy": {
+        "aliasesOfficial": "directly derived from Grupo Yoma sources",
+        "aliasesCommon": "conservative common chemical names for resolver convenience; do not use semantic similarity as proof of existence"
+      },
+      "families": []
+    },
+    {
+      "id": "glicerina",
+      "canonicalName": "Glicerina",
+      "aliasesOfficial": [],
+      "variants": [],
+      "cas": "56-81-5",
+      "description": "Líquido claro y viscoso, no tiene olor ni color.",
+      "presentations": [
+        {
+          "container": "tambor",
+          "quantities": [
+            250
+          ],
+          "unit": "kg",
+          "raw": "Tambos: 250 kg"
+        },
+        {
+          "container": "porrón",
+          "quantities": [
+            20,
+            50
+          ],
+          "unit": "kg",
+          "raw": "Porrones: 20 kg y 50 kg"
+        }
+      ],
+      "applications": [
+        "Industria cosmética."
+      ],
+      "sourcePresence": {
+        "pdf2025": true,
+        "webCatalog": true,
+        "detailPage": true
+      },
+      "sourceNames": {
+        "pdf2025": [
+          "Glicerina"
+        ],
+        "web": [
+          "Glicerina"
+        ]
+      },
+      "sourceUrls": [
+        "https://grupoyoma.com.mx/products.html",
+        "https://grupoyoma.com.mx/product-single-Product25.html",
+        "https://grupoyoma.com.mx/product-single-Product44.html",
+        "https://grupoyoma.com.mx/assets/docs/CATALOGO%20DE%20PRODUCTOS%202025.pdf"
+      ],
+      "dataQualityFlags": [
+        "duplicate_current_detail_page"
+      ],
+      "aliasesCommon": [],
+      "aliasPolicy": {
+        "aliasesOfficial": "directly derived from Grupo Yoma sources",
+        "aliasesCommon": "conservative common chemical names for resolver convenience; do not use semantic similarity as proof of existence"
+      },
+      "families": []
+    },
+    {
+      "id": "heptano",
+      "canonicalName": "Heptano",
+      "aliasesOfficial": [],
+      "variants": [],
+      "cas": "142-82-5",
+      "description": "Líquido claro e incoloro de olor suave similar al de la gasolina.",
+      "presentations": [
+        {
+          "container": "pipa",
+          "minQuantity": 5000,
+          "maxQuantity": 35000,
+          "unit": "kg",
+          "raw": "Pipa: 5000 kg hasta 35,000 kg."
+        },
+        {
+          "container": "tambor",
+          "quantities": [
+            200
+          ],
+          "unit": "L",
+          "raw": "Tambos: 200 l."
+        },
+        {
+          "container": "porrón",
+          "quantities": [
+            20,
+            50
+          ],
+          "unit": "L",
+          "raw": "Porrones: 20 l y 50 l."
+        }
+      ],
+      "applications": [
+        "Como disolvente en la fabricación de adhesivos, lacas y tintas."
+      ],
+      "sourcePresence": {
+        "pdf2025": true,
+        "webCatalog": true,
+        "detailPage": true
+      },
+      "sourceNames": {
+        "pdf2025": [
+          "Heptano"
+        ],
+        "web": [
+          "Heptano"
+        ]
+      },
+      "sourceUrls": [
+        "https://grupoyoma.com.mx/products.html",
+        "https://grupoyoma.com.mx/product-single-Product24.html",
+        "https://grupoyoma.com.mx/assets/docs/CATALOGO%20DE%20PRODUCTOS%202025.pdf"
+      ],
+      "dataQualityFlags": [],
+      "aliasesCommon": [
+        "n-heptane"
+      ],
+      "aliasPolicy": {
+        "aliasesOfficial": "directly derived from Grupo Yoma sources",
+        "aliasesCommon": "conservative common chemical names for resolver convenience; do not use semantic similarity as proof of existence"
+      },
+      "families": []
+    },
+    {
+      "id": "hexano",
+      "canonicalName": "Hexano",
+      "aliasesOfficial": [],
+      "variants": [],
+      "cas": "110-54-3",
+      "description": "Líquido claro e incoloro de olor ligeramente picante y suave similar al de la gasolina.",
+      "presentations": [
+        {
+          "container": "pipa",
+          "minQuantity": 5000,
+          "maxQuantity": 35000,
+          "unit": "kg",
+          "raw": "Pipa: 5000 kg hasta 35,000 kg."
+        },
+        {
+          "container": "tambor",
+          "quantities": [
+            200
+          ],
+          "unit": "L",
+          "raw": "Tambos: 200 l."
+        },
+        {
+          "container": "porrón",
+          "quantities": [
+            20,
+            50
+          ],
+          "unit": "L",
+          "raw": "Porrones: 20 l y 50 l."
+        }
+      ],
+      "applications": [
+        "Industria del calzado y cuero, en adhesivos, pinturas, en la limpieza de textiles y metales."
+      ],
+      "sourcePresence": {
+        "pdf2025": true,
+        "webCatalog": true,
+        "detailPage": true
+      },
+      "sourceNames": {
+        "pdf2025": [
+          "Hexano"
+        ],
+        "web": [
+          "Hexano"
+        ]
+      },
+      "sourceUrls": [
+        "https://grupoyoma.com.mx/products.html",
+        "https://grupoyoma.com.mx/product-single-Product23.html",
+        "https://grupoyoma.com.mx/assets/docs/CATALOGO%20DE%20PRODUCTOS%202025.pdf"
+      ],
+      "dataQualityFlags": [],
+      "aliasesCommon": [
+        "n-hexane"
+      ],
+      "aliasPolicy": {
+        "aliasesOfficial": "directly derived from Grupo Yoma sources",
+        "aliasesCommon": "conservative common chemical names for resolver convenience; do not use semantic similarity as proof of existence"
+      },
+      "families": []
+    },
+    {
+      "id": "isoforona",
+      "canonicalName": "Isoforona",
+      "aliasesOfficial": [],
+      "variants": [],
+      "cas": null,
+      "description": null,
+      "presentations": [],
+      "applications": [],
+      "sourcePresence": {
+        "pdf2025": true,
+        "webCatalog": false,
+        "detailPage": false
+      },
+      "sourceNames": {
+        "pdf2025": [
+          "Isoforona"
+        ],
+        "web": []
+      },
+      "sourceUrls": [
+        "https://grupoyoma.com.mx/assets/docs/CATALOGO%20DE%20PRODUCTOS%202025.pdf"
+      ],
+      "dataQualityFlags": [
+        "pdf_only_no_current_web_detail"
+      ],
+      "aliasesCommon": [
+        "isophorone"
+      ],
+      "aliasPolicy": {
+        "aliasesOfficial": "directly derived from Grupo Yoma sources",
+        "aliasesCommon": "conservative common chemical names for resolver convenience; do not use semantic similarity as proof of existence"
+      },
+      "families": []
+    },
+    {
+      "id": "metil-amil-cetona",
+      "canonicalName": "Metil Amil Cetona",
+      "aliasesOfficial": [
+        "MAK"
+      ],
+      "variants": [],
+      "cas": null,
+      "description": null,
+      "presentations": [],
+      "applications": [],
+      "sourcePresence": {
+        "pdf2025": true,
+        "webCatalog": false,
+        "detailPage": false
+      },
+      "sourceNames": {
+        "pdf2025": [
+          "Metil Amil Cetona (MAK)"
+        ],
+        "web": []
+      },
+      "sourceUrls": [
+        "https://grupoyoma.com.mx/assets/docs/CATALOGO%20DE%20PRODUCTOS%202025.pdf"
+      ],
+      "dataQualityFlags": [
+        "pdf_only_no_current_web_detail"
+      ],
+      "aliasesCommon": [
+        "methyl amyl ketone"
+      ],
+      "aliasPolicy": {
+        "aliasesOfficial": "directly derived from Grupo Yoma sources",
+        "aliasesCommon": "conservative common chemical names for resolver convenience; do not use semantic similarity as proof of existence"
+      },
+      "families": [
+        "cetona"
+      ]
+    },
+    {
+      "id": "metil-etil-cetona",
+      "canonicalName": "Metil Etil Cetona",
+      "aliasesOfficial": [
+        "MEK"
+      ],
+      "variants": [],
+      "cas": null,
+      "description": null,
+      "presentations": [],
+      "applications": [],
+      "sourcePresence": {
+        "pdf2025": true,
+        "webCatalog": false,
+        "detailPage": false
+      },
+      "sourceNames": {
+        "pdf2025": [
+          "Metil Etil Cetona (MEK)"
+        ],
+        "web": []
+      },
+      "sourceUrls": [
+        "https://grupoyoma.com.mx/assets/docs/CATALOGO%20DE%20PRODUCTOS%202025.pdf"
+      ],
+      "dataQualityFlags": [
+        "pdf_only_no_current_web_detail"
+      ],
+      "aliasesCommon": [
+        "methyl ethyl ketone",
+        "2-butanone",
+        "butanone",
+        "butanona",
+        "2-butanona",
+        "metil etilcetona"
+      ],
+      "aliasPolicy": {
+        "aliasesOfficial": "directly derived from Grupo Yoma sources",
+        "aliasesCommon": "conservative common chemical names for resolver convenience; do not use semantic similarity as proof of existence"
+      },
+      "families": [
+        "cetona"
+      ]
+    },
+    {
+      "id": "metil-isobutil-cetona",
+      "canonicalName": "Metil Isobutil Cetona",
+      "aliasesOfficial": [
+        "MIBK"
+      ],
+      "variants": [],
+      "cas": "108-10-1",
+      "description": "Líquido claro e incoloro, se dice que tiene olor a alcanfor.",
+      "presentations": [
+        {
+          "container": "pipa",
+          "minQuantity": 5000,
+          "maxQuantity": 35000,
+          "unit": "kg",
+          "raw": "Pipa: 5000 kg hasta 35,000 kg."
+        },
+        {
+          "container": "tambor",
+          "quantities": [
+            200
+          ],
+          "unit": "L",
+          "raw": "Tambos: 200 l."
+        },
+        {
+          "container": "porrón",
+          "quantities": [
+            20,
+            50
+          ],
+          "unit": "L",
+          "raw": "Porrones: 20 l y 50 l."
+        }
+      ],
+      "applications": [
+        "Pinturas, barnices y cauchos."
+      ],
+      "sourcePresence": {
+        "pdf2025": true,
+        "webCatalog": true,
+        "detailPage": true
+      },
+      "sourceNames": {
+        "pdf2025": [
+          "Metil Isobutil Cetona (MIBK)"
+        ],
+        "web": [
+          "Metil Isobutil Cetona"
+        ]
+      },
+      "sourceUrls": [
+        "https://grupoyoma.com.mx/products.html",
+        "https://grupoyoma.com.mx/product-single-Product32.html",
+        "https://grupoyoma.com.mx/assets/docs/CATALOGO%20DE%20PRODUCTOS%202025.pdf"
+      ],
+      "dataQualityFlags": [],
+      "aliasesCommon": [
+        "methyl isobutyl ketone"
+      ],
+      "aliasPolicy": {
+        "aliasesOfficial": "directly derived from Grupo Yoma sources",
+        "aliasesCommon": "conservative common chemical names for resolver convenience; do not use semantic similarity as proof of existence"
+      },
+      "families": [
+        "cetona"
+      ]
+    },
+    {
+      "id": "monoetanolamina",
+      "canonicalName": "Monoetanolamina",
+      "aliasesOfficial": [],
+      "variants": [],
+      "cas": "141-43-5",
+      "description": "Líquido claro e incoloro, de olor amoniacal.",
+      "presentations": [
+        {
+          "container": "tambor",
+          "quantities": [
+            210
+          ],
+          "unit": "kg",
+          "raw": "Tambos: 210 kg"
+        },
+        {
+          "container": "porrón",
+          "quantities": [
+            20,
+            50
+          ],
+          "unit": "kg",
+          "raw": "Porrones: 20 kg y 50 kg"
+        }
+      ],
+      "applications": [
+        "Industria textil, tratamiento de madera, detergentes y productos para el cuidado personal."
+      ],
+      "sourcePresence": {
+        "pdf2025": true,
+        "webCatalog": true,
+        "detailPage": true
+      },
+      "sourceNames": {
+        "pdf2025": [
+          "Monoetanolamina"
+        ],
+        "web": [
+          "Monoetanolamina"
+        ]
+      },
+      "sourceUrls": [
+        "https://grupoyoma.com.mx/products.html",
+        "https://grupoyoma.com.mx/product-single-Product28.html",
+        "https://grupoyoma.com.mx/assets/docs/CATALOGO%20DE%20PRODUCTOS%202025.pdf"
+      ],
+      "dataQualityFlags": [],
+      "aliasesCommon": [
+        "MEA",
+        "ethanolamine"
+      ],
+      "aliasPolicy": {
+        "aliasesOfficial": "directly derived from Grupo Yoma sources",
+        "aliasesCommon": "conservative common chemical names for resolver convenience; do not use semantic similarity as proof of existence"
+      },
+      "families": [
+        "etanolamina"
+      ]
+    },
+    {
+      "id": "monoetilen-glicol",
+      "canonicalName": "Monoetilen Glicol",
+      "aliasesOfficial": [
+        "MEG"
+      ],
+      "variants": [],
+      "cas": "107-21-1",
+      "description": "Líquido claro e incoloro, de olor muy tenue.",
+      "presentations": [
+        {
+          "container": "pipa",
+          "minQuantity": 5000,
+          "maxQuantity": 35000,
+          "unit": "kg",
+          "raw": "Pipas: a partir de 5,000 kg hasta 35,000 kg"
+        },
+        {
+          "container": "tambor",
+          "quantities": [
+            230
+          ],
+          "unit": "kg",
+          "raw": "Tambos: 230 kg"
+        },
+        {
+          "container": "porrón",
+          "quantities": [
+            20,
+            50
+          ],
+          "unit": "kg",
+          "raw": "Porrones: 20 kg y 50 kg"
+        }
+      ],
+      "applications": [
+        "Anticongelantes y refrigerantes."
+      ],
+      "sourcePresence": {
+        "pdf2025": true,
+        "webCatalog": true,
+        "detailPage": true
+      },
+      "sourceNames": {
+        "pdf2025": [
+          "Monoetilen Glicol (MEG)"
+        ],
+        "web": [
+          "Monoetilen Glicol"
+        ]
+      },
+      "sourceUrls": [
+        "https://grupoyoma.com.mx/products.html",
+        "https://grupoyoma.com.mx/product-single-Product34.html",
+        "https://grupoyoma.com.mx/assets/docs/CATALOGO%20DE%20PRODUCTOS%202025.pdf"
+      ],
+      "dataQualityFlags": [],
+      "aliasesCommon": [
+        "ethylene glycol"
+      ],
+      "aliasPolicy": {
+        "aliasesOfficial": "directly derived from Grupo Yoma sources",
+        "aliasesCommon": "conservative common chemical names for resolver convenience; do not use semantic similarity as proof of existence"
+      },
+      "families": [
+        "glicol"
+      ]
+    },
+    {
+      "id": "monopropilen-glicol",
+      "canonicalName": "Monopropilen Glicol",
+      "aliasesOfficial": [
+        "MPG",
+        "Monopropilen Glicol G. I."
+      ],
+      "variants": [],
+      "cas": "57-55-6",
+      "description": "Líquido claro e incoloro, de olor muy suave.",
+      "presentations": [
+        {
+          "container": "pipa",
+          "minQuantity": 5000,
+          "maxQuantity": 35000,
+          "unit": "kg",
+          "raw": "Pipas: a partir de 5,000 kg hasta 35,000 kg"
+        },
+        {
+          "container": "tambor",
+          "quantities": [
+            210
+          ],
+          "unit": "kg",
+          "raw": "Tambos: 210 kg"
+        },
+        {
+          "container": "porrón",
+          "quantities": [
+            20,
+            50
+          ],
+          "unit": "kg",
+          "raw": "Porrones: 20 kg y 50 kg"
+        }
+      ],
+      "applications": [
+        "Industria cosmética, farmacéutica y mecánica."
+      ],
+      "sourcePresence": {
+        "pdf2025": true,
+        "webCatalog": true,
+        "detailPage": true
+      },
+      "sourceNames": {
+        "pdf2025": [
+          "Monopropilen Glicol G. I. (MPG)"
+        ],
+        "web": [
+          "Monopropilen Glicol"
+        ]
+      },
+      "sourceUrls": [
+        "https://grupoyoma.com.mx/products.html",
+        "https://grupoyoma.com.mx/product-single-Product35.html",
+        "https://grupoyoma.com.mx/assets/docs/CATALOGO%20DE%20PRODUCTOS%202025.pdf"
+      ],
+      "dataQualityFlags": [],
+      "aliasesCommon": [
+        "propylene glycol"
+      ],
+      "aliasPolicy": {
+        "aliasesOfficial": "directly derived from Grupo Yoma sources",
+        "aliasesCommon": "conservative common chemical names for resolver convenience; do not use semantic similarity as proof of existence"
+      },
+      "families": [
+        "glicol"
+      ]
+    },
+    {
+      "id": "monomero-acetato-de-vinilo",
+      "canonicalName": "Monómero Acetato de Vinilo",
+      "aliasesOfficial": [],
+      "variants": [],
+      "cas": null,
+      "description": null,
+      "presentations": [],
+      "applications": [],
+      "sourcePresence": {
+        "pdf2025": true,
+        "webCatalog": false,
+        "detailPage": false
+      },
+      "sourceNames": {
+        "pdf2025": [
+          "Monómero Acetato de Vinilo"
+        ],
+        "web": []
+      },
+      "sourceUrls": [
+        "https://grupoyoma.com.mx/assets/docs/CATALOGO%20DE%20PRODUCTOS%202025.pdf"
+      ],
+      "dataQualityFlags": [
+        "pdf_only_no_current_web_detail"
+      ],
+      "aliasesCommon": [
+        "VAM",
+        "acetato de vinilo",
+        "vinil acetato"
+      ],
+      "aliasPolicy": {
+        "aliasesOfficial": "directly derived from Grupo Yoma sources",
+        "aliasesCommon": "conservative common chemical names for resolver convenience; do not use semantic similarity as proof of existence"
+      },
+      "families": [
+        "acetato"
+      ]
+    },
+    {
+      "id": "monomero-de-estireno",
+      "canonicalName": "Monómero de Estireno",
+      "aliasesOfficial": [],
+      "variants": [],
+      "cas": "100-42-5",
+      "description": "Líquido claro, puede ser incoloro hasta amarillo, de olor característico.",
+      "presentations": [
+        {
+          "container": "pipa",
+          "minQuantity": 5000,
+          "maxQuantity": 35000,
+          "unit": "kg",
+          "raw": "Pipas: a partir de 5,000 kg hasta 35,000 kg"
+        },
+        {
+          "container": "tambor",
+          "quantities": [
+            181
+          ],
+          "unit": "kg",
+          "raw": "Tambos: 181 kg"
+        },
+        {
+          "container": "porrón",
+          "quantities": [
+            20,
+            50
+          ],
+          "unit": "kg",
+          "raw": "Porrones: 20 kg y 50 kg"
+        }
+      ],
+      "applications": [
+        "Producción de plásticos y resinas."
+      ],
+      "sourcePresence": {
+        "pdf2025": true,
+        "webCatalog": true,
+        "detailPage": true
+      },
+      "sourceNames": {
+        "pdf2025": [
+          "Monómero de Estireno"
+        ],
+        "web": [
+          "Monómero de Estireno"
+        ]
+      },
+      "sourceUrls": [
+        "https://grupoyoma.com.mx/products.html",
+        "https://grupoyoma.com.mx/product-single-Product37.html",
+        "https://grupoyoma.com.mx/assets/docs/CATALOGO%20DE%20PRODUCTOS%202025.pdf"
+      ],
+      "dataQualityFlags": [],
+      "aliasesCommon": [
+        "styrene",
+        "vinylbenzene",
+        "vinil benceno"
+      ],
+      "aliasPolicy": {
+        "aliasesOfficial": "directly derived from Grupo Yoma sources",
+        "aliasesCommon": "conservative common chemical names for resolver convenience; do not use semantic similarity as proof of existence"
+      },
+      "families": []
+    },
+    {
+      "id": "percloroetileno",
+      "canonicalName": "Percloroetileno",
+      "aliasesOfficial": [],
+      "variants": [],
+      "cas": "127-8-4",
+      "description": "Líquido claro e incoloro de olor dulce y penetrante.",
+      "presentations": [
+        {
+          "container": "pipa",
+          "minQuantity": 5000,
+          "maxQuantity": 35000,
+          "unit": "kg",
+          "raw": "Pipa: 5000 kg hasta 35,000 kg."
+        },
+        {
+          "container": "tambor",
+          "quantities": [
+            300
+          ],
+          "unit": "kg",
+          "raw": "Tambos: 300 kg."
+        },
+        {
+          "container": "porrón",
+          "quantities": [
+            20,
+            50
+          ],
+          "unit": "kg",
+          "raw": "Porrones: 20 kg y 50 kg."
+        }
+      ],
+      "applications": [
+        "Lavado en seco textiles y metales."
+      ],
+      "sourcePresence": {
+        "pdf2025": true,
+        "webCatalog": true,
+        "detailPage": true
+      },
+      "sourceNames": {
+        "pdf2025": [
+          "Percloroetileno"
+        ],
+        "web": [
+          "Percloroetileno"
+        ]
+      },
+      "sourceUrls": [
+        "https://grupoyoma.com.mx/products.html",
+        "https://grupoyoma.com.mx/product-single-Product21.html",
+        "https://grupoyoma.com.mx/assets/docs/CATALOGO%20DE%20PRODUCTOS%202025.pdf"
+      ],
+      "dataQualityFlags": [
+        "cas_format_suspicious_as_published"
+      ],
+      "aliasesCommon": [
+        "tetrachloroethylene",
+        "PCE",
+        "perc"
+      ],
+      "aliasPolicy": {
+        "aliasesOfficial": "directly derived from Grupo Yoma sources",
+        "aliasesCommon": "conservative common chemical names for resolver convenience; do not use semantic similarity as proof of existence"
+      },
+      "families": []
+    },
+    {
+      "id": "pm-acetato",
+      "canonicalName": "PM Acetato",
+      "aliasesOfficial": [],
+      "variants": [],
+      "cas": "108-65-6",
+      "description": "Líquido claro e incoloro de olor dulce y afrutado.",
+      "presentations": [
+        {
+          "container": "pipa",
+          "minQuantity": 5000,
+          "maxQuantity": 35000,
+          "unit": "kg",
+          "raw": "Pipa: 5000 kg hasta 35,000 kg."
+        },
+        {
+          "container": "tambor",
+          "quantities": [
+            200
+          ],
+          "unit": "L",
+          "raw": "Tambos: 200 l."
+        },
+        {
+          "container": "porrón",
+          "quantities": [
+            20,
+            50
+          ],
+          "unit": "L",
+          "raw": "Porrones: 20 l y 50 l."
+        }
+      ],
+      "applications": [
+        "Tintas, pinturas y lacas."
+      ],
+      "sourcePresence": {
+        "pdf2025": false,
+        "webCatalog": true,
+        "detailPage": true
+      },
+      "sourceNames": {
+        "pdf2025": [],
+        "web": [
+          "PM Acetato"
+        ]
+      },
+      "sourceUrls": [
+        "https://grupoyoma.com.mx/products.html",
+        "https://grupoyoma.com.mx/product-single-Product16.html"
+      ],
+      "dataQualityFlags": [
+        "web_only_not_in_pdf_2025"
+      ],
+      "aliasesCommon": [],
+      "aliasPolicy": {
+        "aliasesOfficial": "directly derived from Grupo Yoma sources",
+        "aliasesCommon": "conservative common chemical names for resolver convenience; do not use semantic similarity as proof of existence"
+      },
+      "families": [
+        "acetato"
+      ]
+    },
+    {
+      "id": "sosa-caustica-en-escamas",
+      "canonicalName": "Sosa Caústica en Escamas",
+      "aliasesOfficial": [],
+      "variants": [],
+      "cas": null,
+      "description": null,
+      "presentations": [],
+      "applications": [],
+      "sourcePresence": {
+        "pdf2025": true,
+        "webCatalog": false,
+        "detailPage": false
+      },
+      "sourceNames": {
+        "pdf2025": [
+          "Sosa Caústica en Escamas"
+        ],
+        "web": []
+      },
+      "sourceUrls": [
+        "https://grupoyoma.com.mx/assets/docs/CATALOGO%20DE%20PRODUCTOS%202025.pdf"
+      ],
+      "dataQualityFlags": [
+        "pdf_only_no_current_web_detail"
+      ],
+      "aliasesCommon": [
+        "sosa caustica",
+        "sosa",
+        "sosa en escamas",
+        "hidroxido de sodio",
+        "NaOH"
+      ],
+      "aliasPolicy": {
+        "aliasesOfficial": "directly derived from Grupo Yoma sources",
+        "aliasesCommon": "conservative common chemical names for resolver convenience; do not use semantic similarity as proof of existence"
+      },
+      "families": []
+    },
+    {
+      "id": "texanol",
+      "canonicalName": "Texanol",
+      "aliasesOfficial": [],
+      "variants": [],
+      "cas": "14125265-77-4",
+      "description": "Líquido claro e incoloro de olor ligero.",
+      "presentations": [
+        {
+          "container": "pipa",
+          "minQuantity": 5000,
+          "maxQuantity": 35000,
+          "unit": "kg",
+          "raw": "Pipa: 5000 kg hasta 35,000 kg."
+        },
+        {
+          "container": "tambor",
+          "quantities": [
+            200
+          ],
+          "unit": "L",
+          "raw": "Tambos: 200 l."
+        },
+        {
+          "container": "porrón",
+          "quantities": [
+            20,
+            50
+          ],
+          "unit": "L",
+          "raw": "Porrones: 20 l y 50 l."
+        }
+      ],
+      "applications": [
+        "Pinturas e impermeabilizantes."
+      ],
+      "sourcePresence": {
+        "pdf2025": true,
+        "webCatalog": true,
+        "detailPage": true
+      },
+      "sourceNames": {
+        "pdf2025": [
+          "Texanol"
+        ],
+        "web": [
+          "Texanol"
+        ]
+      },
+      "sourceUrls": [
+        "https://grupoyoma.com.mx/products.html",
+        "https://grupoyoma.com.mx/product-single-Product17.html",
+        "https://grupoyoma.com.mx/assets/docs/CATALOGO%20DE%20PRODUCTOS%202025.pdf"
+      ],
+      "dataQualityFlags": [
+        "cas_format_suspicious_as_published"
+      ],
+      "aliasesCommon": [],
+      "aliasPolicy": {
+        "aliasesOfficial": "directly derived from Grupo Yoma sources",
+        "aliasesCommon": "conservative common chemical names for resolver convenience; do not use semantic similarity as proof of existence"
+      },
+      "families": []
+    },
+    {
+      "id": "thinner-acrilico",
+      "canonicalName": "Thinner Acrilico",
+      "aliasesOfficial": [],
+      "variants": [],
+      "cas": null,
+      "description": null,
+      "presentations": [],
+      "applications": [],
+      "sourcePresence": {
+        "pdf2025": true,
+        "webCatalog": false,
+        "detailPage": false
+      },
+      "sourceNames": {
+        "pdf2025": [
+          "Thinner Acrilico"
+        ],
+        "web": []
+      },
+      "sourceUrls": [
+        "https://grupoyoma.com.mx/assets/docs/CATALOGO%20DE%20PRODUCTOS%202025.pdf"
+      ],
+      "dataQualityFlags": [
+        "pdf_only_no_current_web_detail"
+      ],
+      "aliasesCommon": [
+        "thiner acrilico",
+        "tiner acrilico"
+      ],
+      "aliasPolicy": {
+        "aliasesOfficial": "directly derived from Grupo Yoma sources",
+        "aliasesCommon": "conservative common chemical names for resolver convenience; do not use semantic similarity as proof of existence"
+      },
+      "families": [
+        "thinner"
+      ]
+    },
+    {
+      "id": "thinner-americano",
+      "canonicalName": "Thinner Americano",
+      "aliasesOfficial": [],
+      "variants": [],
+      "cas": null,
+      "description": null,
+      "presentations": [],
+      "applications": [],
+      "sourcePresence": {
+        "pdf2025": true,
+        "webCatalog": false,
+        "detailPage": false
+      },
+      "sourceNames": {
+        "pdf2025": [
+          "Thinner Americano"
+        ],
+        "web": []
+      },
+      "sourceUrls": [
+        "https://grupoyoma.com.mx/assets/docs/CATALOGO%20DE%20PRODUCTOS%202025.pdf"
+      ],
+      "dataQualityFlags": [
+        "pdf_only_no_current_web_detail"
+      ],
+      "aliasesCommon": [
+        "thiner americano",
+        "tiner americano",
+        "tinner americano"
+      ],
+      "aliasPolicy": {
+        "aliasesOfficial": "directly derived from Grupo Yoma sources",
+        "aliasesCommon": "conservative common chemical names for resolver convenience; do not use semantic similarity as proof of existence"
+      },
+      "families": [
+        "thinner"
+      ]
+    },
+    {
+      "id": "thinner-standard",
+      "canonicalName": "Thinner Standard",
+      "aliasesOfficial": [],
+      "variants": [],
+      "cas": null,
+      "description": null,
+      "presentations": [],
+      "applications": [],
+      "sourcePresence": {
+        "pdf2025": true,
+        "webCatalog": false,
+        "detailPage": false
+      },
+      "sourceNames": {
+        "pdf2025": [
+          "Thinner Standard"
+        ],
+        "web": []
+      },
+      "sourceUrls": [
+        "https://grupoyoma.com.mx/assets/docs/CATALOGO%20DE%20PRODUCTOS%202025.pdf"
+      ],
+      "dataQualityFlags": [
+        "pdf_only_no_current_web_detail"
+      ],
+      "aliasesCommon": [
+        "thiner standard",
+        "tiner standard",
+        "thinner estandar",
+        "thiner estandar"
+      ],
+      "aliasPolicy": {
+        "aliasesOfficial": "directly derived from Grupo Yoma sources",
+        "aliasesCommon": "conservative common chemical names for resolver convenience; do not use semantic similarity as proof of existence"
+      },
+      "families": [
+        "thinner"
+      ]
+    },
+    {
+      "id": "tolueno",
+      "canonicalName": "Tolueno",
+      "aliasesOfficial": [],
+      "variants": [],
+      "cas": "108-88-3",
+      "description": "Líquido claro e incoloro, de olor dulce, similar al benceno.",
+      "presentations": [
+        {
+          "container": "pipa",
+          "minQuantity": 5000,
+          "maxQuantity": 35000,
+          "unit": "kg",
+          "raw": "Pipa: 5000 kg hasta 35,000 kg."
+        },
+        {
+          "container": "tambor",
+          "quantities": [
+            200
+          ],
+          "unit": "L",
+          "raw": "Tambos: 200 l."
+        },
+        {
+          "container": "porrón",
+          "quantities": [
+            20,
+            50
+          ],
+          "unit": "L",
+          "raw": "Porrones: 20 l y 50 l."
+        }
+      ],
+      "applications": [
+        "Disolvente, combustibles, perfumes, detergentes, adhesivos, pinturas y barnices."
+      ],
+      "sourcePresence": {
+        "pdf2025": true,
+        "webCatalog": true,
+        "detailPage": true
+      },
+      "sourceNames": {
+        "pdf2025": [
+          "Tolueno"
+        ],
+        "web": [
+          "Tolueno"
+        ]
+      },
+      "sourceUrls": [
+        "https://grupoyoma.com.mx/products.html",
+        "https://grupoyoma.com.mx/product-single-Product30.html",
+        "https://grupoyoma.com.mx/assets/docs/CATALOGO%20DE%20PRODUCTOS%202025.pdf"
+      ],
+      "dataQualityFlags": [],
+      "aliasesCommon": [
+        "toluol"
+      ],
+      "aliasPolicy": {
+        "aliasesOfficial": "directly derived from Grupo Yoma sources",
+        "aliasesCommon": "conservative common chemical names for resolver convenience; do not use semantic similarity as proof of existence"
+      },
+      "families": []
+    },
+    {
+      "id": "tricloroetileno",
+      "canonicalName": "Tricloroetileno",
+      "aliasesOfficial": [],
+      "variants": [],
+      "cas": "79-01-6",
+      "description": "Líquido claro e incoloro de olor dulce, picante y penetrante.",
+      "presentations": [
+        {
+          "container": "tambor",
+          "quantities": [
+            300
+          ],
+          "unit": "kg",
+          "raw": "Tambos: 300 kg."
+        },
+        {
+          "container": "porrón",
+          "quantities": [
+            20,
+            50
+          ],
+          "unit": "kg",
+          "raw": "Porrones: 20 kg y 50 kg."
+        }
+      ],
+      "applications": [
+        "Desengrasante, ingrediente en removedores y en adhesivos."
+      ],
+      "sourcePresence": {
+        "pdf2025": true,
+        "webCatalog": true,
+        "detailPage": true
+      },
+      "sourceNames": {
+        "pdf2025": [
+          "Tricloroetileno"
+        ],
+        "web": [
+          "Tricloroetileno"
+        ]
+      },
+      "sourceUrls": [
+        "https://grupoyoma.com.mx/products.html",
+        "https://grupoyoma.com.mx/product-single-Product22.html",
+        "https://grupoyoma.com.mx/assets/docs/CATALOGO%20DE%20PRODUCTOS%202025.pdf"
+      ],
+      "dataQualityFlags": [],
+      "aliasesCommon": [
+        "trichloroethylene",
+        "TCE"
+      ],
+      "aliasPolicy": {
+        "aliasesOfficial": "directly derived from Grupo Yoma sources",
+        "aliasesCommon": "conservative common chemical names for resolver convenience; do not use semantic similarity as proof of existence"
+      },
+      "families": []
+    },
+    {
+      "id": "trietanolamina",
+      "canonicalName": "Trietanolamina",
+      "aliasesOfficial": [],
+      "variants": [
+        {
+          "grade": "85%",
+          "sourceName": "Trietanolamina 85%"
+        },
+        {
+          "grade": "99%",
+          "sourceName": "Trietanolamina 99%"
+        }
+      ],
+      "cas": "102-71-6",
+      "description": "Líquido claro, viscoso e incoloro, puede tener color amarillo claro, de olor ligeramente amoniacal.",
+      "presentations": [
+        {
+          "container": "tambor",
+          "quantities": [
+            230
+          ],
+          "unit": "kg",
+          "raw": "Tambos: 230 kg"
+        },
+        {
+          "container": "porrón",
+          "quantities": [
+            20,
+            50
+          ],
+          "unit": "kg",
+          "raw": "Porrones: 20 kg y 50 kg"
+        }
+      ],
+      "applications": [
+        "Productos cosméticos, limpieza y tintas de impresión."
+      ],
+      "sourcePresence": {
+        "pdf2025": true,
+        "webCatalog": true,
+        "detailPage": true
+      },
+      "sourceNames": {
+        "pdf2025": [
+          "Trietanolamina 85%",
+          "Trietanolamina 99%"
+        ],
+        "web": [
+          "Trietanolamina"
+        ]
+      },
+      "sourceUrls": [
+        "https://grupoyoma.com.mx/products.html",
+        "https://grupoyoma.com.mx/product-single-Product29.html",
+        "https://grupoyoma.com.mx/assets/docs/CATALOGO%20DE%20PRODUCTOS%202025.pdf"
+      ],
+      "dataQualityFlags": [
+        "web_detail_is_generic_while_pdf_lists_85_and_99_percent_variants"
+      ],
+      "aliasesCommon": [
+        "TEA"
+      ],
+      "aliasPolicy": {
+        "aliasesOfficial": "directly derived from Grupo Yoma sources",
+        "aliasesCommon": "conservative common chemical names for resolver convenience; do not use semantic similarity as proof of existence"
+      },
+      "families": [
+        "etanolamina"
+      ]
+    },
+    {
+      "id": "varsol",
+      "canonicalName": "Varsol",
+      "aliasesOfficial": [],
+      "variants": [],
+      "cas": "95-63-6",
+      "description": "Líquido claro e incoloro, puede presentar color ligeramente amarillo, de olor característico asociado al queroseno.",
+      "presentations": [
+        {
+          "container": "pipa",
+          "minQuantity": 5000,
+          "maxQuantity": 35000,
+          "unit": "kg",
+          "raw": "Pipa: 5000 kg hasta 35,000 kg."
+        },
+        {
+          "container": "tambor",
+          "quantities": [
+            200
+          ],
+          "unit": "L",
+          "raw": "Tambos: 200 l."
+        },
+        {
+          "container": "porrón",
+          "quantities": [
+            20,
+            50
+          ],
+          "unit": "L",
+          "raw": "Porrones: 20 l y 50 l."
+        }
+      ],
+      "applications": [
+        "Limpieza de maquinarias y motores, diluyente y fabricación de barnices, pinturas y revestimientos."
+      ],
+      "sourcePresence": {
+        "pdf2025": true,
+        "webCatalog": true,
+        "detailPage": true
+      },
+      "sourceNames": {
+        "pdf2025": [
+          "Varsol"
+        ],
+        "web": [
+          "Varsol"
+        ]
+      },
+      "sourceUrls": [
+        "https://grupoyoma.com.mx/products.html",
+        "https://grupoyoma.com.mx/product-single-Product27.html",
+        "https://grupoyoma.com.mx/assets/docs/CATALOGO%20DE%20PRODUCTOS%202025.pdf"
+      ],
+      "dataQualityFlags": [
+        "cas_duplicated_on_website:95-63-6"
+      ],
+      "aliasesCommon": [],
+      "aliasPolicy": {
+        "aliasesOfficial": "directly derived from Grupo Yoma sources",
+        "aliasesCommon": "conservative common chemical names for resolver convenience; do not use semantic similarity as proof of existence"
+      },
+      "families": []
+    },
+    {
+      "id": "xileno",
+      "canonicalName": "Xileno",
+      "aliasesOfficial": [],
+      "variants": [],
+      "cas": "1330-20-7",
+      "description": "Líquido claro e incoloro, de olor dulce y aromático, ligeramente picante.",
+      "presentations": [
+        {
+          "container": "pipa",
+          "minQuantity": 5000,
+          "maxQuantity": 35000,
+          "unit": "kg",
+          "raw": "Pipa: 5000 kg hasta 35,000 kg."
+        },
+        {
+          "container": "tambor",
+          "quantities": [
+            200
+          ],
+          "unit": "L",
+          "raw": "Tambos: 200 l."
+        },
+        {
+          "container": "porrón",
+          "quantities": [
+            20,
+            50
+          ],
+          "unit": "L",
+          "raw": "Porrones: 20 l y 50 l."
+        }
+      ],
+      "applications": [
+        "Disolvente, fabricación de pinturas y adhesivos."
+      ],
+      "sourcePresence": {
+        "pdf2025": true,
+        "webCatalog": true,
+        "detailPage": true
+      },
+      "sourceNames": {
+        "pdf2025": [
+          "Xileno"
+        ],
+        "web": [
+          "Xileno"
+        ]
+      },
+      "sourceUrls": [
+        "https://grupoyoma.com.mx/products.html",
+        "https://grupoyoma.com.mx/product-single-Product31.html",
+        "https://grupoyoma.com.mx/assets/docs/CATALOGO%20DE%20PRODUCTOS%202025.pdf"
+      ],
+      "dataQualityFlags": [],
+      "aliasesCommon": [
+        "xylol",
+        "xylene"
+      ],
+      "aliasPolicy": {
+        "aliasesOfficial": "directly derived from Grupo Yoma sources",
+        "aliasesCommon": "conservative common chemical names for resolver convenience; do not use semantic similarity as proof of existence"
+      },
+      "families": []
+    }
+  ],
+  "families": {
+    "thinner": {
+      "label": "thinner",
+      "terms": [
+        "thinner",
+        "thiner",
+        "tiner",
+        "tinner",
+        "thinners"
+      ]
+    },
+    "alcohol": {
+      "label": "alcohol",
+      "terms": [
+        "alcohol",
+        "alcoholes"
+      ]
+    },
+    "acetato": {
+      "label": "acetato",
+      "terms": [
+        "acetato",
+        "acetatos"
+      ]
+    },
+    "cetona": {
+      "label": "cetona",
+      "terms": [
+        "cetona",
+        "cetonas"
+      ]
+    },
+    "glicol": {
+      "label": "glicol",
+      "terms": [
+        "glicol",
+        "glicoles"
+      ]
+    },
+    "ftalato": {
+      "label": "ftalato",
+      "terms": [
+        "ftalato",
+        "ftalatos"
+      ]
+    },
+    "dioctil": {
+      "label": "dioctil",
+      "terms": [
+        "dioctil"
+      ]
+    },
+    "exxsol": {
+      "label": "Exxsol",
+      "terms": [
+        "exxsol"
+      ]
+    },
+    "aromina": {
+      "label": "Aromina",
+      "terms": [
+        "aromina"
+      ]
+    },
+    "etanolamina": {
+      "label": "etanolamina",
+      "terms": [
+        "etanolamina",
+        "etanolaminas"
+      ]
+    }
+  }
+}

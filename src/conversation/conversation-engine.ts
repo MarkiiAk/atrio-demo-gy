@@ -4,13 +4,22 @@ import { runAssistantTurn, OpenAiUnavailableError, type TurnResult } from '../ai
 import type { AiTurnOutput } from '../ai/ai-schema';
 import { getVectorStoreId } from '../knowledge/vector-store.service';
 import {
+  canonicalizeProduct,
   findSubstitutedFields,
+  inspectCatalogFields,
   resolveKnownProduct,
+  resolveTerm,
   verifyCaseFields,
   verifyTerm,
 } from '../knowledge/knowledge-verifier';
+import { presentationSummary } from '../knowledge/product-catalog';
 import { recordGap } from '../onboarding/gap.service';
-import { buildSystemPrompt, buildTurnHint, type ActiveCaseView } from '../prompts/build-system-prompt';
+import {
+  buildSystemPrompt,
+  buildTurnHint,
+  type ActiveCaseView,
+  type MentionedProduct,
+} from '../prompts/build-system-prompt';
 import {
   createCase,
   findActiveCaseByWorkflow,
@@ -101,6 +110,12 @@ export async function processTurn(input: EngineInput): Promise<EngineResult> {
   // ── 1. Estado actual ───────────────────────────────────────────────────────
   let snapshot = snapshotConversation(config, conversation.id, channel);
 
+  // Lo que la persona acaba de mencionar, resuelto ANTES de generar. En el turno
+  // en que alguien pide algo por primera vez todavía no hay caso, así que los
+  // hallazgos del estado llegan un turno tarde: sin esto el asistente contestaba
+  // la primera petición a ciegas.
+  const mentionedProducts = resolveMentions(config, input.newMessages);
+
   const buildPrompt = (views: ActiveCaseView[]): string =>
     buildSystemPrompt({
       config,
@@ -113,6 +128,7 @@ export async function processTurn(input: EngineInput): Promise<EngineResult> {
       ambiguityCount: conversation.ambiguity_count,
       hasKnowledge: Boolean(vectorStoreId),
       globalCannotDo: [...new Set(enabledWorkflows(config).flatMap((w) => w.config.cannot_do))],
+      mentionedProducts,
     });
 
   const history = buildHistory(conversation.id, input.newMessages);
@@ -227,6 +243,15 @@ export async function processTurn(input: EngineInput): Promise<EngineResult> {
           status.known,
           userMessages,
         ).map((v) => v.field),
+        // Un producto ambiguo tampoco se canaliza. "thinner" son tres productos
+        // distintos: mandarle a Ventas una cotización sin saber cuál obliga a
+        // volver a preguntar por otro medio, que es justo lo que este asistente
+        // debía evitar. Un producto sin presentaciones publicadas SÍ se canaliza:
+        // existe y se sabe cuál es, sólo falta el envase, y eso lo resuelve quien
+        // atienda.
+        ...inspectCatalogFields(config, caseData.row.workflow_key, status.known)
+          .filter((f) => f.kind === 'AMBIGUOUS')
+          .map((f) => f.field),
       ],
     });
     if (!decision.eligible) {
@@ -404,6 +429,54 @@ export async function processTurn(input: EngineInput): Promise<EngineResult> {
 
 // ── piezas internas ──────────────────────────────────────────────────────────
 
+/**
+ * Resuelve contra el catálogo los productos que la persona nombró en los mensajes
+ * de ESTE turno.
+ *
+ * Se descartan los términos que no resuelven a nada Y que además no parecen un
+ * producto: `candidateProductTerms` es generoso a propósito, y decirle al modelo
+ * "«buenas tardes» no está en el catálogo" lo empuja a negar cosas absurdas. Sólo
+ * se reporta un NO_MATCH cuando el término tiene pinta de producto pedido, que es
+ * cuando negarlo es la respuesta correcta.
+ */
+function resolveMentions(config: TenantConfig, messages: string[]): MentionedProduct[] {
+  const seen = new Set<string>();
+  const out: MentionedProduct[] = [];
+
+  for (const message of messages) {
+    for (const term of candidateProductTerms(message)) {
+      const key = term.toLowerCase();
+      if (seen.has(key)) continue;
+      seen.add(key);
+
+      const r = resolveTerm(config, term);
+
+      if (r.status === 'MATCH' && r.product) {
+        out.push({
+          term,
+          status: 'MATCH',
+          canonicalName: r.product.canonicalName,
+          presentations: presentationSummary(r.product),
+        });
+      } else if (r.status === 'AMBIGUOUS') {
+        out.push({
+          term,
+          status: 'AMBIGUOUS',
+          candidates: (r.candidates ?? []).map((p) => p.canonicalName),
+          ...(r.matchedFamily ? { familyLabel: r.matchedFamily } : {}),
+        });
+      }
+      // NO_MATCH y NO_KNOWLEDGE no se reportan aquí: de negar un producto se
+      // encarga la verificación del campo extraído, que sabe cuál de todos los
+      // términos del mensaje era realmente el producto pedido.
+    }
+  }
+
+  // Un mensaje puede nombrar dos productos ("tolueno y xileno") y eso es legítimo,
+  // pero una lista larga es ruido del extractor: se acota para no diluir el prompt.
+  return out.slice(0, 6);
+}
+
 function accumulateUsage(debug: EngineDebug, turn: TurnResult): void {
   debug.usage.inputTokens += turn.usage.inputTokens;
   debug.usage.outputTokens += turn.usage.outputTokens;
@@ -553,14 +626,30 @@ function materializeCases(
     // la conversación diciéndolo.
     const missingVerifiable = wf.verify_against_knowledge.filter((f) => !c.fields[f]?.trim());
     if (missingVerifiable.length > 0) {
-      const known = resolveKnownProduct(
-        config,
-        userMessages.flatMap((m) => candidateProductTerms(m)),
-      );
+      // `product_query` primero: el modelo ya separó ahí la identidad del producto
+      // de las cantidades y los envases, así que es más preciso que barrer el
+      // mensaje palabra por palabra. El barrido queda como respaldo.
+      const known =
+        resolveKnownProduct(config, ai.product_query ? [ai.product_query] : []) ??
+        resolveKnownProduct(config, userMessages.flatMap((m) => candidateProductTerms(m)));
       if (known) {
         const filled = Object.fromEntries(missingVerifiable.map((f) => [f, known]));
         upsertCaseFields(c.row.id, filled, 'USER');
         c.fields = { ...c.fields, ...filled };
+      }
+    }
+
+    // Se normaliza al nombre del catálogo: quien escribió "thiner americano" deja
+    // registrado "Thinner Americano". Así el panel y el aviso al área ven el
+    // nombre real del producto y no la grafía de cada persona, y dos clientes que
+    // piden lo mismo con palabras distintas producen el mismo dato.
+    for (const field of wf.verify_against_knowledge) {
+      const value = c.fields[field];
+      if (!value) continue;
+      const canonical = canonicalizeProduct(config, value);
+      if (canonical) {
+        upsertCaseFields(c.row.id, { [field]: canonical }, 'SYSTEM');
+        c.fields = { ...c.fields, [field]: canonical };
       }
     }
 

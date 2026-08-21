@@ -187,6 +187,17 @@ export function candidateProductTerms(text: string): string[] {
   const words = cleaned.split(/\s+/).filter(Boolean);
   const out: string[] = [];
 
+  // Acrónimos: así pide un comprador industrial. "¿manejan MEK?" no producía
+  // ningún candidato porque el mínimo eran 5 letras, y el asistente contestaba a
+  // ciegas una pregunta sobre un producto que sí está en el catálogo. Se toman de
+  // la mayúscula del texto ORIGINAL, que es la señal de que es un acrónimo y no
+  // una palabra corta cualquiera; si no está declarado, el catálogo lo rechaza.
+  // Mínimo tres caracteres: con dos entrarían "CP", "SA" o "NL", y un candidato
+  // que no es producto puede acabar reportado como "algo que no vendemos".
+  for (const acronym of text.match(/(?<![\p{L}\p{N}])[A-Z][A-Z0-9]{2,5}(?![\p{L}\p{N}])/gu) ?? []) {
+    if (!TERM_NOISE.has(acronym.toLowerCase())) out.push(acronym);
+  }
+
   for (let i = 0; i < words.length; i += 1) {
     const w = words[i];
     if (w.length < 5 || TERM_NOISE.has(w) || /^\d+$/.test(w)) continue;
@@ -262,6 +273,17 @@ export const TERM_NOISE = new Set([
   'ciudad',
   'estado',
   'colonia',
+  // Siglas frecuentes en un pedido que NO son productos. Sin esto, "mi RFC es..."
+  // acaba reportado como un producto que no manejamos.
+  'rfc',
+  'iva',
+  'usd',
+  'mxn',
+  'sat',
+  'cfdi',
+  'oc',
+  'pdf',
+  'whatsapp',
   'direccion',
   'postal',
   'codigo',
