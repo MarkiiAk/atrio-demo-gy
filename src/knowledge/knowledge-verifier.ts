@@ -130,6 +130,33 @@ const STOPWORDS = new Set([
   'of',
 ]);
 
+/**
+ * ¿La persona pidió algo que NO está en el catálogo, aunque el modelo no lo
+ * haya registrado en ningún campo?
+ *
+ * Se usa como respaldo cuando el campo verificable quedó vacío. Sólo avisa
+ * cuando NINGÚN candidato del mensaje aparece en la documentación: si alguno
+ * coincide, es que la persona está pidiendo algo que sí manejamos y no hay nada
+ * que advertir. Ante la duda, se calla — un falso aviso haría que el asistente
+ * niegue productos que sí existen.
+ */
+export function detectUnknownRequest(
+  config: TenantConfig,
+  candidates: string[],
+): string | null {
+  if (candidates.length === 0) return null;
+
+  const checked = candidates
+    .map((term) => ({ term, result: verifyTerm(config, term) }))
+    .filter((c) => c.result !== 'NO_KNOWLEDGE');
+
+  if (checked.length === 0) return null;
+  if (checked.some((c) => c.result === 'FOUND')) return null;
+
+  // Ninguno existe: se reporta el más específico (el más largo).
+  return checked[0].term;
+}
+
 export interface FieldVerification {
   workflowKey: string;
   field: string;

@@ -2,8 +2,12 @@ import type { TenantConfig } from '../tenants/config-schema';
 import type { ActiveCaseView } from '../prompts/build-system-prompt';
 import { activeCases, lastRoutingOutcome, type CaseWithData } from '../repositories/case.repository';
 import type { ChannelContext } from '../workflows/field-engine';
-import { evaluateFields } from '../workflows/field-engine';
-import { findSubstitutedFields, verifyCaseFields } from '../knowledge/knowledge-verifier';
+import { candidateProductTerms, evaluateFields } from '../workflows/field-engine';
+import {
+  detectUnknownRequest,
+  findSubstitutedFields,
+  verifyCaseFields,
+} from '../knowledge/knowledge-verifier';
 import { folioFor } from '../panel/labels';
 
 export interface ConversationSnapshot {
@@ -70,11 +74,45 @@ export function snapshotConversation(
             reason: 'NO es lo que la persona pidió' as const,
           }),
         ),
+        // Respaldo: el modelo dejó el campo vacío, pero la persona sí pidió algo
+        // que no aparece en el catálogo. Sin esto nadie puede avisarlo.
+        ...unknownRequestFor(config, c.row.workflow_key, status.known, userMessages),
       ],
     });
   }
 
   return { cases, views };
+}
+
+/**
+ * Detecta una petición fuera de catálogo cuando el campo verificable quedó
+ * VACÍO. Si el modelo sí lo registró, esa vía ya lo cubre y aquí no se duplica.
+ */
+function unknownRequestFor(
+  config: TenantConfig,
+  workflowKey: string,
+  known: Record<string, string>,
+  userMessages: string[],
+): Array<{ field: string; value: string; reason: string }> {
+  const wf = config.workflows.workflows[workflowKey];
+  if (!wf || wf.verify_against_knowledge.length === 0) return [];
+
+  const empty = wf.verify_against_knowledge.filter((f) => !known[f]?.trim());
+  if (empty.length === 0) return [];
+
+  const term = detectUnknownRequest(
+    config,
+    userMessages.flatMap((m) => candidateProductTerms(m)),
+  );
+  if (!term) return [];
+
+  return [
+    {
+      field: empty[0],
+      value: term,
+      reason: 'no aparece en la documentación de la empresa',
+    },
+  ];
 }
 
 /** Datos que el canal aporta gratis, en lenguaje entendible para el prompt. */

@@ -166,6 +166,105 @@ export function fillDescriptiveFields(
   return out;
 }
 
+/**
+ * Extrae del texto de la persona los términos que parecen nombrar un producto.
+ *
+ * Red de seguridad para cuando el modelo NO registra el campo. Pasó en
+ * producción: alguien pidió "27 tambos de thiner americano" y el modelo dejó
+ * `product` vacío "para no asumir"; sin campo no había nada que verificar, así
+ * que el sistema no pudo avisar que no está en catálogo y el asistente acabó
+ * interrogando a la persona sobre algo que ya había dicho.
+ *
+ * Devuelve candidatos, no certezas: quien los use debe tratarlos como pistas.
+ */
+export function candidateProductTerms(text: string): string[] {
+  const cleaned = text
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/\p{Diacritic}/gu, '')
+    .replace(/[^\p{L}\p{N}\s]/gu, ' ');
+
+  const words = cleaned.split(/\s+/).filter(Boolean);
+  const out: string[] = [];
+
+  for (let i = 0; i < words.length; i += 1) {
+    const w = words[i];
+    if (w.length < 5 || TERM_NOISE.has(w) || /^\d+$/.test(w)) continue;
+    out.push(w);
+    // Nombres compuestos habituales en catálogos: "alcohol isopropilico",
+    // "thiner americano", "monomero de estireno".
+    const next = words[i + 1];
+    if (next && next.length >= 4 && !TERM_NOISE.has(next) && !/^\d+$/.test(next)) {
+      out.push(`${w} ${next}`);
+    }
+  }
+  // Los compuestos primero: son más específicos que una palabra sola.
+  return [...new Set(out)].sort((a, b) => b.length - a.length).slice(0, 8);
+}
+
+/** Palabras que aparecen en cualquier pedido y no nombran un producto. */
+const TERM_NOISE = new Set([
+  'buenas',
+  'tardes',
+  'noches',
+  'gustaria',
+  'quisiera',
+  'necesito',
+  'ocupo',
+  'quiero',
+  'cotizar',
+  'cotizacion',
+  'comprar',
+  'pedido',
+  'precio',
+  'favor',
+  'gracias',
+  'hola',
+  'tambos',
+  'tambor',
+  'tambores',
+  'porrones',
+  'porron',
+  'pipas',
+  'pipa',
+  'litros',
+  'litro',
+  'kilos',
+  'kilogramos',
+  'toneladas',
+  'piezas',
+  'entrega',
+  'entregar',
+  'enviar',
+  'envio',
+  'ciudad',
+  'estado',
+  'colonia',
+  'direccion',
+  'postal',
+  'codigo',
+  'empresa',
+  'nombre',
+  'correo',
+  'telefono',
+  'contacto',
+  'ustedes',
+  'nosotros',
+  'manejan',
+  'venden',
+  'tienen',
+  'producto',
+  'productos',
+  'presentacion',
+  'presentaciones',
+  'trimestral',
+  'mensual',
+  'semanal',
+  'aproximadamente',
+  'urgente',
+  'pronto',
+]);
+
 export interface FieldStatus {
   known: FieldMap;
   missingEssential: string[];

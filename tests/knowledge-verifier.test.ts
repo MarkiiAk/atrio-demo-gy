@@ -6,10 +6,12 @@ import { writeTenant } from './helpers/fixtures';
 import { clearTenantCache, requireTenantConfig } from '../src/tenants/tenant-loader';
 import {
   clearVerifierCache,
+  detectUnknownRequest,
   findSubstitutedFields,
   verifyCaseFields,
   verifyTerm,
 } from '../src/knowledge/knowledge-verifier';
+import { candidateProductTerms } from '../src/workflows/field-engine';
 import { getVectorStoreId } from '../src/knowledge/vector-store.service';
 import { ensureTenantRow, getTenantConfig } from '../src/db';
 import { tenantCacheDir, websiteCacheDir } from '../src/knowledge/knowledge-manifest';
@@ -261,6 +263,52 @@ describe('verificación de los campos de un caso', () => {
         findSubstitutedFields(config, 'SALES_QUOTE', { product: registrado }, [dicho]),
         `no debió marcar sustitución: "${dicho}" -> "${registrado}"`,
       ).toEqual([]);
+    }
+  });
+
+  it('detecta una petición fuera de catálogo aunque el modelo no registre el campo', () => {
+    // Caso real: alguien pidió "27 tambos de thiner americano" y el modelo dejó
+    // `product` vacío "para no asumir". Sin campo no había nada que verificar,
+    // así que el sistema no pudo avisar y el asistente acabó interrogando a la
+    // persona sobre algo que ya había dicho.
+    writeTenant('respaldo');
+    clearTenantCache();
+    seedKnowledge('respaldo');
+    const config = requireTenantConfig('respaldo');
+
+    const term = detectUnknownRequest(
+      config,
+      candidateProductTerms('me gustaría cotizar 27 tambos de thiner americano, 28000 colima'),
+    );
+    expect(term).toBeTruthy();
+    expect(String(term)).toContain('thiner');
+  });
+
+  it('se calla cuando la persona sí pide algo del catálogo', () => {
+    writeTenant('respaldo-ok');
+    clearTenantCache();
+    seedKnowledge('respaldo-ok');
+    const config = requireTenantConfig('respaldo-ok');
+
+    // Un aviso falso sería peor: haría que el asistente niegue lo que sí vende.
+    for (const msg of [
+      'necesito 800 litros de tolueno en tambos',
+      'quiero cotizar alcohol isopropilico',
+      'buenas tardes, me interesa el xileno',
+    ]) {
+      expect(
+        detectUnknownRequest(config, candidateProductTerms(msg)),
+        `no debió avisar por: "${msg}"`,
+      ).toBeNull();
+    }
+  });
+
+  it('ignora saludos, unidades y datos de contacto al buscar candidatos', () => {
+    const terms = candidateProductTerms(
+      'hola buenas noches, necesito cotizar 27 tambos para entrega en ciudad de colima',
+    );
+    for (const ruido of ['buenas', 'noches', 'cotizar', 'tambos', 'entrega', 'ciudad']) {
+      expect(terms.some((t) => t === ruido), `"${ruido}" no debería ser candidato`).toBe(false);
     }
   });
 
